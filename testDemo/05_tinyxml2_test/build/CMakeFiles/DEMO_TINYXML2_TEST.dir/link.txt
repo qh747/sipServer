@@ -1,0 +1,1 @@
+/usr/bin/c++ -g CMakeFiles/DEMO_TINYXML2_TEST.dir/main.cpp.o -o ../bin/DEMO_TINYXML2_TEST   -L/home/quhan/06_myCode/05_sipServer/testDemo/05_tinyxml2_test/../../thirdParty/tinyxml2/lib  -Wl,-rpath,/home/quhan/06_myCode/05_sipServer/testDemo/05_tinyxml2_test/../../thirdParty/tinyxml2/lib -ltinyxml2 

@@ -1,0 +1,10 @@
+prefix=/home/quhan/02_myLibrary/vo-amrwbenc-0.1.3/install
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: VisualOn AMR-WB encoder
+Description: Adaptive Multi-Rate Wideband speech codec library
+Version: 0.1.3
+Libs: -L${libdir} -lvo-amrwbenc
+Cflags: -I${includedir}

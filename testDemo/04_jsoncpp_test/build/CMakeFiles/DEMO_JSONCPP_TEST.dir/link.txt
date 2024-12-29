@@ -1,0 +1,1 @@
+/usr/bin/c++ -g CMakeFiles/DEMO_JSONCPP_TEST.dir/main.cpp.o -o ../bin/DEMO_JSONCPP_TEST   -L/home/quhan/06_myCode/05_sipServer/testDemo/04_jsoncpp_test/../../thirdParty/jsoncpp/lib  -Wl,-rpath,/home/quhan/06_myCode/05_sipServer/testDemo/04_jsoncpp_test/../../thirdParty/jsoncpp/lib -ljsoncpp 
