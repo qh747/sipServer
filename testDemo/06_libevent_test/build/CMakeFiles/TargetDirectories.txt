@@ -1,0 +1,3 @@
+/home/quhan/06_myCode/05_sipServer/testDemo/06_libevent_test/build/CMakeFiles/DEMO_LIBEVENT_TEST.dir
+/home/quhan/06_myCode/05_sipServer/testDemo/06_libevent_test/build/CMakeFiles/edit_cache.dir
+/home/quhan/06_myCode/05_sipServer/testDemo/06_libevent_test/build/CMakeFiles/rebuild_cache.dir
