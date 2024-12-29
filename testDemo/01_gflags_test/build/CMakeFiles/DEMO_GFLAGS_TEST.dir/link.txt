@@ -1,1 +1,0 @@
-/usr/bin/c++ -g CMakeFiles/DEMO_GFLAGS_TEST.dir/main.cpp.o -o ../bin/DEMO_GFLAGS_TEST   -L/../../thirdParty/gflags/lib  -Wl,-rpath,/../../thirdParty/gflags/lib -lgflags 

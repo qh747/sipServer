@@ -1,0 +1,5 @@
+.vscode/
+sipServer/bin/
+sipServer/build/
+testDemo/**/bin/
+testDemo/**/build/

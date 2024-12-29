@@ -1,3 +1,0 @@
-/home/quhan/06_myCode/05_sipServer/testDemo/04_jsoncpp_test/build/CMakeFiles/DEMO_JSONCPP_TEST.dir
-/home/quhan/06_myCode/05_sipServer/testDemo/04_jsoncpp_test/build/CMakeFiles/edit_cache.dir
-/home/quhan/06_myCode/05_sipServer/testDemo/04_jsoncpp_test/build/CMakeFiles/rebuild_cache.dir

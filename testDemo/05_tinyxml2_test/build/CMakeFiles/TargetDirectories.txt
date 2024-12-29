@@ -1,3 +1,0 @@
-/home/quhan/06_myCode/05_sipServer/testDemo/05_tinyxml2_test/build/CMakeFiles/DEMO_TINYXML2_TEST.dir
-/home/quhan/06_myCode/05_sipServer/testDemo/05_tinyxml2_test/build/CMakeFiles/edit_cache.dir
-/home/quhan/06_myCode/05_sipServer/testDemo/05_tinyxml2_test/build/CMakeFiles/rebuild_cache.dir

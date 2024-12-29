@@ -1,3 +1,0 @@
-/home/quhan/06_myCode/05_sipServer/testDemo/01_gflags_test/build/CMakeFiles/DEMO_GFLAGS_TEST.dir
-/home/quhan/06_myCode/05_sipServer/testDemo/01_gflags_test/build/CMakeFiles/edit_cache.dir
-/home/quhan/06_myCode/05_sipServer/testDemo/01_gflags_test/build/CMakeFiles/rebuild_cache.dir
