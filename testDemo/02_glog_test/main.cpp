@@ -2,21 +2,27 @@
 #include <glog/logging.h>
 
 int main(int argc, char* argv[]) {
-    // 使用glog之前必须先初始化库，仅需执行一次，括号内为程序名
-    google::InitGoogleLogging(argv[0]);
+  // 初始化 Google's logging library.
+  google::InitGoogleLogging(argv[0]);
 
-    // 是否将日志输出到文件和stderr
-    FLAGS_alsologtostderr = true;
+  // 设置日志文件的路径
+  FLAGS_log_dir = ".";  // 当前目录
+  FLAGS_logtostderr = 0;  // 不输出到标准错误，只输出到文件
 
-    // 是否启用不同颜色显示
-	FLAGS_colorlogtostderr = true;
+  // 设置日志文件名前缀，这样就会生成 xx.INFO，xx.WARNING，xx.ERROR 等文件
+  FLAGS_log_prefix = true;
+  FLAGS_logbuflevel = -1;  // 实时输出日志
 
-    // 日志输出
-    LOG(INFO) << "log info";
-    LOG(WARNING) << "log warning";
-    LOG(ERROR) << "log error";
+  // 设置日志文件名
+  google::SetLogDestination(google::INFO, "xx.log");
 
-    // 当要结束glog时必须关闭库，否则会内存溢出
-    google::ShutdownGoogleLogging();
-    return 0;
+  // 记录日志
+  LOG(INFO) << "This is an info message.";
+  LOG(WARNING) << "This is a warning message.";
+  LOG(ERROR) << "This is an error message.";
+
+  // 清理 glog
+  google::ShutdownGoogleLogging();
+
+  return 0;
 }
