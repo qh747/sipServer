@@ -19,7 +19,7 @@ aux_source_directory(${CMAKE_SOURCE_DIR} SRC_FILES)
 # 生成可执行程序
 add_executable(${PROJECT_NAME} ${SRC_FILES})
 
-# 链接gflags依赖库
+# 链接依赖库
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../../thirdParty/tinyxml2/include)
 target_link_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../../thirdParty/tinyxml2/lib)
 target_link_libraries(${PROJECT_NAME} PRIVATE tinyxml2)
