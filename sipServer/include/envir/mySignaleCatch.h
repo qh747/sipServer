@@ -1,7 +1,9 @@
 #pragma once
 #include <map>
+#include <mutex>
 #include <csignal>
 #include <cstdbool>
+#include <condition_variable>
 #include "utils/myHelper.h"
 #include "common/myDataDef.h"
 
@@ -16,10 +18,10 @@ namespace MY_ENVIR
     {
     public:
         /**
-         * @brief           信号处理类对象初始化
+         * @brief           信号处理类对象运行
          * @return          MyStatus_t状态码
          */
-        static MyStatus_t   Init();
+        static MyStatus_t   Run();
 
     private:
         /**
@@ -27,5 +29,9 @@ namespace MY_ENVIR
          * @param signum    信号id
          */
         static void         SignalHandler(int signum);
+
+    private:
+        static std::recursive_mutex         Mutex;
+        static std::condition_variable_any  Condition;
     };
 }; // namespace MY_ENVIR

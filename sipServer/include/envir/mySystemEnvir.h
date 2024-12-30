@@ -18,6 +18,12 @@ namespace MY_ENVIR
         static MyStatus_t Init();
 
         /**
+         * @brief  运行程序
+         * @return MyStatus_t状态码
+         */
+        static MyStatus_t Run();
+
+        /**
          * @brief  关闭系统环境
          * @return MyStatus_t状态码
          */
