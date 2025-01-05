@@ -4,8 +4,10 @@
 
 int main(int argc, char* argv[]) 
 {
+    // 初始化sipServer环境
     MY_ENVIR::MySystemEnvir::Init(argc, argv);
-    MY_ENVIR::MySystemEnvir::Run();
 
+    // 运行sipServer
+    MY_ENVIR::MySystemEnvir::Run();
     return 0;
 }

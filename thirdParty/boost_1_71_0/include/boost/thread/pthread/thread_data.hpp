@@ -57,6 +57,10 @@ namespace boost
 #else
           std::size_t page_size = ::sysconf( _SC_PAGESIZE);
 #endif
+
+#undef PTHREAD_STACK_MIN
+#define PTHREAD_STACK_MIN 16384
+
 #if PTHREAD_STACK_MIN > 0
           if (size<PTHREAD_STACK_MIN) size=PTHREAD_STACK_MIN;
 #endif

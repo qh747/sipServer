@@ -34,6 +34,12 @@ target_link_libraries(${PROJECT_NAME} PRIVATE gflags)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../thirdParty/boost_1_71_0/include)
 target_link_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../thirdParty/boost_1_71_0/lib)
 target_link_libraries(${PROJECT_NAME} PRIVATE boost_system)
+target_link_libraries(${PROJECT_NAME} PRIVATE boost_thread)
 
 # 链接Simpleini依赖库
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../thirdParty/simpleini/include)
+
+# 链接依赖库
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../thirdParty/ZLToolKit/include)
+target_link_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../thirdParty/ZLToolKit/lib)
+target_link_libraries(${PROJECT_NAME} PRIVATE ZLToolKit)

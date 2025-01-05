@@ -1,6 +1,3 @@
-#define GLOG_USE_GLOG_EXPORT
-#include <glog/logging.h>
-#include <gflags/gflags.h>
 #include "envir/mySignaleCatch.h"
 #include "envir/mySystemConfg.h"
 #include "envir/mySystemEnvir.h"
@@ -8,27 +5,34 @@
 namespace MY_ENVIR {
 
 DEFINE_string(serverConfigPath, "", "serverConfigPath");
-DEFINE_string(serverLogPath,    "", "serverLogPath");
+
+google::LogSeverity MySystemEnvir::LogLevelConvert(const std::string& level)
+{
+    if ("INFO" == level || "info" == level) {
+        return google::INFO;
+    } 
+    else if ("WARNING" == level || "warning" == level) {
+        return google::WARNING;
+    } 
+    else if ("ERROR" == level || "error" == level) {
+        return google::ERROR;
+    } 
+    else if ("FATAL" == level || "fatal" == level) {
+        return google::FATAL;
+    } 
+    else {
+        return google::INFO;
+    }
+}
 
 MyStatus_t MySystemEnvir::Init(int argc, char** argv)
 {
     // --------------------------------------------------- 命令行参数解析 ------------------------------------------------------------
     gflags::ParseCommandLineFlags(&argc, &argv, true);
-    if (FLAGS_serverLogPath.empty() || FLAGS_serverConfigPath.empty()) {
-        LOG(ERROR) << "Server init failed. ServerLogPath or serverConfigPath is empty";
+    if (FLAGS_serverConfigPath.empty()) {
+        LOG(ERROR) << "Server init failed. serverConfigPath is empty";
         return MyStatus_t::FAILED;
     }
- 
-    // --------------------------------------------------- 日志初始化 ------------------------------------------------------------
-    google::InitGoogleLogging("sipServer");
-    // 是否将日志输出到文件和stderr
-    FLAGS_alsologtostderr  = true;
-    // 是否启用不同颜色显示
-    FLAGS_colorlogtostderr = true;
-    // 日志输出路径
-    FLAGS_log_dir          = FLAGS_serverLogPath;
-    // 日志等级
-    FLAGS_minloglevel      = google::INFO;
 
     // --------------------------------------------------- 加载配置 ------------------------------------------------------------
     MyStatus_t status = MySystemConfig::load(FLAGS_serverConfigPath);
@@ -36,10 +40,18 @@ MyStatus_t MySystemEnvir::Init(int argc, char** argv)
         LOG(ERROR) << "Server init failed. Load config file failed. Config path: " << FLAGS_serverConfigPath;
         return MyStatus_t::FAILED;
     }
-    else {
-        const MyServerConfig_dt& cfg = MySystemConfig::GetServerConfig();
-        LOG(INFO) << "Load config file success: server ip: " << cfg.ipAddr << ", port: " << cfg.port << ", name: " << cfg.name << ", domain: " << cfg.domain;
-    }
+ 
+    // --------------------------------------------------- 日志初始化 ------------------------------------------------------------
+    const MyServerLogConfig_dt& logConfig = MySystemConfig::GetServerLogConfig();
+    google::InitGoogleLogging("sipServer");
+    // 是否将日志输出到文件和stderr
+    FLAGS_alsologtostderr  = logConfig.enableOutputToConsole;
+    // 是否启用不同颜色显示
+    FLAGS_colorlogtostderr = logConfig.enableUseDiffColorDisplay;
+    // 日志输出路径
+    FLAGS_log_dir          = logConfig.logPath;
+    // 日志等级
+    FLAGS_minloglevel      = MySystemEnvir::LogLevelConvert(logConfig.logLevel);
 
     return MyStatus_t::SUCCESS;
 }
