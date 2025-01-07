@@ -1,5 +1,0 @@
-Log file created at: 2025/01/08 01:25:46
-Running on machine: quhan-virtual-machine
-Running duration (h:mm:ss): 0:00:-3
-Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
-I20250108 01:25:46.707824 140737348988544 mySipServer.cpp:65] SipServer init success. name: sipServer domain: sipServer.com ip: 127.0.0.1 port: 5060 protocol: udp/tcp

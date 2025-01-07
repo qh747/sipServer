@@ -1,4 +1,5 @@
 .vscode/
+sipServer/log/
 sipServer/bin/
 sipServer/build/
 testDemo/**/bin/
