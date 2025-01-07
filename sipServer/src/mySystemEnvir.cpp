@@ -1,6 +1,8 @@
 #include "envir/mySignaleCatch.h"
 #include "envir/mySystemConfg.h"
+#include "server/mySipServer.h"
 #include "envir/mySystemEnvir.h"
+using MY_SERVER::MySipServer;
 
 namespace MY_ENVIR {
 
@@ -58,8 +60,24 @@ MyStatus_t MySystemEnvir::Init(int argc, char** argv)
 
 MyStatus_t MySystemEnvir::Run()
 {
+    // 启动sipServer(暂时)
+    std::shared_ptr<MySipServer> sipServerPtr = std::make_shared<MySipServer>(false);
+    if (sipServerPtr->init()) {
+        LOG(INFO) << "Server run success.";
+    }
+
     // 信号处理阻塞程序退出
     MyStatus_t status = MySignalCatcher::Run();
+    if (MyStatus_t::SUCCESS != status) {
+        LOG(ERROR) << "Server run failed. Signal catcher failed";
+        return MyStatus_t::FAILED;
+    }
+
+    // 关闭sipServer(暂时)
+    if (sipServerPtr->shutdown()) {
+        LOG(INFO) << "Server shutdown success.";
+    }
+
     // 资源销毁，后续补充
     status = MySystemEnvir::Shutdown();
     return status;

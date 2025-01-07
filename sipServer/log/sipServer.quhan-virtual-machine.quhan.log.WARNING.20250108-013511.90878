@@ -1,0 +1,5 @@
+Log file created at: 2025/01/08 01:35:11
+Running on machine: quhan-virtual-machine
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+W20250108 01:35:11.043138 132748705083008 mySipServer.cpp:73] SipServer is not inited.

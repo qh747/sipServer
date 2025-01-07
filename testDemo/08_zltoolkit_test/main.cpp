@@ -1,11 +1,18 @@
 #include <chrono>
+#include <csignal>
+#include <iostream>
+#include <Util/util.h>
 #include <Util/logger.h>
 #include <Util/onceToken.h>
 #include <Util/TimeTicker.h>
+#include <Network/Session.h>
+#include <Network/TcpServer.h>
 #include <Thread/ThreadPool.h>
+#include <Poller/EventPoller.h>
 using namespace std;
 using namespace toolkit;
 
+// 线程池测试
 void FuncTestThreadPool()
 {
     //初始化日志系统  
@@ -48,10 +55,96 @@ void FuncTestThreadPool()
     }
 }
 
+// 事件池测试
+void FuncTestEventPool()
+{
+    static bool exit_flag = false;
+    signal(SIGINT, [](int) { exit_flag = true; });
+    //设置日志
+    Logger::Instance().add(std::make_shared<ConsoleChannel>());
+
+    Ticker ticker;
+    while(!exit_flag) {
+        if(ticker.elapsedTime() > 1000){
+            auto vec = EventPollerPool::Instance().getExecutorLoad();
+            _StrPrinter printer;
+            for(auto load : vec){
+                printer << load << "-";
+            }
+            DebugL << "cpu负载:" << printer;
+
+            EventPollerPool::Instance().getExecutorDelay([](const vector<int> &vec){
+                _StrPrinter printer;
+                for(auto delay : vec){
+                    printer << delay << "-";
+                }
+                DebugL << "cpu任务执行延时:" << printer;
+            });
+            ticker.resetTime();
+        }
+
+        EventPollerPool::Instance().getExecutor()->async([](){
+            auto usec = rand() % 4000;
+            //DebugL << usec;
+            usleep(usec);
+        });
+
+        usleep(2000);
+    }
+}
+
+// TcpServer测试
+class EchoSession: public Session {
+public:
+    EchoSession(const Socket::Ptr &sock) : Session(sock) { DebugL; }
+    ~EchoSession() { DebugL; }
+
+    void onRecv(const Buffer::Ptr &buf) override{
+        //处理客户端发送过来的数据 
+        TraceL << buf->data() <<  " from port:" << get_local_port();
+        send(buf);
+    }
+
+    void onError(const SockException &err) override{
+        //客户端断开连接或其他原因导致该对象脱离TCPServer管理
+        WarnL << err;
+    }
+
+    void onManager() override{
+        //定时管理该对象，譬如会话超时检查
+        DebugL;
+    }
+
+private:
+    Ticker _ticker;
+};
+
+void FuncTestTcpEchoServer()
+{
+    // 初始化日志模块 
+    Logger::Instance().add(std::make_shared<ConsoleChannel>());
+    Logger::Instance().setWriter(std::make_shared<AsyncLogWriter>());
+
+    // 监听9000端口
+    TcpServer::Ptr server(new TcpServer());
+    server->start<EchoSession>(9000);
+
+    // 退出程序事件处理
+    static semaphore sem;
+    signal(SIGINT, [](int) { sem.post(); });
+    sem.wait();
+}
+
 int main() 
 {
     // 线程池测试
-    FuncTestThreadPool();
+    // FuncTestThreadPool();
+
+    // 事件池测试
+    // FuncTestEventPool();
+
+    // TcpServer测试
+    FuncTestTcpEchoServer();
 
     return 0;
 }

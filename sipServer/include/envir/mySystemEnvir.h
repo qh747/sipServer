@@ -2,7 +2,7 @@
 #define GLOG_USE_GLOG_EXPORT
 #include <glog/logging.h>
 #include <gflags/gflags.h>
-#include "utils/myHelper.h"
+#include "utils/myBaseHelper.h"
 #include "common/myDataDef.h"
 using MY_COMMON::MyStatus_t;
 

@@ -5,6 +5,7 @@ CSimpleIniA             MySystemConfig::SystemCfgIni;
 MyServerAddrConfig_dt   MySystemConfig::ServerAddrConfig;
 MyServerLogConfig_dt    MySystemConfig::ServerLogConfig;
 MyServerThreadConfig_dt MySystemConfig::ServerThreadConfig;
+MySipStackConfig_dt     MySystemConfig::SipStackConfig;
 
 MyStatus_t MySystemConfig::load(const std::string& path)
 {
@@ -27,6 +28,10 @@ MyStatus_t MySystemConfig::load(const std::string& path)
 
     // 读取线程池配置
     ServerThreadConfig.initIhreadCount          = SystemCfgIni.GetLongValue("threadPool", "initThreadCount", 4);
+
+    // 读取SIP协议栈配置
+    SipStackConfig.sipStackSize                 = SystemCfgIni.GetLongValue("sipStack", "sipStackSize", 1024*256);
+    SipStackConfig.sipStackName                 = SystemCfgIni.GetValue("sipStack", "sipStackName", "mySipStack");
     
     return MyStatus_t::SUCCESS;
 }

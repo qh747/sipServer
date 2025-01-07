@@ -1,0 +1,9 @@
+Log file created at: 2025/01/08 01:55:26
+Running on machine: quhan-virtual-machine
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I20250108 01:55:26.106375 139313174933120 mySipServer.cpp:67] SipServer init success. name: mySipServer domain: mySipServer.com ip: 127.0.0.1 port: 5060 protocol: udp/tcp
+I20250108 01:55:26.106513 139313174933120 mySystemEnvir.cpp:66] Server run success.
+I20250108 01:55:34.890289 139313174933120 mySignaleCatch.cpp:34] Interrupt signal (2) received. server is shutting down...
+I20250108 01:55:35.892215 139313174933120 mySipServer.cpp:90] SipServer shurdown success. name: mySipServer domain: mySipServer.com ip: 127.0.0.1 port: 5060 protocol: udp/tcp
+I20250108 01:55:35.892241 139313174933120 mySystemEnvir.cpp:78] Server shutdown success.

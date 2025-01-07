@@ -61,5 +61,15 @@ typedef struct MyServerThreadConfigDataType
 
 } MyServerThreadConfig_dt; 
 
+/**
+ * @brief SIP协议栈配置
+ */
+typedef struct MySipStackConfigDataType 
+{
+    std::size_t sipStackSize;               // sip协议栈大小
+    std::string sipStackName;               // sip协议栈名称
+
+} MySipStackConfig_dt; 
+
 
 }; // MY_COMMON
