@@ -12,7 +12,7 @@ namespace MY_ENVIR {
 /**
  * 信号处理类
  */
-class MySignalCatcher : public MY_UTILS::MyNonConstructableAndNonCopyable
+class MySignalCatch : public MY_UTILS::MyNonConstructableAndNonCopyable
 {
 public:
     /**
@@ -26,7 +26,7 @@ private:
      * @brief                               信号处理函数
      * @param signum                        信号id
      */                 
-    static void                             SignalHandler(int signum);
+    static void                             SignalHandle(int signum);
 
 private:
     static std::recursive_mutex             Mutex;

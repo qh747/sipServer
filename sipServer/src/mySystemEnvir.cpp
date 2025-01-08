@@ -67,7 +67,7 @@ MyStatus_t MySystemEnvir::Run()
     }
 
     // 信号处理阻塞程序退出
-    MyStatus_t status = MySignalCatcher::Run();
+    MyStatus_t status = MySignalCatch::Run();
     if (MyStatus_t::SUCCESS != status) {
         LOG(ERROR) << "Server run failed. Signal catcher failed";
         return MyStatus_t::FAILED;

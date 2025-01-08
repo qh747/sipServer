@@ -4,17 +4,17 @@
 #include "envir/mySignaleCatch.h"
 
 namespace MY_ENVIR {
-std::recursive_mutex         MySignalCatcher::Mutex;
-std::condition_variable_any  MySignalCatcher::Condition;
+std::recursive_mutex         MySignalCatch::Mutex;
+std::condition_variable_any  MySignalCatch::Condition;
 
-MyStatus_t MySignalCatcher::Run()
+MyStatus_t MySignalCatch::Run()
 {
     // 捕获ctrl + c信号
-    signal(SIGINT, MySignalCatcher::SignalHandler);
+    signal(SIGINT, MySignalCatch::SignalHandle);
     // 捕获ctrl + z信号
-    signal(SIGSTOP, MySignalCatcher::SignalHandler);
+    signal(SIGSTOP, MySignalCatch::SignalHandle);
     // 捕获ctrl + \信号
-    signal(SIGQUIT, MySignalCatcher::SignalHandler);
+    signal(SIGQUIT, MySignalCatch::SignalHandle);
 
     // 阻塞程序退出
     std::unique_lock<std::recursive_mutex> lock(Mutex);
@@ -25,7 +25,7 @@ MyStatus_t MySignalCatcher::Run()
     return MyStatus_t::SUCCESS;
 }
 
-void MySignalCatcher::SignalHandler(int signum)
+void MySignalCatch::SignalHandle(int signum)
 {
     switch (signum) {
         case SIGINT: 
