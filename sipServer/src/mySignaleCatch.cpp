@@ -4,6 +4,7 @@
 #include "envir/mySignaleCatch.h"
 
 namespace MY_ENVIR {
+    
 std::recursive_mutex         MySignalCatch::Mutex;
 std::condition_variable_any  MySignalCatch::Condition;
 

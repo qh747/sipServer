@@ -6,7 +6,7 @@ using MY_SERVER::MySipServer;
 
 namespace MY_ENVIR {
 
-DEFINE_string(serverConfigPath, "", "serverConfigPath");
+DEFINE_string(servCfgPath, "", "servCfgPath");
 
 google::LogSeverity MySystemEnvir::LogLevelConvert(const std::string& level)
 {
@@ -31,15 +31,15 @@ MyStatus_t MySystemEnvir::Init(int argc, char** argv)
 {
     // --------------------------------------------------- 命令行参数解析 ------------------------------------------------------------
     gflags::ParseCommandLineFlags(&argc, &argv, true);
-    if (FLAGS_serverConfigPath.empty()) {
-        LOG(ERROR) << "Server init failed. serverConfigPath is empty";
+    if (FLAGS_servCfgPath.empty()) {
+        LOG(ERROR) << "Server init failed. servCfgPath is empty";
         return MyStatus_t::FAILED;
     }
 
     // --------------------------------------------------- 加载配置 ------------------------------------------------------------
-    MyStatus_t status = MySystemConfig::load(FLAGS_serverConfigPath);
+    MyStatus_t status = MySystemConfig::load(FLAGS_servCfgPath);
     if (MyStatus_t::SUCCESS != status) {
-        LOG(ERROR) << "Server init failed. Load config file failed. Config path: " << FLAGS_serverConfigPath;
+        LOG(ERROR) << "Server init failed. Load config file failed. Config path: " << FLAGS_servCfgPath;
         return MyStatus_t::FAILED;
     }
  
@@ -62,7 +62,7 @@ MyStatus_t MySystemEnvir::Run()
 {
     // 启动sipServer(暂时)
     std::shared_ptr<MySipServer> sipServerPtr = std::make_shared<MySipServer>(false);
-    if (sipServerPtr->init()) {
+    if (MyStatus_t::SUCCESS == sipServerPtr->init()) {
         LOG(INFO) << "Server run success.";
     }
 
@@ -74,7 +74,7 @@ MyStatus_t MySystemEnvir::Run()
     }
 
     // 关闭sipServer(暂时)
-    if (sipServerPtr->shutdown()) {
+    if (MyStatus_t::SUCCESS == sipServerPtr->shutdown()) {
         LOG(INFO) << "Server shutdown success.";
     }
 

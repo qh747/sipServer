@@ -9,6 +9,7 @@
 #include <pjsip_ua.h>
 #include <pjsip/sip_auth.h>
 #include "common/myDataDef.h"
+using MY_COMMON::MyStatus_t;
 using MY_COMMON::MyServerAddrConfig_dt;
 
 namespace MY_SERVER {
@@ -18,7 +19,9 @@ namespace MY_SERVER {
 class MySipServer 
 {
 public:
-    typedef std::shared_ptr<MyServerAddrConfig_dt> servCfgPtr;
+    typedef std::shared_ptr<MyServerAddrConfig_dt>  ServCfgPtr;
+    typedef pjsip_endpoint*                         ServEndpointPtr;
+    typedef pjmedia_endpt*                          ServMediaEndpointPtr;
 
 public:
     MySipServer(bool autoInit = true);
@@ -26,63 +29,63 @@ public:
 
 public:
     /**
-     * @brief           初始化sip服务
-     * @return          初始化结果，true-初始化成功，false-初始化失败
+     * @brief                   初始化sip服务
+     * @return                  初始化结果，0-success，-1-failed
+     */             
+    MyStatus_t                  init();
+
+    /**     
+     * @brief                   关闭sip服务
+     * @return                  初始化结果，0-success，-1-failed
+     */         
+    MyStatus_t                  shutdown();
+
+public:     
+    /**     
+     * @brief                   sip服务是否启动
+     * @return                  启动结果，0-success，-1-failed
+     */
+    inline MyStatus_t           isStarted() const { return m_isStarted.load(); }
+
+private:
+    /**
+     * @brief                   初始化配置
+     * @return                  初始化结果，0-success，-1-failed
      */     
-    bool                init();
+    MyStatus_t                  initConfig();
 
-    /**
-     * @brief           关闭sip服务
-     * @return          初始化结果，true-关闭成功，false-关闭失败
-     */  
-    bool                shutdown();
+    /**     
+     * @brief                   初始化pjsip库
+     */     
+    MyStatus_t                  initPjsipLib();
 
-public:
-    /**
-     * @brief           sip服务是否启动
-     * @return          启动结果，true-启动成功，false-启动失败
-     */
-    inline bool         isStarted() const { return m_isStarted.load(); }
+    /**     
+     * @brief                   初始化pjsip模块
+     * @return                  初始化结果，0-success，-1-failed
+     */     
+    MyStatus_t                  initModule();
 
-private:
-    /**
-     * @brief           初始化配置
-     * @return          初始化结果，true-初始化成功，false-初始化失败
-     */
-    pj_status_t         initConfig();
-
-    /**
-     * @brief           初始化pjsip库
-     */
-    pj_status_t         initPjsipLib();
-
-    /**
-     * @brief           初始化pjsip模块
-     * @return          初始化结果，true-初始化成功，false-初始化失败
-     */
-    pj_status_t         initModule();
-
-    /**
-     * @brief           注册pjsip模块
-     * @return          注册结果，true-注册成功，false-注册失败
-     */
-    pj_status_t         registerModule();      
+    /**     
+     * @brief                   注册pjsip模块
+     * @return                  注册结果，0-success，-1-failed
+     */     
+    MyStatus_t                  registerModule();      
 
 private:
-    //                  服务是否启动 
-    std::atomic<bool>   m_isStarted;
+    //                          服务是否启动 
+    std::atomic<MyStatus_t>     m_isStarted;
 
-    //                  服务配置
-    servCfgPtr          m_cfgPtr;
-    
-    //                  pjsip内存池
-    pj_caching_pool     m_cachingPool;
+    //                          服务配置
+    ServCfgPtr                  m_cfgPtr;
 
-    //                  pjsip endpoint
-    pjsip_endpoint*     m_endpointPtr;
+    //                          pjsip内存池
+    pj_caching_pool             m_cachingPool;
 
-    //                  pjsip media endpoint
-    pjmedia_endpt*      m_mediaEndptPtr;
+    //                          pjsip endpoint
+    ServEndpointPtr             m_endpointPtr;
+
+    //                          pjsip media endpoint
+    ServMediaEndpointPtr        m_mediaEndptPtr;
 };
 
 }; //namespace MY_SERVER

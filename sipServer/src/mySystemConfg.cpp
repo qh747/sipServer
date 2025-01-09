@@ -1,6 +1,7 @@
 #include "envir/mySystemConfg.h"
 
 namespace MY_ENVIR {
+    
 CSimpleIniA             MySystemConfig::SystemCfgIni;
 MyServerAddrConfig_dt   MySystemConfig::ServerAddrConfig;
 MyServerLogConfig_dt    MySystemConfig::ServerLogConfig;
