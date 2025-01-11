@@ -31,6 +31,7 @@ MySipAppWrapper::SipAppModPtr MySipAppWrapper::AppModule()
 
 MyStatus_t MySipAppWrapper::Init(SipAppEndptPtr endpt, const std::string& name, pjsip_module_priority priority)
 {
+    // 初始化条件验证
     if (nullptr != AppModulePtr) {
         LOG(WARNING) << "Sip app module has been init: " << MySipAppWrapper::GetAppModuleInfo() << ".";
         return MyStatus_t::SUCCESS;
@@ -41,6 +42,7 @@ MyStatus_t MySipAppWrapper::Init(SipAppEndptPtr endpt, const std::string& name, 
         return MyStatus_t::FAILED;
     }
 
+    // app模块创建
     AppModulePtr                                = new pjsip_module();
     static std::string MY_SIP_APP_WRAPPER_NAME  = (name.empty() ? "MySipApp" : name);
     AppModulePtr->name.ptr                      = new char[MY_SIP_APP_WRAPPER_NAME.length() + 1];
@@ -60,6 +62,7 @@ MyStatus_t MySipAppWrapper::Init(SipAppEndptPtr endpt, const std::string& name, 
     AppModulePtr->on_tx_response                = MySipAppWrapper::OnAppModuleSendRespCb;
     AppModulePtr->on_tsx_state                  = MySipAppWrapper::OnAppModuleTsxStateChangeCb;
 
+    // app模块注册
     pj_status_t result = pjsip_endpt_register_module(endpt, AppModulePtr);
     if(PJ_SUCCESS != result) {
         delete AppModulePtr;

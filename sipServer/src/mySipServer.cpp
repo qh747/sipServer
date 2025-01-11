@@ -1,17 +1,56 @@
-#include <mutex>
+#include <thread>
+#include <chrono>
 #include <functional>
 #define GLOG_USE_GLOG_EXPORT
 #include <glog/logging.h>
 #include "envir/mySystemConfg.h"
 #include "app/mySipApp.h"
 #include "server/mySipServer.h"
-using MY_COMMON::MySipStackConfig_dt;
-using MY_ENVIR::MySystemConfig;
 using MY_APP::MySipAppWrapper;
+using MY_ENVIR::MySystemConfig;
+using MY_COMMON::MySipStackConfig_dt;
 
 namespace MY_SERVER {
 
-MySipServer::MySipServer(bool autoInit) : m_isStarted(MyStatus_t::FAILED), m_cfgPtr(nullptr), m_endpointPtr(nullptr), m_mediaEndptPtr(nullptr)
+int MySipServer::OnSipServerEvCb(ServEvThreadCbParamPtr args)
+{
+    // 检查参数是否有效
+    if (nullptr == args) {
+        LOG(ERROR) << "SipServer start listen failed. input invalid param.";
+        return static_cast<int>(MyStatus_t::FAILED);
+    }
+
+    ServPtr servPtr = static_cast<ServPtr>(args);
+    
+    // 检查服务是否已经初始化完成
+    if (MyStatus_t::SUCCESS != servPtr->m_isStarted.load()) {
+        LOG(ERROR) << "SipServer start listen failed. server is not init.";
+        return static_cast<int>(MyStatus_t::FAILED);
+    }
+    else {
+        LOG(INFO) << "SipServer start listen success. name: " << servPtr->m_cfgPtr->name << " domain: " << servPtr->m_cfgPtr->domain
+                  << " ip: " << servPtr->m_cfgPtr->ipAddr << " port: " << servPtr->m_cfgPtr->port << " protocol: udp/tcp.";
+    }
+
+    while (true) {
+        // 服务如果停止则取消监听事件
+        if (MyStatus_t::SUCCESS != servPtr->m_isStarted.load()) {
+            LOG(INFO) << "SipServer stop listen.";
+            break;
+        }
+
+        pj_time_val timeout = {0, 500};
+        if(PJ_SUCCESS != pjsip_endpt_handle_events(servPtr->m_endpointPtr, &timeout)) {
+            LOG(ERROR) << "SipServer listen failed, pjsip_endpt_handle_events() error.";
+            return static_cast<int>(MyStatus_t::FAILED);
+        }
+    }
+
+    return static_cast<int>(MyStatus_t::SUCCESS);
+}
+
+MySipServer::MySipServer(bool autoInit) : m_isStarted(MyStatus_t::FAILED), m_cfgPtr(nullptr), m_endpointPtr(nullptr), m_mediaEndptPtr(nullptr),
+                                          m_evCbPoolPtr(nullptr), m_evThreadPtr(nullptr)
 {
     pj_bzero(&m_cachingPool, sizeof(pj_caching_pool));
 
@@ -59,15 +98,14 @@ MyStatus_t MySipServer::init()
     }
 
     // pjsip模块注册
-    status = this->registerModule();
+    status = this->initThread();
     if (MyStatus_t::SUCCESS != status) {
-        LOG(ERROR) << "SipServer init failed. registerModule() error.";
+        LOG(ERROR) << "SipServer init failed. initThread() error.";
         return MyStatus_t::FAILED;
     }
 
     m_isStarted.store(MyStatus_t::SUCCESS);
-    LOG(INFO) << "SipServer init success. name: " << m_cfgPtr->name << " domain: " << m_cfgPtr->domain
-              << " ip: " << m_cfgPtr->ipAddr << " port: " << m_cfgPtr->port << " protocol: udp/tcp.";
+    LOG(INFO) << "SipServer init success.";
     return MyStatus_t::SUCCESS;
 }
 
@@ -79,14 +117,30 @@ MyStatus_t MySipServer::shutdown()
     }
     m_isStarted.store(MyStatus_t::FAILED);
 
+    // 等待所有线程退出
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
     MySipAppWrapper::Destory(m_endpointPtr);
+
+    if (nullptr != m_evThreadPtr) {
+        pj_thread_join(m_evThreadPtr);
+        pj_thread_destroy(m_evThreadPtr);
+        m_evThreadPtr = nullptr;
+    }
+
+    if (nullptr != m_evCbPoolPtr) {
+        pjsip_endpt_release_pool(m_endpointPtr, m_evCbPoolPtr);
+        m_evCbPoolPtr = nullptr;
+    }
 
     if (nullptr != m_mediaEndptPtr) {
         pjmedia_endpt_destroy(m_mediaEndptPtr);
+        m_mediaEndptPtr = nullptr;
     }
 
     if (nullptr != m_endpointPtr) {
         pjsip_endpt_destroy(m_endpointPtr);
+        m_endpointPtr = nullptr;
     }
 
     pj_caching_pool_destroy(&m_cachingPool);
@@ -199,26 +253,33 @@ MyStatus_t MySipServer::initModule()
         LOG(ERROR) << "SipServer init module failed. pjsip_100rel_init_module() error. Code: " << result << ".";
         return MyStatus_t::FAILED;
     }
+
+    // 应用层模块初始化
+    if (MyStatus_t::SUCCESS != MySipAppWrapper::Init(m_endpointPtr, "MySipServerApp", PJSIP_MOD_PRIORITY_APPLICATION)) {
+        LOG(ERROR) << "SipServer init module failed. MySipAppWrapper::Init() error.";
+        return MyStatus_t::FAILED;
+    }
     return MyStatus_t::SUCCESS;
 }
 
-MyStatus_t MySipServer::registerModule()
+MyStatus_t MySipServer::initThread()
 {
-    if (nullptr == m_endpointPtr) {
-        LOG(ERROR) << "SipServer register module failed. m_endpointPtr is null.";
+    m_evCbPoolPtr = pjsip_endpt_create_pool(m_endpointPtr, "MySipServerThreadPool", MY_COMMON::SIPSERV_EVTRD_INIT_MEM_SIZE, MY_COMMON::SIPSERV_EVTRD_INCREM_MEM_SIZE);
+    if (nullptr == m_evCbPoolPtr) {
+        LOG(ERROR) << "SipServer init thread failed. pjsip_endpt_create_pool error.";
         return MyStatus_t::FAILED;
     }
 
-    MyStatus_t status = MyStatus_t::SUCCESS;
+    pj_status_t result = PJ_SUCCESS;
 
-    // 模块注册
-    status = MySipAppWrapper::Init(m_endpointPtr, "MySipServerApp", PJSIP_MOD_PRIORITY_APPLICATION);
-    if (MyStatus_t::SUCCESS != status) {
-        LOG(ERROR) << "SipServer register module failed. MySipAppWrapper::Init() error.";
-        return status;
+    // 创建事件处理线程
+    result = pj_thread_create(m_evCbPoolPtr, "MySipServerThread", &MySipServer::OnSipServerEvCb, this, PJ_THREAD_DEFAULT_STACK_SIZE, 0, &m_evThreadPtr);
+    if (PJ_SUCCESS != result) {
+        LOG(ERROR) << "SipServer init thread failed. pj_thread_create() error. Code: " << result << ".";
+        return MyStatus_t::FAILED;
     }
 
-    return status;
+    return MyStatus_t::SUCCESS;
 }
 
 }; //namespace MY_SERVER

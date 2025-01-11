@@ -1,4 +1,5 @@
 #pragma once
+#include <mutex>
 #include <memory>
 #include <atomic>
 #include <cstdbool>
@@ -19,14 +20,22 @@ namespace MY_SERVER {
 class MySipServer 
 {
 public:
+    typedef MySipServer*                            ServPtr;
+    typedef pj_pool_t*                              ServPoolPtr;
     typedef std::shared_ptr<MyServerAddrConfig_dt>  ServCfgPtr;
     typedef pjsip_endpoint*                         ServEndpointPtr;
     typedef pjmedia_endpt*                          ServMediaEndpointPtr;
+    typedef void*                                   ServEvThreadCbParamPtr;   
+    typedef pj_thread_t*                            ServEvThreadPtr;  
 
 public:
     MySipServer(bool autoInit = true);
     ~MySipServer();
 
+public:
+    //                          sip服务事件监听
+    static int                  OnSipServerEvCb(ServEvThreadCbParamPtr args);
+;
 public:
     /**
      * @brief                   初始化sip服务
@@ -66,14 +75,17 @@ private:
     MyStatus_t                  initModule();
 
     /**     
-     * @brief                   注册pjsip模块
-     * @return                  注册结果，0-success，-1-failed
+     * @brief                   初始化pjsip线程
+     * @return                  初始化结果，0-success，-1-failed
      */     
-    MyStatus_t                  registerModule();      
+    MyStatus_t                  initThread();    
 
 private:
     //                          服务是否启动 
     std::atomic<MyStatus_t>     m_isStarted;
+
+    //                          服务多线程互斥量
+    std::recursive_mutex        m_lock;
 
     //                          服务配置
     ServCfgPtr                  m_cfgPtr;
@@ -86,6 +98,12 @@ private:
 
     //                          pjsip media endpoint
     ServMediaEndpointPtr        m_mediaEndptPtr;
+
+    //                          pjsip事件回调函数所在线程使用的内存地址
+    ServPoolPtr                 m_evCbPoolPtr;
+
+    //                          pjsip事件回调函数所在线程
+    ServEvThreadPtr             m_evThreadPtr;
 };
 
 }; //namespace MY_SERVER
