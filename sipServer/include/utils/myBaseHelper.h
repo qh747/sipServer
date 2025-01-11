@@ -2,6 +2,7 @@
 #include <boost/noncopyable.hpp>
 
 namespace MY_UTILS {
+    
 /**
  * 禁止构造类
  */
@@ -21,4 +22,5 @@ private:
     MyNonConstructableAndNonCopyable() = delete;
     ~MyNonConstructableAndNonCopyable() = delete;
 };
+
 }; // namespace MY_UTILS

@@ -9,6 +9,7 @@
 using MY_COMMON::MyStatus_t;
 
 namespace MY_ENVIR {
+    
 /**
  * 信号处理类
  */
@@ -32,4 +33,5 @@ private:
     static std::recursive_mutex             Mutex;
     static std::condition_variable_any      Condition;
 };
+
 }; // namespace MY_ENVIR

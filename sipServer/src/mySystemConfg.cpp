@@ -36,4 +36,5 @@ MyStatus_t MySystemConfig::load(const std::string& path)
     
     return MyStatus_t::SUCCESS;
 }
+
 }; // namespace MY_ENVIR

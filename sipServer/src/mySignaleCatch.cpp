@@ -42,4 +42,5 @@ void MySignalCatch::SignalHandle(int signum)
             break;
     };
 }
+
 }; // namespace MY_ENVIR

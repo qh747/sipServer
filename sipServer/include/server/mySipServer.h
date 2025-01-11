@@ -14,6 +14,7 @@ using MY_COMMON::MyStatus_t;
 using MY_COMMON::MyServerAddrConfig_dt;
 
 namespace MY_SERVER {
+    
 /**
  * sip服务类
  */
@@ -42,6 +43,12 @@ public:
      * @return                  初始化结果，0-success，-1-failed
      */             
     MyStatus_t                  init();
+
+    /**
+     * @brief                   启动sip服务
+     * @return                  启动结果，0-success，-1-failed
+     */             
+    MyStatus_t                  run();
 
     /**     
      * @brief                   关闭sip服务
@@ -72,13 +79,7 @@ private:
      * @brief                   初始化pjsip模块
      * @return                  初始化结果，0-success，-1-failed
      */     
-    MyStatus_t                  initModule();
-
-    /**     
-     * @brief                   初始化pjsip线程
-     * @return                  初始化结果，0-success，-1-failed
-     */     
-    MyStatus_t                  initThread();    
+    MyStatus_t                  initModule(); 
 
 private:
     //                          服务是否启动 

@@ -10,6 +10,7 @@ using MY_COMMON::MyServerThreadConfig_dt;
 using MY_COMMON::MySipStackConfig_dt;
 
 namespace MY_ENVIR {
+
 /**
  * 系统配置类
  */
@@ -43,4 +44,5 @@ private:
     static MyServerThreadConfig_dt                  ServerThreadConfig;
     static MySipStackConfig_dt                      SipStackConfig;      
 };
+
 }; // namespace MY_ENVIR

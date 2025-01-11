@@ -7,6 +7,7 @@
 using MY_COMMON::MyStatus_t;
 
 namespace MY_APP {
+    
 /**
  * sip应用类
  */

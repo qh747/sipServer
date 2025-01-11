@@ -97,15 +97,28 @@ MyStatus_t MySipServer::init()
         return MyStatus_t::FAILED;
     }
 
-    // pjsip模块注册
-    status = this->initThread();
-    if (MyStatus_t::SUCCESS != status) {
-        LOG(ERROR) << "SipServer init failed. initThread() error.";
+    m_isStarted.store(MyStatus_t::SUCCESS);
+    LOG(INFO) << "SipServer init success.";
+    return MyStatus_t::SUCCESS;
+}
+
+MyStatus_t MySipServer::run()
+{
+    m_evCbPoolPtr = pjsip_endpt_create_pool(m_endpointPtr, "MySipServerThreadPool", MY_COMMON::SIPSERV_EVTRD_INIT_MEM_SIZE, MY_COMMON::SIPSERV_EVTRD_INCREM_MEM_SIZE);
+    if (nullptr == m_evCbPoolPtr) {
+        LOG(ERROR) << "SipServer init thread failed. pjsip_endpt_create_pool error.";
         return MyStatus_t::FAILED;
     }
 
-    m_isStarted.store(MyStatus_t::SUCCESS);
-    LOG(INFO) << "SipServer init success.";
+    pj_status_t result = PJ_SUCCESS;
+
+    // 创建事件处理线程
+    result = pj_thread_create(m_evCbPoolPtr, "MySipServerThread", &MySipServer::OnSipServerEvCb, this, PJ_THREAD_DEFAULT_STACK_SIZE, 0, &m_evThreadPtr);
+    if (PJ_SUCCESS != result) {
+        LOG(ERROR) << "SipServer init thread failed. pj_thread_create() error. Code: " << result << ".";
+        return MyStatus_t::FAILED;
+    }
+
     return MyStatus_t::SUCCESS;
 }
 
@@ -145,7 +158,7 @@ MyStatus_t MySipServer::shutdown()
 
     pj_caching_pool_destroy(&m_cachingPool);
 
-    LOG(INFO) << "SipServer shurdown success. name: " << m_cfgPtr->name << " domain: " << m_cfgPtr->domain
+    LOG(INFO) << "SipServer shutdown success. name: " << m_cfgPtr->name << " domain: " << m_cfgPtr->domain
               << " ip: " << m_cfgPtr->ipAddr << " port: " << m_cfgPtr->port << " protocol: udp/tcp.";
     return MyStatus_t::SUCCESS;
 }
@@ -259,26 +272,6 @@ MyStatus_t MySipServer::initModule()
         LOG(ERROR) << "SipServer init module failed. MySipAppWrapper::Init() error.";
         return MyStatus_t::FAILED;
     }
-    return MyStatus_t::SUCCESS;
-}
-
-MyStatus_t MySipServer::initThread()
-{
-    m_evCbPoolPtr = pjsip_endpt_create_pool(m_endpointPtr, "MySipServerThreadPool", MY_COMMON::SIPSERV_EVTRD_INIT_MEM_SIZE, MY_COMMON::SIPSERV_EVTRD_INCREM_MEM_SIZE);
-    if (nullptr == m_evCbPoolPtr) {
-        LOG(ERROR) << "SipServer init thread failed. pjsip_endpt_create_pool error.";
-        return MyStatus_t::FAILED;
-    }
-
-    pj_status_t result = PJ_SUCCESS;
-
-    // 创建事件处理线程
-    result = pj_thread_create(m_evCbPoolPtr, "MySipServerThread", &MySipServer::OnSipServerEvCb, this, PJ_THREAD_DEFAULT_STACK_SIZE, 0, &m_evThreadPtr);
-    if (PJ_SUCCESS != result) {
-        LOG(ERROR) << "SipServer init thread failed. pj_thread_create() error. Code: " << result << ".";
-        return MyStatus_t::FAILED;
-    }
-
     return MyStatus_t::SUCCESS;
 }
 

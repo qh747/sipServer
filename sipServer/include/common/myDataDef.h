@@ -77,5 +77,4 @@ typedef struct MySipStackConfigDataType
 
 } MySipStackConfig_dt; 
 
-
 }; // MY_COMMON

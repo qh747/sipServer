@@ -42,7 +42,7 @@ For SIP server code practice.
  log directory in: ./sipServer/log/
 ```
 
-# clear
+# clean
 
 ``` command
  1. rm -rf ./sipServer/build
@@ -52,5 +52,5 @@ For SIP server code practice.
 # Usage
 
 ``` command
- ./bin/sipServer --servCfgPath ./servCfg.ini
+ ./bin/sipServer --servCfgPath ./bin/servCfg.ini
 ```
