@@ -9,7 +9,7 @@ using MY_COMMON::MyStatus_t;
 namespace MY_APP {
     
 /**
- * sip应用类
+ * sip应用包装类
  */
 class MySipAppWrapper : public MY_UTILS::MyNonConstructableAndNonCopyable
 {
@@ -29,7 +29,7 @@ public:
     static SipAppModPtr                     AppModule();
 
     /**     
-     * @brief                               初始化sip应用
+     * @brief                               初始化
      * @return                              初始化结果，0-success，-1-failed
      * @param endpt                         pjsip endpoint
      * @param appName                       sip应用名称
@@ -38,11 +38,11 @@ public:
     static MyStatus_t                       Init(SipAppEndptPtr endpt, const std::string& name, pjsip_module_priority priority);
 
     /**
-     * @brief                               销毁sip应用
-     * @return                              销毁结果，0-success，-1-failed
+     * @brief                               关闭
+     * @return                              关闭结果，0-success，-1-failed
      * @param endpt                         pjsip endpoint
      */
-    static MyStatus_t                       Destory(SipAppEndptPtr endpt);
+    static MyStatus_t                       Shutdown(SipAppEndptPtr endpt);
 
     /**
      * @brief                               获取sip应用信息

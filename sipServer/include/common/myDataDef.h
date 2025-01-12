@@ -28,6 +28,8 @@ typedef enum class MyStatusType : int
  */
 typedef struct MyServerAddrConfigDataType 
 {
+    //                              服务端ID
+    std::string                     id;
     //                              服务端IP地址
     std::string                     ipAddr;    
     //                              服务端端口号
@@ -76,5 +78,93 @@ typedef struct MySipStackConfigDataType
     std::string                     sipStackName;               
 
 } MySipStackConfig_dt; 
+
+/**
+ * @brief SIP上级注册服务信息
+ */
+typedef struct MySipRegUpServInfoDataType 
+{
+    //                              服务端ID
+    std::string                     id;
+    //                              服务端IP地址
+    std::string                     ipAddr;    
+    //                              服务端端口号
+    uint16_t                        port;  
+    //                              服务端名称
+    std::string                     name;      
+    //                              服务端域名
+    std::string                     domain;   
+    //                              注册时长
+    double                          duration;             
+
+} MySipRegUpServInfo_dt; 
+
+/**
+ * @brief SIP上级注册服务结果
+ */
+typedef struct MySipRegUpServResultDataType 
+{
+    //                              服务端ID
+    std::string                     id;
+    //                              服务端IP地址
+    std::string                     ipAddr;    
+    //                              服务端端口号
+    uint16_t                        port;  
+    //                              服务端名称
+    std::string                     name;      
+    //                              服务端域名
+    std::string                     domain;  
+    //                              注册结果
+    MyStatus_t                      result;
+    //                              注册时长
+    double                          duration;
+    //                              发起注册时间, 格式为: YYYY-MM-DD HH:MM:SS
+    std::string                     time;
+
+} MySipRegUpServResult_dt; 
+
+/**
+ * @brief SIP下级注册服务信息
+ */
+typedef struct MySipRegLowServInfoDataType 
+{
+    //                              服务端ID
+    std::string                     id;
+    //                              服务端IP地址
+    std::string                     ipAddr;    
+    //                              服务端端口号
+    uint16_t                        port;  
+    //                              服务端名称
+    std::string                     name;      
+    //                              服务端域名
+    std::string                     domain;    
+    //                              注册时长
+    double                          duration;            
+
+} MySipRegLowServInfo_dt; 
+
+/**
+ * @brief SIP下级注册服务结果
+ */
+typedef struct MySipRegLowServResultDataType 
+{
+    //                              服务端ID
+    std::string                     id;
+    //                              服务端IP地址
+    std::string                     ipAddr;    
+    //                              服务端端口号
+    uint16_t                        port;  
+    //                              服务端名称
+    std::string                     name;      
+    //                              服务端域名
+    std::string                     domain;  
+    //                              注册结果
+    MyStatus_t                      result;
+    //                              注册时长
+    double                          duration;
+    //                              发起注册时间, 格式为: YYYY-MM-DD HH:MM:SS
+    std::string                     time;
+
+} MySipRegLowServResult_dt; 
 
 }; // MY_COMMON

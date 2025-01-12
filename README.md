@@ -2,13 +2,6 @@
 
 For SIP server code practice.
 
-# Current Support
-
-1. sip protocol stack init.
-2. config file load.
-3. log file generate.
-4. sip event handle.
-
 # Todo
 
 1. sip register message handle.
@@ -54,3 +47,7 @@ For SIP server code practice.
 ``` command
  ./bin/sipServer --servCfgPath ./bin/servCfg.ini
 ```
+
+# Precautions
+
+1. In the program, there can only be one instance of `sipServer`, because the endpoint object in the PJSIP protocol stack is global.

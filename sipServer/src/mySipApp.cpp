@@ -14,7 +14,7 @@ public:
     MySipAppRels(MySipAppWrapper::SipAppEndptPtr endptPtr) : m_endpointPtr(endptPtr) {}
     ~MySipAppRels() {
         if (nullptr != MySipAppWrapper::AppModule()) {
-            MySipAppWrapper::Destory(m_endpointPtr);
+            MySipAppWrapper::Shutdown(m_endpointPtr);
         }
     }
 
@@ -78,14 +78,14 @@ MyStatus_t MySipAppWrapper::Init(SipAppEndptPtr endpt, const std::string& name, 
     return MyStatus_t::SUCCESS;
 }
 
-MyStatus_t MySipAppWrapper::Destory(SipAppEndptPtr endpt)
+MyStatus_t MySipAppWrapper::Shutdown(SipAppEndptPtr endpt)
 {
     if (nullptr == AppModulePtr) {
-        LOG(WARNING) << "Sip app module ia not init.";
+        LOG(WARNING) << "Sip app module shutdown failed. sip app module ia not init.";
         return MyStatus_t::SUCCESS;
     }
 
-    LOG(INFO) << "Sip app module destory success: " << MySipAppWrapper::GetAppModuleInfo() << ".";
+    LOG(INFO) << "Sip app module shutdown success: " << MySipAppWrapper::GetAppModuleInfo() << ".";
 
     if (nullptr != AppModulePtr->name.ptr) {
         delete[] AppModulePtr->name.ptr;

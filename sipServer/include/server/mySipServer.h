@@ -14,7 +14,7 @@ using MY_COMMON::MyStatus_t;
 using MY_COMMON::MyServerAddrConfig_dt;
 
 namespace MY_SERVER {
-    
+
 /**
  * sip服务类
  */
@@ -22,7 +22,7 @@ class MySipServer
 {
 public:
     typedef MySipServer*                            ServPtr;
-    typedef pj_pool_t*                              ServPoolPtr;
+    typedef pj_pool_t*                              ServThreadPoolPtr;
     typedef std::shared_ptr<MyServerAddrConfig_dt>  ServCfgPtr;
     typedef pjsip_endpoint*                         ServEndpointPtr;
     typedef pjmedia_endpt*                          ServMediaEndpointPtr;
@@ -34,7 +34,11 @@ public:
     ~MySipServer();
 
 public:
-    //                          sip服务事件监听
+    /**
+     * @brief                   回调函数: sip服务事件监听
+     * @return                  0-success，-1-failed
+     * @param args              线程函数传入参数
+     */
     static int                  OnSipServerEvCb(ServEvThreadCbParamPtr args);
 ;
 public:
@@ -56,12 +60,49 @@ public:
      */         
     MyStatus_t                  shutdown();
 
+public:
+    /**
+     * @brief                   获取服务信息
+     * @return                  服务信息
+     */
+    std::string                 getServerInfo();
+
 public:     
     /**     
      * @brief                   sip服务是否启动
      * @return                  启动结果，0-success，-1-failed
      */
-    inline MyStatus_t           isStarted() const { return m_isStarted.load(); }
+    inline MyStatus_t           isStarted() const { return m_startState.load(); }
+
+    /**
+     * @brief                   获取服务名称
+     * @return                  服务名称
+     */
+    inline std::string          getServerName() const { return (nullptr != m_cfgPtr ? m_cfgPtr->name : ""); }
+
+    /**
+     * @brief                   获取服务域名
+     * @return                  服务域名
+     */
+    inline std::string          getServeDomain() const { return (nullptr != m_cfgPtr ? m_cfgPtr->domain : ""); }
+
+    /**
+     * @brief                   获取服务ID
+     * @return                  服务ID
+     */
+    inline std::string          getServerId() const { return (nullptr != m_cfgPtr ? m_cfgPtr->id : ""); }
+
+    /**
+     * @brief                   获取服务IP地址
+     * @return                  服务IP地址
+     */
+    inline std::string          getServerIp() const { return (nullptr != m_cfgPtr ? m_cfgPtr->ipAddr : ""); }
+
+    /**
+     * @brief                   获取服务端口
+     * @return                  服务端口
+     */
+    inline uint16_t             getServerPort() const { return (nullptr != m_cfgPtr ? m_cfgPtr->port : 0); }
 
 private:
     /**
@@ -82,8 +123,8 @@ private:
     MyStatus_t                  initModule(); 
 
 private:
-    //                          服务是否启动 
-    std::atomic<MyStatus_t>     m_isStarted;
+    //                          启动状态 
+    std::atomic<MyStatus_t>     m_startState;
 
     //                          服务多线程互斥量
     std::recursive_mutex        m_lock;
@@ -101,7 +142,7 @@ private:
     ServMediaEndpointPtr        m_mediaEndptPtr;
 
     //                          pjsip事件回调函数所在线程使用的内存地址
-    ServPoolPtr                 m_evCbPoolPtr;
+    ServThreadPoolPtr           m_servThreadPoolPtr;
 
     //                          pjsip事件回调函数所在线程
     ServEvThreadPtr             m_evThreadPtr;

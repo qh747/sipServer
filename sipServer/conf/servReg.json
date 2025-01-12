@@ -1,0 +1,40 @@
+{
+    "registerServer": {
+      "upperServer": [
+        {
+          "id": "10000100001000010001",
+          "ipAddr": "192.168.1.1",
+          "port": "5061",
+          "name": "sipUpServerFst",
+          "domain": "sipUpServerFst.com",
+          "expired": "3600"
+        },
+        {
+          "id": "10000100001000010002",
+          "ipAddr": "192.168.1.2",
+          "port": "5061",
+          "name": "sipUpServerSec",
+          "domain": "sipUpServerSec.com",
+          "expired": "3600"
+        }
+      ],
+      "lowerServer": [
+        {
+          "id": "10000100001000010010",
+          "ipAddr": "192.168.2.1",
+          "port": "5062",
+          "name": "sipLowServerFst",
+          "domain": "sipLowServerFst.com",
+          "expired": "3600"
+        },
+        {
+          "id": "10000100001000010020",
+          "ipAddr": "192.168.2.2",
+          "port": "5062",
+          "name": "sipLowServerSec",
+          "domain": "sipLowServerSec.com",
+          "expired": "3600"
+        }
+      ]
+    }
+  }

@@ -39,6 +39,11 @@ target_link_libraries(${PROJECT_NAME} PRIVATE boost_thread)
 # 链接Simpleini依赖库
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../thirdParty/simpleini/include)
 
+# 链接jsoncpp依赖库
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../thirdParty/jsoncpp/include)
+target_link_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../thirdParty/jsoncpp/lib)
+target_link_libraries(${PROJECT_NAME} PRIVATE jsoncpp)
+
 # 链接依赖库
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../thirdParty/ZLToolKit/include)
 target_link_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../thirdParty/ZLToolKit/lib)

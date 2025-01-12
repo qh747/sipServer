@@ -37,12 +37,27 @@ public:
     //                                              获取SIP协议栈配置
     inline static const MySipStackConfig_dt&        GetSipStackConfig() { return SipStackConfig; }
 
+    //                                              获取SIP注册文件路径
+    inline static const std::string&                GetServerRegisterFile() { return ServerRegisterFile; }
+
 private:
+    //                                              ini配置文件处理对象
     static CSimpleIniA                              SystemCfgIni;
+
+    //                                              服务端地址配置
     static MyServerAddrConfig_dt                    ServerAddrConfig;
+
+    //                                              服务端日志配置
     static MyServerLogConfig_dt                     ServerLogConfig;
+    
+    //                                              服务端线程池配置
     static MyServerThreadConfig_dt                  ServerThreadConfig;
-    static MySipStackConfig_dt                      SipStackConfig;      
+
+    //                                              SIP协议栈配置
+    static MySipStackConfig_dt                      SipStackConfig;
+
+    //                                              SIP注册文件路径
+    static std::string                              ServerRegisterFile; 
 };
 
 }; // namespace MY_ENVIR
