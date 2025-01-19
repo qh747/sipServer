@@ -1,45 +1,59 @@
+#include <SimpleIni.h>
 #include "envir/mySystemConfg.h"
+using MY_COMMON::MyStatus_t;
+using MY_COMMON::MyServLogCfg_dt;    
+using MY_COMMON::MySipStackCfg_dt;   
+using MY_COMMON::MySipEvThdMemCfg_dt;   
+using MY_COMMON::MySipServAddrCfg_dt;
+using MY_UTILS::MyJsonHelper;
 
 namespace MY_ENVIR {
-    
-CSimpleIniA             MySystemConfig::SystemCfgIni;
-MyServerAddrConfig_dt   MySystemConfig::ServerAddrConfig;
-MyServerLogConfig_dt    MySystemConfig::ServerLogConfig;
-MyServerThreadConfig_dt MySystemConfig::ServerThreadConfig;
-MySipStackConfig_dt     MySystemConfig::SipStackConfig;
-std::string             MySystemConfig::ServerRegisterFile;
 
-MyStatus_t MySystemConfig::load(const std::string& path)
+MyServLogCfg_dt                     MySystemConfig::ServLogCfg;
+MySipStackCfg_dt                    MySystemConfig::SipStackCfg;
+MySipEvThdMemCfg_dt                 MySystemConfig::SipEvThdMemCfg;
+MySipServAddrCfg_dt                 MySystemConfig::SipServAddrCfg;
+MyJsonHelper::SipRegUpServJsonMap   MySystemConfig::SipUpRegServCfgMap;
+MyJsonHelper::SipRegLowServJsonMap  MySystemConfig::SipLowRegServCfgMap;
+
+MyStatus_t MySystemConfig::Init(const std::string& path)
 {
     // 加载INI文件
-    if (0 < SystemCfgIni.LoadFile(path.c_str())) {
+    CSimpleIniA SysCfgIni;
+    if (path.empty() || (0 < SysCfgIni.LoadFile(path.c_str()))) {
         return MyStatus_t::FAILED;
     }
 
-    // 读取服务配置
-    ServerAddrConfig.port                       = SystemCfgIni.GetLongValue("sipServer", "serverPort", 5060);
-    ServerAddrConfig.id                         = SystemCfgIni.GetValue("sipServer", "serverId", "");
-    ServerAddrConfig.ipAddr                     = SystemCfgIni.GetValue("sipServer", "serverIp", "127.0.0.1");
-    ServerAddrConfig.name                       = SystemCfgIni.GetValue("sipServer", "serverName", "mySipServer");
-    ServerAddrConfig.domain                     = SystemCfgIni.GetValue("sipServer", "serverDomain", "mySipServer.com");
-
-    // 读取日志配置                 
-    ServerLogConfig.logLevel                    = SystemCfgIni.GetValue("log", "logLevel", "info");
-    ServerLogConfig.logPath                     = SystemCfgIni.GetValue("log", "logPath", "./log");
-    ServerLogConfig.enableOutputToConsole       = SystemCfgIni.GetBoolValue("log", "enableOutputToConsole", true);
-    ServerLogConfig.enableUseDiffColorDisplay   = SystemCfgIni.GetBoolValue("log", "enableUseDiffColorDisplay", true);
-
-    // 读取线程池配置
-    ServerThreadConfig.initIhreadCount          = SystemCfgIni.GetLongValue("threadPool", "initThreadCount", 4);
+    // 读取服务端日志配置                 
+    ServLogCfg.logLevel                    = SysCfgIni.GetValue("log", "logLevel", "info");
+    ServLogCfg.logPath                     = SysCfgIni.GetValue("log", "logPath", "./log");
+    ServLogCfg.enableOutputToConsole       = SysCfgIni.GetBoolValue("log", "enableOutputToConsole", true);
+    ServLogCfg.enableUseDiffColorDisplay   = SysCfgIni.GetBoolValue("log", "enableUseDiffColorDisplay", true);
 
     // 读取SIP协议栈配置
-    SipStackConfig.sipStackSize                 = SystemCfgIni.GetLongValue("sipStack", "sipStackSize", 1024*256);
-    SipStackConfig.sipStackName                 = SystemCfgIni.GetValue("sipStack", "sipStackName", "mySipStack");
+    SipStackCfg.sipStackSize               = SysCfgIni.GetLongValue("sipStack", "sipStackSize", 1024*256);
+    SipStackCfg.sipStackName               = SysCfgIni.GetValue("sipStack", "sipStackName", "sipStack");
 
-    // 读取服务注册文件配置
-    std::string filePath                        = SystemCfgIni.GetValue("sipRegister", "sipRegisterFilePath", ".");
-    std::string fileName                        = SystemCfgIni.GetValue("sipRegister", "sipRegisterFileName", "servReg.json");
-    ServerRegisterFile                          = filePath + std::string("/") + fileName;
+    // 读取事件线程内存配置
+    SipEvThdMemCfg.sipEvThdInitSize        = SysCfgIni.GetLongValue("sipEventThread", "sipEventThreadInitSize", 1024*1024*1);
+    SipEvThdMemCfg.sipEvThdIncreSize       = SysCfgIni.GetLongValue("sipEventThread", "sipEventThreadIncrementSize", 1024*1024*1);
+
+    // 读取sip服务端地址配置
+    SipServAddrCfg.port                    = SysCfgIni.GetLongValue("sipServer", "sipServerPort", 5060);
+    SipServAddrCfg.id                      = SysCfgIni.GetValue("sipServer", "sipServerId", "");
+    SipServAddrCfg.ipAddr                  = SysCfgIni.GetValue("sipServer", "sipServerIp", "127.0.0.1");
+    SipServAddrCfg.name                    = SysCfgIni.GetValue("sipServer", "sipServerName", "sipServer");
+    SipServAddrCfg.domain                  = SysCfgIni.GetValue("sipServer", "sipServerDomain", "sipServer.com");
+
+    // 读取sip服务注册文件配置
+    std::string filePath                   = SysCfgIni.GetValue("sipServerRegister", "sipServerRegisterFilePath", ".");
+    std::string fileName                   = SysCfgIni.GetValue("sipServerRegister", "sipServerRegisterFileName", "servReg.json");
+    fileName                               = filePath + std::string("/") + fileName;
+
+    // 解析sip服务注册文件
+    if (MyStatus_t::SUCCESS != MyJsonHelper::ParseSipServRegJsonFile(fileName, SipUpRegServCfgMap, SipLowRegServCfgMap)) {
+        return MyStatus_t::FAILED;
+    }
     
     return MyStatus_t::SUCCESS;
 }

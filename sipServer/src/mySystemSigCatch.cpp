@@ -1,22 +1,28 @@
 #define GLOG_USE_GLOG_EXPORT
 #include <thread>
 #include <glog/logging.h>
-#include "envir/mySignaleCatch.h"
+#include <gflags/gflags.h>
+#include "envir/mySystemSigCatch.h"
+using MY_COMMON::MyStatus_t;
 
 namespace MY_ENVIR {
     
-std::recursive_mutex         MySignalCatch::Mutex;
-std::condition_variable_any  MySignalCatch::Condition;
+std::recursive_mutex         MySystemSigCatch::Mutex;
+std::condition_variable_any  MySystemSigCatch::Condition;
 
-MyStatus_t MySignalCatch::Run()
+MyStatus_t MySystemSigCatch::Init()
 {
     // 捕获ctrl + c信号
-    signal(SIGINT, MySignalCatch::SignalHandle);
+    signal(SIGINT, MySystemSigCatch::SignalHandle);
     // 捕获ctrl + z信号
-    signal(SIGSTOP, MySignalCatch::SignalHandle);
+    signal(SIGSTOP, MySystemSigCatch::SignalHandle);
     // 捕获ctrl + \信号
-    signal(SIGQUIT, MySignalCatch::SignalHandle);
+    signal(SIGQUIT, MySystemSigCatch::SignalHandle);
+    return MyStatus_t::SUCCESS;
+}
 
+MyStatus_t MySystemSigCatch::Run()
+{ 
     // 阻塞程序退出
     std::unique_lock<std::recursive_mutex> lock(Mutex);
     Condition.wait(lock);
@@ -26,7 +32,7 @@ MyStatus_t MySignalCatch::Run()
     return MyStatus_t::SUCCESS;
 }
 
-void MySignalCatch::SignalHandle(int signum)
+void MySystemSigCatch::SignalHandle(int signum)
 {
     switch (signum) {
         case SIGINT: 

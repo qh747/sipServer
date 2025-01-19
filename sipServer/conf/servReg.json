@@ -7,7 +7,12 @@
           "port": "5061",
           "name": "sipUpServerFst",
           "domain": "sipUpServerFst.com",
-          "expired": "3600"
+          "proto": "udp",
+          "expired": "3600",
+          "auth": "true",
+          "authName": "admin",
+          "authPwd": "123456",
+          "authRealm": "1000010000"
         },
         {
           "id": "10000100001000010002",
@@ -15,7 +20,12 @@
           "port": "5061",
           "name": "sipUpServerSec",
           "domain": "sipUpServerSec.com",
-          "expired": "3600"
+          "proto": "udp",
+          "expired": "3600",
+          "auth": "true",
+          "authName": "admin",
+          "authPwd": "123456",
+          "authRealm": "1000010000"
         }
       ],
       "lowerServer": [
@@ -25,7 +35,12 @@
           "port": "5062",
           "name": "sipLowServerFst",
           "domain": "sipLowServerFst.com",
-          "expired": "3600"
+          "proto": "udp",
+          "expired": "3600",
+          "auth": "true",
+          "authName": "admin",
+          "authPwd": "123456",
+          "authRealm": "1000010000"
         },
         {
           "id": "10000100001000010020",
@@ -33,7 +48,12 @@
           "port": "5062",
           "name": "sipLowServerSec",
           "domain": "sipLowServerSec.com",
-          "expired": "3600"
+          "proto": "udp",
+          "expired": "3600",
+          "auth": "true",
+          "authName": "admin",
+          "authPwd": "123456",
+          "authRealm": "1000010000"
         }
       ]
     }
