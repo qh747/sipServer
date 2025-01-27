@@ -44,14 +44,17 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../thirdP
 target_link_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../thirdParty/jsoncpp/lib)
 target_link_libraries(${PROJECT_NAME} PRIVATE jsoncpp)
 
-# 链接依赖库
+# 链接ZLToolkit依赖库
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../thirdParty/ZLToolKit/include)
 target_link_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../thirdParty/ZLToolKit/lib)
 target_link_libraries(${PROJECT_NAME} PRIVATE ZLToolKit)
 
+# 链接pthread库
+target_link_libraries(${PROJECT_NAME} PRIVATE pthread)
+
 # 链接pjsip依赖库
-target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../thirdParty/pjsip/include)
-target_link_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../thirdParty/pjsip/lib)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../thirdParty/pjsip-2.15.1/install/include)
+target_link_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../thirdParty/pjsip-2.15.1/install/lib)
 target_link_libraries(${PROJECT_NAME} PRIVATE pjsua2-x86_64-unknown-linux-gnu)
 target_link_libraries(${PROJECT_NAME} PRIVATE pjsua-x86_64-unknown-linux-gnu)
 target_link_libraries(${PROJECT_NAME} PRIVATE pjsip-ua-x86_64-unknown-linux-gnu)
@@ -102,9 +105,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE ssl crypto)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../thirdParty/uuid/include)
 target_link_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../thirdParty/uuid/lib)
 target_link_libraries(${PROJECT_NAME} PRIVATE uuid)
-
-# 链接pthread库
-target_link_libraries(${PROJECT_NAME} PRIVATE pthread)
 
 # 链接alsa库, 用于获取声卡设备
 # 如果不存在: sudo apt install libasound2-dev

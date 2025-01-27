@@ -1,3 +1,5 @@
+#include <thread>
+#include <chrono>
 #define GLOG_USE_GLOG_EXPORT
 #include <glog/logging.h>
 #include <gflags/gflags.h>
@@ -24,7 +26,7 @@ void MySipRegApp::OnRegRespCb(SipAppRegCbParamPtr paramPtr)
         LOG(ERROR) << "Sip app reg module register response callback failed. invalid param.";
         return;
     }
-
+    
 }
     
 MySipRegApp::MySipRegApp() : m_appIdPtr(nullptr), m_status(MyStatus_t::FAILED), m_servSmtWkPtr()
@@ -122,6 +124,7 @@ MyStatus_t MySipRegApp::shutdown()
 
 MyStatus_t MySipRegApp::startRegUpServ(const SipRegUpServCfg& cfg, const SipServAddrCfg& servAddr, SipAppEndptPtr endptPtr)
 {
+    // 减小临界区
     {
         boost::shared_lock<boost::shared_mutex> lock(m_rwMutex);
         if (m_regUpServMap.end() != m_regUpServMap.find(cfg.upSipServAddrCfg.id)) {
@@ -201,10 +204,12 @@ MyStatus_t MySipRegApp::startRegUpServ(const SipRegUpServCfg& cfg, const SipServ
     upRegServInfoPtr->sipRegUpServCfg    = upServAddrCfg;
     upRegServInfoPtr->sipRegUpServPtr    = regcPtr;
 
+    // 减小临界区
     {
         boost::unique_lock<boost::shared_mutex> lock(m_rwMutex);
         m_regUpServMap.insert(std::make_pair(cfg.upSipServAddrCfg.id, upRegServInfoPtr));
     }
+
     return MyStatus_t::SUCCESS;
 }
 

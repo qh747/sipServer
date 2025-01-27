@@ -28,7 +28,7 @@ int MySipServer::OnSipServerEvCb(SipServEvThreadCbParamPtr args)
     while (true) {
         // 服务如果停止则取消监听事件
         if (MyStatus_t::SUCCESS != servPtr->getState()) {
-            LOG(INFO) << "SipServer stop listen.";
+            LOG(INFO) << "SipServer stop listen. " << MySipServerHelper::GetSipServInfo(servPtr->getSipServAddrCfg()) << ".";
             break;
         }
 
@@ -78,12 +78,13 @@ MyStatus_t MySipServer::init(const SipServAddrCfg& addrCfg, const SipServEvThdMe
     pj_sockaddr_in addr;
     pj_bzero(&addr, sizeof(addr));
 
-    pj_str_t pjAddrstr = pj_str(const_cast<char *>(m_servAddrCfgPtr->ipAddr.c_str()));
-    pj_inet_pton(PJ_AF_INET, &pjAddrstr, &addr.sin_addr);
+    pj_str_t addrstr = pj_str(const_cast<char *>(m_servAddrCfgPtr->ipAddr.c_str()));
+    pj_inet_pton(PJ_AF_INET, &addrstr, &addr.sin_addr);
 
     addr.sin_family = pj_AF_INET();
     addr.sin_port   = pj_htons(m_servAddrCfgPtr->port);
 
+    // 用于本地消息发送和接收
     if(PJ_SUCCESS != pjsip_udp_transport_start(m_servEndptPtr, &addr, nullptr, 1, nullptr)) {
         LOG(ERROR) << "SipServer init failed. pjsip_udp_transport_start() error.";
         return MyStatus_t::FAILED;
@@ -94,9 +95,29 @@ MyStatus_t MySipServer::init(const SipServAddrCfg& addrCfg, const SipServEvThdMe
         return MyStatus_t::FAILED;
     }
 
+    pj_sockaddr_in regAddr;
+    pj_bzero(&regAddr, sizeof(regAddr));
+
+    pj_str_t regAddrstr = pj_str(const_cast<char *>(m_servAddrCfgPtr->ipAddr.c_str()));
+    pj_inet_pton(PJ_AF_INET, &regAddrstr, &addr.sin_addr);
+
+    regAddr.sin_family = pj_AF_INET();
+    regAddr.sin_port   = pj_htons(m_servAddrCfgPtr->regPort);
+
+    // 用于监听下级sip服务注册
+    if(PJ_SUCCESS != pjsip_udp_transport_start(m_servEndptPtr, &regAddr, nullptr, 1, nullptr)) {
+        LOG(ERROR) << "SipServer init failed. pjsip_udp_transport_start() for sip regist error.";
+        return MyStatus_t::FAILED;
+    }
+
+    if(PJ_SUCCESS != pjsip_tcp_transport_start(m_servEndptPtr, &regAddr, 1, nullptr)) {
+        LOG(ERROR) << "SipServer init failed. pjsip_tcp_transport_start() for sip regist error.";
+        return MyStatus_t::FAILED;
+    }
+
     // 事件线程池初始化
     m_servThdPoolPtr = pjsip_endpt_create_pool(m_servEndptPtr, MySipServerHelper::GetSipServThdPoolName(*m_servAddrCfgPtr).c_str(), 
-                                                  evThdMemCfg.sipEvThdInitSize, evThdMemCfg.sipEvThdIncreSize);
+                                               evThdMemCfg.sipEvThdInitSize, evThdMemCfg.sipEvThdIncreSize);
     if (nullptr == m_servThdPoolPtr) {
         LOG(ERROR) << "SipServer init failed. pjsip_endpt_create_pool error.";
         return MyStatus_t::FAILED;

@@ -1,0 +1,60 @@
+{
+    "registerServer": {
+      "upperServer": [
+        {
+          "id": "10000100001000010001",
+          "ipAddr": "192.168.1.1",
+          "port": "5061",
+          "name": "sipUpServerFst",
+          "domain": "sipUpServerFst.com",
+          "proto": "udp",
+          "expired": "3600",
+          "auth": "true",
+          "authName": "admin",
+          "authPwd": "123456",
+          "authRealm": "1000010000"
+        },
+        {
+          "id": "10000100001000010002",
+          "ipAddr": "192.168.1.2",
+          "port": "5061",
+          "name": "sipUpServerSec",
+          "domain": "sipUpServerSec.com",
+          "proto": "udp",
+          "expired": "3600",
+          "auth": "true",
+          "authName": "admin",
+          "authPwd": "123456",
+          "authRealm": "1000010000"
+        }
+      ],
+      "lowerServer": [
+        {
+          "id": "10000100001000010010",
+          "ipAddr": "192.168.2.1",
+          "port": "5060",
+          "name": "sipLowServerFst",
+          "domain": "sipLowServerFst.com",
+          "proto": "udp",
+          "expired": "3600",
+          "auth": "true",
+          "authName": "admin",
+          "authPwd": "123456",
+          "authRealm": "1000010000"
+        },
+        {
+          "id": "10000100001000010020",
+          "ipAddr": "192.168.2.2",
+          "port": "5060",
+          "name": "sipLowServerSec",
+          "domain": "sipLowServerSec.com",
+          "proto": "udp",
+          "expired": "3600",
+          "auth": "true",
+          "authName": "admin",
+          "authPwd": "123456",
+          "authRealm": "1000010000"
+        }
+      ]
+    }
+  }

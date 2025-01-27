@@ -42,10 +42,10 @@ typedef struct MySipAppIdentifyDataType
  */
 typedef struct MySipUpperRegisterServerInfoDataType 
 {
-    //                              app ID
+    //                              sip上级注册服务配置
     MySipRegUpServCfg_dt            sipRegUpServCfg;
 
-    //                              app名称
+    //                              sip上级注册服务句柄
     pjsip_regc*                     sipRegUpServPtr;                  
 
 } MySipUpRegServInfo_dt; 

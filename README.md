@@ -47,7 +47,3 @@ For SIP server code practice.
 ``` command
  ./bin/sipServer --servCfgPath ./bin/servCfg.ini
 ```
-
-# Precautions
-
-1. In the program, there can only be one instance of `sipServer`, because the endpoint object in the PJSIP protocol stack is global.

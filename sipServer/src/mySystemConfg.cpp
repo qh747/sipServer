@@ -40,6 +40,7 @@ MyStatus_t MySystemConfig::Init(const std::string& path)
 
     // 读取sip服务端地址配置
     SipServAddrCfg.port                    = SysCfgIni.GetLongValue("sipServer", "sipServerPort", 5060);
+    SipServAddrCfg.regPort                 = SysCfgIni.GetLongValue("sipServer", "sipServerRegPort", 5061);
     SipServAddrCfg.id                      = SysCfgIni.GetValue("sipServer", "sipServerId", "");
     SipServAddrCfg.ipAddr                  = SysCfgIni.GetValue("sipServer", "sipServerIp", "127.0.0.1");
     SipServAddrCfg.name                    = SysCfgIni.GetValue("sipServer", "sipServerName", "sipServer");

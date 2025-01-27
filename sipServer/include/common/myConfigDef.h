@@ -77,6 +77,9 @@ typedef struct MySipServerAddressConfigDataType
     //                              服务端端口号
     uint16_t                        port; 
 
+    //                              服务端注册使用端口号
+    uint16_t                        regPort; 
+
     //                              服务端名称
     std::string                     name;  
 
