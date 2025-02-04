@@ -81,7 +81,10 @@ typedef struct MySipUpperRegisterServerInfoDataType
     MySipRegUpServCfg_dt            sipRegUpServCfg;
 
     //                              sip上级注册服务句柄
-    pjsip_regc*                     sipRegUpServPtr;                  
+    pjsip_regc*                     sipRegUpServPtr;  
+
+    //                              sip上级注册服务最近一次注册时间(格式：yyyy-mm-dd hh:mm:ss)
+    std::string                     sipRegUpServLastRegTime;                
 
 } MySipUpRegServInfo_dt; 
 
@@ -95,9 +98,6 @@ typedef struct MySipLowerRegisterServerInfoDataType
 
     //                              sip下级注册服务最近一次注册时间(格式：yyyy-mm-dd hh:mm:ss)
     std::string                     sipRegLowServLastRegTime;
-
-    //                              sip下级注册服务注册状态
-    MyStatus_t                      sipRegLowServRegStatus;
 
 } MySipLowRegServInfo_dt; 
 

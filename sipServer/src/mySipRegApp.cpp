@@ -12,6 +12,8 @@
 #include "utils/myTimeHelper.h"
 #include "server/mySipServer.h"
 #include "app/mySipRegApp.h"
+using toolkit::Timer;
+using toolkit::EventPollerPool;
 using MY_COMMON::MyStatus_t;
 using MY_COMMON::MySipMsgUri_dt;
 using MY_COMMON::MySipAppIdCfg_dt;
@@ -37,7 +39,7 @@ void MySipRegApp::OnRegRespCb(SipAppRegCbParamPtr paramPtr)
     
 }
     
-MySipRegApp::MySipRegApp() : m_appIdPtr(nullptr), m_status(MyStatus_t::FAILED), m_servSmtWkPtr()
+MySipRegApp::MySipRegApp() : m_appIdPtr(nullptr), m_status(MyStatus_t::FAILED), m_servSmtWkPtr(), m_timePtr(nullptr)
 {
 
 }
@@ -92,16 +94,27 @@ MyStatus_t MySipRegApp::run()
         return MyStatus_t::FAILED;
     }
 
-    // 获取本地sip服务地址配置
-    SipServAddrCfg servAddrCfg = MySystemConfig::GetSipServAddrCfg();
+    // 定时器初启动
+    if (nullptr == m_timePtr) {
+        SipRegAppSmtWkPtr weakSelf = this->shared_from_this();
+        m_timePtr = std::make_shared<Timer>(3.0f, [weakSelf]() -> bool {
+            auto strongSelf = weakSelf.lock();
+            if (nullptr == strongSelf) {
+                return false;
+            }
+            return strongSelf->onTimer();
+        }, EventPollerPool::Instance().getFirstPoller());
+    }
 
-    // 获取本地sip服务的endpoint
-    if (m_servSmtWkPtr.expired()) {
+    // 获取本地sip服务地址配置
+    SipServSmtPtr strongServPtr = m_servSmtWkPtr.lock();
+    if (nullptr == strongServPtr) {
         LOG(ERROR) << "Sip app module run failed. invalid sip server.";
         return MyStatus_t::FAILED;
     }
+    SipServAddrCfg servAddrCfg = strongServPtr->getSipServAddrCfg();
 
-    SipServSmtPtr strongServPtr = m_servSmtWkPtr.lock();
+    // 获取本地sip服务的endpoint
     SipAppEndptPtr endptPtr = strongServPtr->getSipServEndptPtr();
     if (nullptr == endptPtr) {
         LOG(ERROR) << "Sip app module run failed. invalid endpoint.";
@@ -113,7 +126,7 @@ MyStatus_t MySipRegApp::run()
 
     // 向上级服务发起注册
     for (const auto& iter : regUpServMap) {
-        this->startRegUpServ(iter.second, servAddrCfg, endptPtr);
+        this->regUpServ(iter.second, servAddrCfg, endptPtr);
     }
 
     return MyStatus_t::SUCCESS;
@@ -127,10 +140,15 @@ MyStatus_t MySipRegApp::shutdown()
         return MyStatus_t::SUCCESS;
     }
 
+    // 定时器销毁
+    if (nullptr != m_timePtr) {
+        m_timePtr.reset();
+    }
+
     return MyStatus_t::SUCCESS;
 }
 
-MyStatus_t MySipRegApp::startRegUpServ(const SipRegUpServCfg& cfg, const SipServAddrCfg& servAddr, SipAppEndptPtr endptPtr)
+MyStatus_t MySipRegApp::regUpServ(const SipRegUpServCfg& cfg, const SipServAddrCfg& servAddr, SipAppEndptPtr endptPtr)
 {
     // 减小临界区
     {
@@ -208,17 +226,87 @@ MyStatus_t MySipRegApp::startRegUpServ(const SipRegUpServCfg& cfg, const SipServ
     }
 
     // 保存sip reg上下文
-    SipUpRegServInfoPtr upRegServInfoPtr = std::make_shared<SipUpRegServInfo>();
-    upRegServInfoPtr->sipRegUpServCfg    = upServAddrCfg;
-    upRegServInfoPtr->sipRegUpServPtr    = regcPtr;
+    SipUpRegServInfoPtr upRegServInfoPtr        = std::make_shared<SipUpRegServInfo>();
+    upRegServInfoPtr->sipRegUpServCfg           = upServAddrCfg;
+    upRegServInfoPtr->sipRegUpServPtr           = regcPtr;
+    upRegServInfoPtr->sipRegUpServLastRegTime   = MyTimeHelper::GetCurrentFormatTime();
 
     // 减小临界区
     {
         boost::unique_lock<boost::shared_mutex> lock(m_rwMutex);
         m_regUpServMap.insert(std::make_pair(cfg.upSipServAddrCfg.id, upRegServInfoPtr));
     }
-
     return MyStatus_t::SUCCESS;
+}
+
+bool MySipRegApp::onTimer()
+{
+    if (MyStatus_t::SUCCESS != m_status.load()) {
+        return false;
+    }
+
+    boost::unique_lock<boost::shared_mutex> lock(m_rwMutex);
+
+    SipServSmtPtr strongServPtr = m_servSmtWkPtr.lock();
+    if (nullptr == strongServPtr) {
+        LOG(ERROR) << "Sip app module trigger timer failed. invalid sip server.";
+        return false;
+    }
+
+    SipServAddrCfg servAddrCfg = strongServPtr->getSipServAddrCfg();
+    SipAppEndptPtr endptPtr    = strongServPtr->getSipServEndptPtr();
+
+    auto regUpServIter = m_regUpServMap.begin();
+    while (m_regUpServMap.end() != regUpServIter) {
+        int timeDiff = 0;
+        if (MyStatus_t::SUCCESS != MyTimeHelper::CompareWithCurrentTime(regUpServIter->second->sipRegUpServLastRegTime, 
+                                                                        (unsigned int)(regUpServIter->second->sipRegUpServCfg.expired), 
+                                                                        timeDiff)) {
+            LOG(ERROR) << "Sip app module erase invalid sip up server. invalid sip up server regist time format."
+                       << " sip up server id: " << regUpServIter->second->sipRegUpServCfg.upSipServAddrCfg.id 
+                       << " ip addr: " << regUpServIter->second->sipRegUpServCfg.upSipServAddrCfg.ipAddr
+                       << " port: " << regUpServIter->second->sipRegUpServCfg.upSipServAddrCfg.port;
+            regUpServIter = m_regUpServMap.erase(regUpServIter);
+            continue;
+        }
+
+        // 上级sip服务注册即将超时，重新注册
+        if (timeDiff < 5) {
+            lock.unlock();
+            this->regUpServ(regUpServIter->second->sipRegUpServCfg, servAddrCfg, endptPtr);
+            lock.lock();
+        }
+        ++regUpServIter;
+    }
+
+    auto regLowServIter = m_regLowServMap.begin();
+    while (m_regLowServMap.end() != regLowServIter) {
+        // 移除超时的下级sip注册服务
+        int timeDiff = 0;
+        if (MyStatus_t::SUCCESS != MyTimeHelper::CompareWithCurrentTime(regLowServIter->second->sipRegLowServLastRegTime, 
+                                                                        (unsigned int)(regLowServIter->second->sipRegLowServCfg.expired), 
+                                                                        timeDiff)) {
+            LOG(ERROR) << "Sip app module erase invalid sip low server. invalid sip regist time format."
+                       << " sip low server id: " << regLowServIter->second->sipRegLowServCfg.lowSipServAddrCfg.id
+                       << " ip addr: " << regLowServIter->second->sipRegLowServCfg.lowSipServAddrCfg.ipAddr
+                       << " port: " << regLowServIter->second->sipRegLowServCfg.lowSipServAddrCfg.port;
+
+            regLowServIter = m_regLowServMap.erase(regLowServIter);
+            continue;
+        }
+
+        if (timeDiff <= 0) {
+            LOG(ERROR) << "Sip app module erase invalid sip low server. invalid sip regist time format."
+                       << " sip low server id: " << regLowServIter->second->sipRegLowServCfg.lowSipServAddrCfg.id
+                       << " ip addr: " << regLowServIter->second->sipRegLowServCfg.lowSipServAddrCfg.ipAddr
+                       << " port: " << regLowServIter->second->sipRegLowServCfg.lowSipServAddrCfg.port;
+
+            regLowServIter = m_regLowServMap.erase(regLowServIter);
+            continue;
+        }
+        ++regLowServIter;
+    }
+    return true;
 }
 
 MyStatus_t MySipRegApp::onRecvSipRegReqMsg(SipAppRxDataPtr rxDataPtr)
@@ -267,53 +355,54 @@ MyStatus_t MySipRegApp::onRecvSipRegReqMsg(SipAppRxDataPtr rxDataPtr)
         return MyStatus_t::FAILED;
     }
 
+    // 获取本地sip服务的endpoint
+    auto sipServPtr = m_servSmtWkPtr.lock();
+    if (nullptr == sipServPtr) {
+        LOG(ERROR) << "Sip app receive register request message failed. can't get local sip server. "
+                   << "id: " << sipContactHeader.id << " ip addr: " << sipContactHeader.ipAddr << " port: " << sipContactHeader.port << ".";
+        return MyStatus_t::FAILED;
+    }
+
+    auto sipServEndptPtr = sipServPtr->getSipServEndptPtr();
+
+    // 创建向下级sip服务响应的sip 200 ok消息
+    SipAppTxDataPtr txDataPtr = nullptr;
+    if (PJ_SUCCESS != pjsip_endpt_create_response(sipServEndptPtr, rxDataPtr, 200, nullptr, &txDataPtr)) {
+        LOG(ERROR) << "Sip app receive register request message failed. can't create response message. "
+                   << "id: " << sipContactHeader.id << " ip addr: " << sipContactHeader.ipAddr << " port: " << sipContactHeader.port << ".";
+        return MyStatus_t::FAILED;
+    }
+
+    // 向sip 200 ok消息添加Date首部
+    std::string curTime    = MyTimeHelper::GetCurrentSipHeaderTime();
+    pj_str_t    valueTime  = pj_str(const_cast<char*>(curTime.c_str()));
+    pj_str_t    keyTime    = pj_str("Date");
+
+    SipAppMsgDateHdrPtr dateHdrPtr = (SipAppMsgDateHdrPtr)pjsip_date_hdr_create(rxDataPtr->tp_info.pool, &keyTime, &valueTime);
+    pjsip_msg_add_hdr(txDataPtr->msg, (SipAppMsgHdrPtr)dateHdrPtr);
+
+    // 获取发送sip 200 ok消息的地址
+    pjsip_response_addr respAddr;
+    if(PJ_SUCCESS != pjsip_get_response_addr(txDataPtr->pool, rxDataPtr, &respAddr)) {
+        pjsip_tx_data_dec_ref(txDataPtr);
+        LOG(ERROR) << "Sip app receive register request message failed. get response addr failed. "
+                   << "id: " << sipContactHeader.id << " ip addr: " << sipContactHeader.ipAddr << " port: " << sipContactHeader.port << ".";
+        return MyStatus_t::FAILED;
+    }
+
+    // 发送sip 200 ok消息
+    if(PJ_SUCCESS != pjsip_endpt_send_response(sipServEndptPtr, &respAddr, txDataPtr, nullptr, nullptr)) {
+        pjsip_tx_data_dec_ref(txDataPtr);
+        LOG(ERROR) << "Sip app receive register request message failed. send response msg failed. "
+                   << "id: " << sipContactHeader.id << " ip addr: " << sipContactHeader.ipAddr << " port: " << sipContactHeader.port << ".";
+        return MyStatus_t::FAILED;
+    }
+
     boost::unique_lock<boost::shared_mutex> lock(m_rwMutex);
 
     auto infoIter = m_regLowServMap.find(sipContactHeader.id);
     if (expire > 0) {
-        // 获取本地sip服务的endpoint
-        auto sipServPtr = m_servSmtWkPtr.lock();
-        if (nullptr == sipServPtr) {
-            LOG(ERROR) << "Sip app receive register request message failed. can't get local sip server. "
-                       << "id: " << sipContactHeader.id << " ip addr: " << sipContactHeader.ipAddr << " port: " << sipContactHeader.port << ".";
-            return MyStatus_t::FAILED;
-        }
-
-        // 创建向下级sip服务响应的sip 200 ok消息
-        SipAppTxDataPtr txDataPtr       = nullptr;
-        auto            sipServEndptPtr = sipServPtr->getSipServEndptPtr();
-        if (PJ_SUCCESS != pjsip_endpt_create_response(sipServEndptPtr, rxDataPtr, 200, nullptr, &txDataPtr)) {
-            LOG(ERROR) << "Sip app receive register request message failed. can't create response message. "
-                       << "id: " << sipContactHeader.id << " ip addr: " << sipContactHeader.ipAddr << " port: " << sipContactHeader.port << ".";
-            return MyStatus_t::FAILED;
-        }
-
-        // 向sip 200 ok消息添加Date首部
-        std::string curTime    = MyTimeHelper::GetCurrentSipHeaderTime();
-        pj_str_t    valueTime  = pj_str(const_cast<char*>(curTime.c_str()));
-        pj_str_t    keyTime    = pj_str("Date");
-
-        SipAppMsgDateHdrPtr dateHdrPtr = (SipAppMsgDateHdrPtr)pjsip_date_hdr_create(rxDataPtr->tp_info.pool, &keyTime, &valueTime);
-        pjsip_msg_add_hdr(txDataPtr->msg, (SipAppMsgHdrPtr)dateHdrPtr);
-
-        // 获取发送sip 200 ok消息的地址
-        pjsip_response_addr respAddr;
-        if(PJ_SUCCESS != pjsip_get_response_addr(txDataPtr->pool, rxDataPtr, &respAddr)) {
-            pjsip_tx_data_dec_ref(txDataPtr);
-            LOG(ERROR) << "Sip app receive register request message failed. get response addr failed. "
-                       << "id: " << sipContactHeader.id << " ip addr: " << sipContactHeader.ipAddr << " port: " << sipContactHeader.port << ".";
-            return MyStatus_t::FAILED;
-        }
-
-        // 发送sip 200 ok消息
-        if(PJ_SUCCESS != pjsip_endpt_send_response(sipServEndptPtr, &respAddr, txDataPtr, nullptr, nullptr)) {
-            pjsip_tx_data_dec_ref(txDataPtr);
-            LOG(ERROR) << "Sip app receive register request message failed. send response msg failed. "
-                       << "id: " << sipContactHeader.id << " ip addr: " << sipContactHeader.ipAddr << " port: " << sipContactHeader.port << ".";
-            return MyStatus_t::FAILED;
-        }
-
-        // 保存下级sip服务配置
+        // 下级sip服务注册
         if (m_regLowServMap.end() == infoIter) {
             // 添加下级sip服务配置
             SipLowRegServInfoPtr lowRegServInfoSmtPtr                       = std::make_shared<SipLowRegServInfo>();
@@ -322,21 +411,27 @@ MyStatus_t MySipRegApp::onRecvSipRegReqMsg(SipAppRxDataPtr rxDataPtr)
             lowRegServInfoSmtPtr->sipRegLowServCfg.lowSipServAddrCfg.port   = sipContactHeader.port;
             lowRegServInfoSmtPtr->sipRegLowServCfg.expired                  = expire;
             lowRegServInfoSmtPtr->sipRegLowServLastRegTime                  = MyTimeHelper::GetCurrentFormatTime();
-            lowRegServInfoSmtPtr->sipRegLowServRegStatus                    = MyStatus_t::SUCCESS;
             m_regLowServMap.insert(std::make_pair(sipContactHeader.id, lowRegServInfoSmtPtr));
         }
         else {
             // 更新下级sip服务配置
-            infoIter->second->sipRegLowServCfg.lowSipServAddrCfg.ipAddr = sipContactHeader.ipAddr;
-            infoIter->second->sipRegLowServCfg.lowSipServAddrCfg.port   = sipContactHeader.port;
-            infoIter->second->sipRegLowServCfg.expired                  = expire;
-            infoIter->second->sipRegLowServLastRegTime                  = MyTimeHelper::GetCurrentFormatTime();
-            infoIter->second->sipRegLowServRegStatus                    = MyStatus_t::SUCCESS;
+            infoIter->second->sipRegLowServCfg.lowSipServAddrCfg.ipAddr     = sipContactHeader.ipAddr;
+            infoIter->second->sipRegLowServCfg.lowSipServAddrCfg.port       = sipContactHeader.port;
+            infoIter->second->sipRegLowServCfg.expired                      = expire;
+            infoIter->second->sipRegLowServLastRegTime                      = MyTimeHelper::GetCurrentFormatTime();
         }
     }
     else {
         // 下级sip服务注销
+        if (m_regLowServMap.end() == infoIter) {
+            // 下级sip服务未注册
+            LOG(ERROR) << "Sip app receive register request message failed. low sip serv not reg. "
+                       << "id: " << sipContactHeader.id << " ip addr: " << sipContactHeader.ipAddr << " port: " << sipContactHeader.port << ".";
+            return MyStatus_t::FAILED;
+        }
 
+        // 移除下级sip服务配置
+        m_regLowServMap.erase(infoIter);
     }
 
     return MyStatus_t::SUCCESS;

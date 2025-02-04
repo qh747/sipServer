@@ -1,3 +1,4 @@
+#include <thread>
 #include <chrono>
 #include <csignal>
 #include <iostream>
@@ -8,6 +9,7 @@
 #include <Network/Session.h>
 #include <Network/TcpServer.h>
 #include <Thread/ThreadPool.h>
+#include <Poller/Timer.h>
 #include <Poller/EventPoller.h>
 using namespace std;
 using namespace toolkit;
@@ -93,46 +95,36 @@ void FuncTestEventPool()
     }
 }
 
-// TcpServer测试
-class EchoSession: public Session {
-public:
-    EchoSession(const Socket::Ptr &sock) : Session(sock) { DebugL; }
-    ~EchoSession() { DebugL; }
-
-    void onRecv(const Buffer::Ptr &buf) override{
-        //处理客户端发送过来的数据 
-        TraceL << buf->data() <<  " from port:" << get_local_port();
-        send(buf);
-    }
-
-    void onError(const SockException &err) override{
-        //客户端断开连接或其他原因导致该对象脱离TCPServer管理
-        WarnL << err;
-    }
-
-    void onManager() override{
-        //定时管理该对象，譬如会话超时检查
-        DebugL;
-    }
-
-private:
-    Ticker _ticker;
-};
-
-void FuncTestTcpEchoServer()
+// 定时器测试
+void FuncTestTicker()
 {
-    // 初始化日志模块 
+    // 设置日志
     Logger::Instance().add(std::make_shared<ConsoleChannel>());
     Logger::Instance().setWriter(std::make_shared<AsyncLogWriter>());
 
-    // 监听9000端口
-    TcpServer::Ptr server(new TcpServer());
-    server->start<EchoSession>(9000);
+    // 创建一个重复执行的定时器任务
+    Timer::Ptr timer0 = std::make_shared<Timer>(0.5f, []() {
+        std::cout << "Timer0: This task repeats every 0.5 seconds." << std::endl;
+        return true; // 返回true表示任务重复执行
+    }, EventPollerPool::Instance().getFirstPoller());
 
-    // 退出程序事件处理
-    static semaphore sem;
-    signal(SIGINT, [](int) { sem.post(); });
-    sem.wait();
+    // 创建一个只执行一次的定时器任务
+    Timer::Ptr timer1 = std::make_shared<Timer>(1.0f, []() {
+        std::cout << "Timer1: This task will only run once after 1 second." << std::endl;
+        return false; // 返回false表示任务只执行一次
+    }, EventPollerPool::Instance().getFirstPoller());
+
+    // 创建一个可能抛出异常的定时器任务
+    // Timer::Ptr timer2 = std::make_shared<Timer>(2.0f, []() {
+    //     std::cout << "Timer2: This task runs every 2 seconds and may throw an exception." << std::endl;
+    //     throw std::runtime_error("Timer2: An exception occurred.");
+    // }, EventPollerPool::Instance().getFirstPoller());
+
+    // 等待用户中断程序
+    std::cout << "Press Ctrl+C to exit." << std::endl;
+    while (true) {
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
 }
 
 int main() 
@@ -143,8 +135,8 @@ int main()
     // 事件池测试
     // FuncTestEventPool();
 
-    // TcpServer测试
-    FuncTestTcpEchoServer();
+    // 定时器测试
+    FuncTestTicker();
 
     return 0;
 }

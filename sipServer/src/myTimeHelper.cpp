@@ -1,4 +1,5 @@
 #include "utils/myTimeHelper.h"
+using MY_COMMON::MyStatus_t;
 
 namespace MY_UTILS {
 
@@ -42,6 +43,29 @@ std::string MyTimeHelper::GetCurrentSipHeaderTime()
 
     // 返回格式化后的字符串
     return oss.str();
+}
+
+MyStatus_t MyTimeHelper::CompareWithCurrentTime(const std::string& timeStr, unsigned int secToAdd, int& timeDiff)
+{
+    // 时间字符串解析
+    std::tm tm = {};
+    std::istringstream ss(timeStr);
+    ss >> std::get_time(&tm, "%Y-%m-%d %H:%M:%S");
+    if (ss.fail()) {
+        return MyStatus_t::FAILED;
+    }
+    
+    auto cmpTime = std::chrono::system_clock::from_time_t(std::mktime(&tm));
+
+    // 增加指定的秒数
+    cmpTime += std::chrono::duration<unsigned int>(secToAdd);
+
+    // 获取当前时间
+    auto curTime = std::chrono::system_clock::now();
+
+    // 计算时间差
+    timeDiff = std::chrono::duration_cast<std::chrono::duration<int>>(cmpTime - curTime).count();
+    return MyStatus_t::SUCCESS;
 }
 
 }; // namespace MY_UTILS

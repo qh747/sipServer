@@ -3,10 +3,13 @@
 #include <memory>
 #include <string>
 #include <atomic>
+#include <cstdbool>
 #include <pjsip.h>
 #include <pjlib.h>
 #include <pjsip_ua.h>
 #include <pjsip/sip_msg.h>
+#include <Poller/Timer.h>
+#include <Poller/EventPoller.h>
 #include <boost/thread/shared_mutex.hpp>
 #include "common/myDataDef.h"
 #include "common/myConfigDef.h"
@@ -82,9 +85,16 @@ public:
      * @param servAddr                          本地sip服务地址配置
      * @param endptPtr                          endpoint
      */
-    MY_COMMON::MyStatus_t                       startRegUpServ(const SipRegUpServCfg& cfg, const SipServAddrCfg& servAddr, SipAppEndptPtr endptPtr);
+    MY_COMMON::MyStatus_t                       regUpServ(const SipRegUpServCfg& cfg, const SipServAddrCfg& servAddr, SipAppEndptPtr endptPtr);
 
 public:
+
+    /**
+     * @brief                                   定时器回调
+     * @return                                  是否继续触发定时器，true-继续，false-停止
+     */
+    bool                                        onTimer();
+
     /**
      * @brief                                   处理下级sip服务的sip注册请求消息
      * @return                                  处理结果，0-success，-1-failed
@@ -123,6 +133,9 @@ private:
 
     //                                          读写互斥量
     boost::shared_mutex                         m_rwMutex;
+
+    //                                          定时器
+    toolkit::Timer::Ptr                         m_timePtr;
 
     // key = up ref server id, value = sip up reg serv info ptr
     std::map<std::string, SipUpRegServInfoPtr>  m_regUpServMap;
