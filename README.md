@@ -4,7 +4,7 @@ For SIP server code practice.
 
 # Todo
 
-1. sip register message handle.
+1. sip authorized register message handle.
 
 # Directory
 
