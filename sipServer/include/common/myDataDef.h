@@ -22,6 +22,41 @@ typedef enum class MyStatusType : int
 } MyStatus_t;
 
 /**
+ * @brief sip消息uri
+ */
+typedef struct MySipMessageUriDataType 
+{
+    //                              sip服务ID
+    std::string                     id;
+
+    //                              sip服务ip地址
+    std::string                     ipAddr; 
+
+    //                              sip服务端口
+    uint16_t                        port;
+
+    //                              sip服务传输协议类型
+    MyTpProto_t                     proto;                    
+
+} MySipMsgUri_dt; 
+
+/**
+ * @brief sip消息contact首部
+ */
+typedef struct MySipMessageContactHeaderDataType 
+{
+    //                              sip服务ID
+    std::string                     id;
+
+    //                              sip服务ip地址
+    std::string                     ipAddr; 
+
+    //                              sip服务端口
+    uint16_t                        port;                  
+
+} MySipMsgContactHdr_dt; 
+
+/**
  * @brief sipApp标识
  */
 typedef struct MySipAppIdentifyDataType 
@@ -32,7 +67,7 @@ typedef struct MySipAppIdentifyDataType
     //                              app名称
     std::string                     name;    
 
-    //                              服务端端口号
+    //                              app优先级
     pjsip_module_priority           priority;                    
 
 } MySipAppIdCfg_dt; 
@@ -49,5 +84,21 @@ typedef struct MySipUpperRegisterServerInfoDataType
     pjsip_regc*                     sipRegUpServPtr;                  
 
 } MySipUpRegServInfo_dt; 
+
+/**
+ * @brief sip下级注册服务信息
+ */
+typedef struct MySipLowerRegisterServerInfoDataType 
+{
+    //                              sip下级注册服务配置
+    MySipRegLowServCfg_dt           sipRegLowServCfg;
+
+    //                              sip下级注册服务最近一次注册时间(格式：yyyy-mm-dd hh:mm:ss)
+    std::string                     sipRegLowServLastRegTime;
+
+    //                              sip下级注册服务注册状态
+    MyStatus_t                      sipRegLowServRegStatus;
+
+} MySipLowRegServInfo_dt; 
 
 }; // MY_COMMON

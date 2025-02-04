@@ -5,13 +5,15 @@
 #define GLOG_USE_GLOG_EXPORT
 #include <glog/logging.h>
 #include <gflags/gflags.h>
+#include "envir/mySystemAppManage.h"
 #include "utils/mySipServerHelper.h"
-#include "app/mySipMsgProcApp.h"
+#include "app/mySipRegApp.h"
 #include "server/mySipServer.h"
 using MY_COMMON::MyStatus_t;
 using MY_ENVIR::MySystemPjsip;
+using MY_ENVIR::MySystemAppManage;
 using MY_UTILS::MySipServerHelper;
-using MY_APP::MySipMsgProcApp;
+using MY_APP::MySipRegApp;
 
 namespace MY_SERVER {
 
@@ -95,24 +97,26 @@ MyStatus_t MySipServer::init(const SipServAddrCfg& addrCfg, const SipServEvThdMe
         return MyStatus_t::FAILED;
     }
 
-    pj_sockaddr_in regAddr;
-    pj_bzero(&regAddr, sizeof(regAddr));
-
-    pj_str_t regAddrstr = pj_str(const_cast<char *>(m_servAddrCfgPtr->ipAddr.c_str()));
-    pj_inet_pton(PJ_AF_INET, &regAddrstr, &addr.sin_addr);
-
-    regAddr.sin_family = pj_AF_INET();
-    regAddr.sin_port   = pj_htons(m_servAddrCfgPtr->regPort);
-
-    // 用于监听下级sip服务注册
-    if(PJ_SUCCESS != pjsip_udp_transport_start(m_servEndptPtr, &regAddr, nullptr, 1, nullptr)) {
-        LOG(ERROR) << "SipServer init failed. pjsip_udp_transport_start() for sip regist error.";
-        return MyStatus_t::FAILED;
-    }
-
-    if(PJ_SUCCESS != pjsip_tcp_transport_start(m_servEndptPtr, &regAddr, 1, nullptr)) {
-        LOG(ERROR) << "SipServer init failed. pjsip_tcp_transport_start() for sip regist error.";
-        return MyStatus_t::FAILED;
+    if (m_servAddrCfgPtr->regPort > 0) {
+        pj_sockaddr_in regAddr;
+        pj_bzero(&regAddr, sizeof(regAddr));
+    
+        pj_str_t regAddrstr = pj_str(const_cast<char *>(m_servAddrCfgPtr->ipAddr.c_str()));
+        pj_inet_pton(PJ_AF_INET, &regAddrstr, &addr.sin_addr);
+    
+        regAddr.sin_family = pj_AF_INET();
+        regAddr.sin_port   = pj_htons(m_servAddrCfgPtr->regPort);
+    
+        // 用于监听下级sip服务注册
+        if(PJ_SUCCESS != pjsip_udp_transport_start(m_servEndptPtr, &regAddr, nullptr, 1, nullptr)) {
+            LOG(ERROR) << "SipServer init failed. pjsip_udp_transport_start() for sip regist error.";
+            return MyStatus_t::FAILED;
+        }
+    
+        if(PJ_SUCCESS != pjsip_tcp_transport_start(m_servEndptPtr, &regAddr, 1, nullptr)) {
+            LOG(ERROR) << "SipServer init failed. pjsip_tcp_transport_start() for sip regist error.";
+            return MyStatus_t::FAILED;
+        }
     }
 
     // 事件线程池初始化
@@ -166,6 +170,18 @@ MyStatus_t MySipServer::shutdown()
 
     LOG(INFO) << "SipServer shutdown success. " << MySipServerHelper::GetSipServInfo(*m_servAddrCfgPtr) << ".";
     return MyStatus_t::SUCCESS;
+}
+
+MyStatus_t MySipServer::onRecvSipRegMsg(SipAppRxDataPtr regReqMsgPtr)
+{
+    auto sipRegAppWkPtr = MySystemAppManage::GetSipRegApp(m_servAddrCfgPtr->id);
+    if (sipRegAppWkPtr.expired()) {
+        LOG(ERROR) << "SipServer onRecvSipRegReq() failed. sipRegAppWkPtr expired.";
+        return MyStatus_t::FAILED;
+    }
+
+    auto sipRegAppPtr = sipRegAppWkPtr.lock();
+    return sipRegAppPtr->onRecvSipRegReqMsg(regReqMsgPtr);
 }
 
 }; //namespace MY_SERVER

@@ -6,6 +6,7 @@
 #include <pjsip.h>
 #include <pjlib.h>
 #include <pjsip_ua.h>
+#include <pjsip/sip_msg.h>
 #include <boost/thread/shared_mutex.hpp>
 #include "common/myDataDef.h"
 #include "common/myConfigDef.h"
@@ -22,7 +23,10 @@ class MySipRegApp : public std::enable_shared_from_this<MySipRegApp>
 public:
     typedef pjsip_endpoint*                                 SipAppEndptPtr; 
     typedef pjsip_regc*                                     SipAppRegcPtr;
+    typedef pjsip_hdr*                                      SipAppMsgHdrPtr;
+    typedef pjsip_rx_data*                                  SipAppRxDataPtr;
     typedef pjsip_tx_data*                                  SipAppTxDataPtr;
+    typedef pjsip_date_hdr*                                 SipAppMsgDateHdrPtr;
     typedef struct pjsip_regc_cbparam*                      SipAppRegCbParamPtr;
     typedef std::shared_ptr<MY_COMMON::MySipAppIdCfg_dt>    SipAppIdSmtPtr;
     typedef std::weak_ptr<MY_SERVER::MySipServer>           SipServSmtWkPtr;
@@ -33,6 +37,8 @@ public:
     typedef MY_COMMON::MySipServAddrCfg_dt                  SipServAddrCfg;
     typedef MY_COMMON::MySipUpRegServInfo_dt                SipUpRegServInfo;
     typedef std::shared_ptr<SipUpRegServInfo>               SipUpRegServInfoPtr;
+    typedef MY_COMMON::MySipLowRegServInfo_dt               SipLowRegServInfo;
+    typedef std::shared_ptr<SipLowRegServInfo>              SipLowRegServInfoPtr;
 
 public:
     /**
@@ -79,6 +85,14 @@ public:
     MY_COMMON::MyStatus_t                       startRegUpServ(const SipRegUpServCfg& cfg, const SipServAddrCfg& servAddr, SipAppEndptPtr endptPtr);
 
 public:
+    /**
+     * @brief                                   处理下级sip服务的sip注册请求消息
+     * @return                                  处理结果，0-success，-1-failed
+     * @param rxDataPtr                         sip注册请求消息
+     */
+    MY_COMMON::MyStatus_t                       onRecvSipRegReqMsg(SipAppRxDataPtr rxDataPtr);
+
+public:
     /**     
      * @brief                                   sip app是否启动
      * @return                                  启动结果，0-success，-1-failed
@@ -112,6 +126,10 @@ private:
 
     // key = up ref server id, value = sip up reg serv info ptr
     std::map<std::string, SipUpRegServInfoPtr>  m_regUpServMap;
+
+    // key = low ref server id, value = sip low reg serv info ptr
+    std::map<std::string, SipLowRegServInfoPtr> m_regLowServMap;
+    
 };
 
 }; // namespace MY_APP

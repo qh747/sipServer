@@ -1,12 +1,19 @@
 #define GLOG_USE_GLOG_EXPORT
 #include <glog/logging.h>
 #include <gflags/gflags.h>
+#include <pjsip/sip_msg.h>
+#include <pjsip/sip_uri.h>
+#include "envir/mySystemServManage.h"
 #include "utils/mySipAppHelper.h"
+#include "utils/mySipMsgHelper.h"
 #include "server/mySipServer.h"
 #include "app/mySipMsgProcApp.h"
 using MY_COMMON::MyStatus_t;
+using MY_COMMON::MySipMsgUri_dt;
 using MY_COMMON::MySipAppIdCfg_dt;
+using MY_ENVIR::MySystemServManage;
 using MY_UTILS::MySipAppHelper;
+using MY_UTILS::MySipMsgHelper;
 using MY_SERVER::MySipServer;
 
 namespace MY_APP {
@@ -136,7 +143,38 @@ pj_status_t MySipMsgProcApp::OnAppModuleStopCb(void)
 
 pj_bool_t MySipMsgProcApp::OnAppModuleRecvReqCb(SipAppRxDataPtr rdata)
 {
-    return PJ_SUCCESS;
+    // 收到sip regist请求消息
+    if (PJSIP_REGISTER_METHOD == rdata->msg_info.msg->line.req.method.id) {
+        // sip regist uri解析
+        char buf[256];
+        pjsip_uri_print(PJSIP_URI_IN_REQ_URI, rdata->msg_info.msg->line.req.uri, buf, sizeof(buf));
+        LOG(INFO) << "Sip app module recv sip regist request. uri: " << buf;
+
+        MySipMsgUri_dt sipUri;
+        if (MyStatus_t::SUCCESS != MySipMsgHelper::ParseSipMsgURL(buf, sipUri)) {
+            LOG(ERROR) << "Sip app module parse sip regist request uri failed. uri: " << buf << ".";
+            return PJ_FALSE;
+        }
+
+        auto sipServWkPtr = MySystemServManage::GetSipServer(sipUri.id);
+        if (sipServWkPtr.expired()) {
+            LOG(ERROR) << "Sip app module find sip server by sip regist request failed. uri: " << buf << ".";
+            return PJ_FALSE;
+        }
+
+        auto sipServPtr = sipServWkPtr.lock();
+        
+        // 处理sip注册请求成功
+        if (MyStatus_t::SUCCESS == sipServPtr->onRecvSipRegMsg(rdata)) {
+            return PJ_SUCCESS;
+        }
+        // 处理sip注册请求失败
+        return PJ_FALSE;
+    }
+    else {
+        LOG(ERROR) << "Sip app module recv unknown message.";
+        return PJ_FALSE;
+    }    
 }
 
 pj_bool_t MySipMsgProcApp::OnAppModuleRecvRespCb(SipAppRxDataPtr rdata)

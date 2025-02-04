@@ -3,6 +3,7 @@
 #include <atomic>
 #include <memory>
 #include <cstdbool>
+#include <pjsip.h>
 #include "common/myDataDef.h"
 #include "common/myConfigDef.h"
 #include "envir/mySystemPjsip.h"
@@ -15,6 +16,7 @@ namespace MY_SERVER {
 class MySipServer : public std::enable_shared_from_this<MySipServer>
 {
 public:
+    typedef pjsip_rx_data*                      SipAppRxDataPtr;
     typedef pjsip_endpoint*                     SipServEndptPtr;
     typedef pj_thread_t*                        SipServEvThreadPtr;  
     typedef pj_pool_t*                          SipServThreadPoolPtr;
@@ -60,6 +62,14 @@ public:
      * @return                              初始化结果，0-success，-1-failed
      */         
     MY_COMMON::MyStatus_t                   shutdown();
+
+public:
+    /**
+     * @brief                               回调函数: sip注册请求接收
+     * @return                              处理结果，0-success，-1-failed
+     * @param regReqMsgPtr                  注册请求消息指针
+     */
+    MY_COMMON::MyStatus_t                   onRecvSipRegMsg(SipAppRxDataPtr regReqMsgPtr);
 
 public:     
     /**     

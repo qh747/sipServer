@@ -220,4 +220,14 @@ MyStatus_t MySystemAppManage::Shutdown()
     return MyStatus_t::SUCCESS;
 }
 
+MySystemAppManage::MySipRegAppWkPtr MySystemAppManage::GetSipRegApp(const std::string& servId)
+{
+    return ManageObject.getSipRegApp(servId);
+}
+
+MySystemAppManage::MySipMsgProcAppWkPtr MySystemAppManage::GetSipMsgProcApp(const std::string& servId)
+{
+    return ManageObject.getSipMsgProcApp(servId);
+}
+
 }; // namespace MY_ENVIR

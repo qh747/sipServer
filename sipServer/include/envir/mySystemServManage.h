@@ -1,6 +1,8 @@
 #pragma once
+#include <map>
 #include <string>
 #include <memory>
+#include <vector>
 #include "common/myDataDef.h"
 #include "utils/myBaseHelper.h"
 

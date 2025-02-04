@@ -24,6 +24,10 @@ public:
      */
     class MySystemAppManageObject;
 
+public:
+    typedef std::weak_ptr<MY_APP::MySipRegApp>      MySipRegAppWkPtr;
+    typedef std::weak_ptr<MY_APP::MySipMsgProcApp>  MySipMsgProcAppWkPtr;
+
 public:         
     /**         
      * @brief                                       初始化
@@ -43,6 +47,21 @@ public:
      * @return                                      MyStatus_t状态码
      */                                             
     static MY_COMMON::MyStatus_t                    Shutdown();
+
+public:
+    /**
+     * @brief                                       获取sip注册应用
+     * @return                                      sip注册应用弱引用指针
+     * @param servId                                sip服务id
+     */
+    static MySipRegAppWkPtr                         GetSipRegApp(const std::string& servId);
+
+    /**
+     * @brief                                       获取sip消息处理应用
+     * @return                                      sip消息处理应用弱引用指针
+     * @param servId                                sip服务id
+     */
+    static MySipMsgProcAppWkPtr                     GetSipMsgProcApp(const std::string& servId);
 };
 
 }; // namespace MY_ENVIR
