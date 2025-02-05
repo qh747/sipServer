@@ -8,6 +8,7 @@
 #include <pjlib.h>
 #include <pjsip_ua.h>
 #include <pjsip/sip_msg.h>
+#include <pjsip/sip_auth.h>
 #include <Poller/Timer.h>
 #include <Poller/EventPoller.h>
 #include <boost/thread/shared_mutex.hpp>
@@ -24,12 +25,16 @@ namespace MY_APP {
 class MySipRegApp : public std::enable_shared_from_this<MySipRegApp>
 {
 public:
+    typedef const pj_str_t*                                 SipAppStrCstPtr;
+    typedef pj_pool_t*                                      SipAppPoolPtr;
+    typedef pjsip_cred_info*                                SipAppCredInfoPtr;
     typedef pjsip_endpoint*                                 SipAppEndptPtr; 
     typedef pjsip_regc*                                     SipAppRegcPtr;
     typedef pjsip_hdr*                                      SipAppMsgHdrPtr;
     typedef pjsip_rx_data*                                  SipAppRxDataPtr;
     typedef pjsip_tx_data*                                  SipAppTxDataPtr;
     typedef pjsip_date_hdr*                                 SipAppMsgDateHdrPtr;
+    typedef pjsip_www_authenticate_hdr*                     SipAppMsgAuthHdrPtr;
     typedef struct pjsip_regc_cbparam*                      SipAppRegCbParamPtr;
     typedef std::shared_ptr<MY_COMMON::MySipAppIdCfg_dt>    SipAppIdSmtPtr;
     typedef std::weak_ptr<MY_SERVER::MySipServer>           SipServSmtWkPtr;
@@ -46,9 +51,20 @@ public:
 public:
     /**
      * @brief                                   回调函数：sip注册响应
-     * @param paramPtr                          回调参数
+     * @param regParamPtr                       回调参数
      */         
-    static void                                 OnRegRespCb(SipAppRegCbParamPtr paramPtr);
+    static void                                 OnRegRespCb(SipAppRegCbParamPtr regParamPtr);
+
+    /**
+     * @brief                                   回调函数：sip注册鉴权信息填充
+     * @return                                  填充结果，0-success，-1-failed
+     * @param pool                              内存池
+     * @param realm                             鉴权域
+     * @param name                              用户名
+     * @param credInfo                          鉴权信息
+     */   
+    static pj_status_t                          OnRegFillAuthInfoCb(SipAppPoolPtr pool, SipAppStrCstPtr realm, 
+                                                                    SipAppStrCstPtr name, SipAppCredInfoPtr credInfo);
 
 public:
     MySipRegApp();

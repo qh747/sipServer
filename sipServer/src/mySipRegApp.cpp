@@ -6,10 +6,11 @@
 #include <gflags/gflags.h>
 #include "envir/mySystemConfg.h"
 #include "envir/mySystemServManage.h"
-#include "utils/mySipServerHelper.h"
+#include "utils/myTimeHelper.h"
 #include "utils/mySipAppHelper.h"
 #include "utils/mySipMsgHelper.h"
-#include "utils/myTimeHelper.h"
+#include "utils/myRandomHelper.h"
+#include "utils/mySipServerHelper.h"
 #include "server/mySipServer.h"
 #include "app/mySipRegApp.h"
 using toolkit::Timer;
@@ -17,12 +18,14 @@ using toolkit::EventPollerPool;
 using MY_COMMON::MyStatus_t;
 using MY_COMMON::MySipMsgUri_dt;
 using MY_COMMON::MySipAppIdCfg_dt;
+using MY_COMMON::MySipServAddrCfg_dt;
 using MY_COMMON::MySipMsgContactHdr_dt;
 using MY_COMMON::MySipLowRegServInfo_dt;
 using MY_UTILS::MyJsonHelper;
 using MY_UTILS::MyTimeHelper;
 using MY_UTILS::MySipAppHelper;
 using MY_UTILS::MySipMsgHelper;
+using MY_UTILS::MyRandomHelper;
 using MY_UTILS::MySipServerHelper;
 using MY_ENVIR::MySystemConfig;
 using MY_ENVIR::MySystemServManage;
@@ -30,13 +33,37 @@ using MY_SERVER::MySipServer;
 
 namespace MY_APP {
 
-void MySipRegApp::OnRegRespCb(SipAppRegCbParamPtr paramPtr)
+void MySipRegApp::OnRegRespCb(SipAppRegCbParamPtr regParamPtr)
 {
-    if (nullptr == paramPtr) {
+    if (nullptr == regParamPtr) {
         LOG(ERROR) << "Sip app reg module register response callback failed. invalid param.";
         return;
     }
-    
+}
+
+pj_status_t MySipRegApp::OnRegFillAuthInfoCb(SipAppPoolPtr pool, SipAppStrCstPtr realm, SipAppStrCstPtr name, SipAppCredInfoPtr credInfo)
+{
+    const auto& sipRegLowServMap = MySystemConfig::GetSipLowRegServCfgMap();
+    for (auto pair : sipRegLowServMap) {
+        std::string nameStr  = std::string(name->ptr).substr(0, name->slen);
+        std::string realmStr = std::string(realm->ptr).substr(0, realm->slen);
+
+        if((pair.second.lowSipServAuthCfg.authName == nameStr) && (pair.second.lowSipServAuthCfg.authRealm == realmStr)) {
+            pj_str_t scheme = pj_str(const_cast<char*>("digest"));
+            pj_str_t passwd = pj_str(const_cast<char*>(pair.second.lowSipServAuthCfg.authPwd.c_str()));
+
+            // 鉴权信息使用深拷贝方式，否则造成信息丢失
+            pj_strdup(pool, &credInfo->scheme, &scheme);
+            pj_strdup(pool, &credInfo->realm, realm);
+            pj_strdup(pool, &credInfo->username, name);
+            pj_strdup(pool, &credInfo->data, &passwd);
+            credInfo->data_type = PJSIP_CRED_DATA_PLAIN_PASSWD;
+            return PJ_SUCCESS;
+        }
+    }
+
+    LOG(ERROR) << "Auth reg sip low server failed. invalid auth info: " << name->ptr << " " << realm->ptr;
+    return PJ_FALSE;
 }
     
 MySipRegApp::MySipRegApp() : m_appIdPtr(nullptr), m_status(MyStatus_t::FAILED), m_servSmtWkPtr(), m_timePtr(nullptr)
@@ -318,7 +345,7 @@ MyStatus_t MySipRegApp::onRecvSipRegReqMsg(SipAppRxDataPtr rxDataPtr)
         return MyStatus_t::FAILED;
     }
 
-    char buf[256];
+    char buf[512];
     pjsip_hdr_print_on(contactHeader, buf, sizeof(buf));
 
     MySipMsgContactHdr_dt sipContactHeader;
@@ -345,6 +372,13 @@ MyStatus_t MySipRegApp::onRecvSipRegReqMsg(SipAppRxDataPtr rxDataPtr)
         return MyStatus_t::FAILED;
     }
 
+    // 解析下级sip服务鉴权信息
+    SipAppMsgHdrPtr authHeader = (SipAppMsgHdrPtr)pjsip_msg_find_hdr(rxDataPtr->msg_info.msg, PJSIP_H_AUTHORIZATION, nullptr);
+    if (nullptr != authHeader) {
+        memset(buf, 0, sizeof(buf));
+        pjsip_hdr_print_on(authHeader, buf, sizeof(buf));
+    }
+
     // 获取下级sip服务配置
     MyJsonHelper::SipRegLowServJsonMap regLowServMap = MySystemConfig::GetSipLowRegServCfgMap();
     auto cfgIter = regLowServMap.find(sipContactHeader.id);
@@ -365,36 +399,77 @@ MyStatus_t MySipRegApp::onRecvSipRegReqMsg(SipAppRxDataPtr rxDataPtr)
 
     auto sipServEndptPtr = sipServPtr->getSipServEndptPtr();
 
-    // 创建向下级sip服务响应的sip 200 ok消息
-    SipAppTxDataPtr txDataPtr = nullptr;
-    if (PJ_SUCCESS != pjsip_endpt_create_response(sipServEndptPtr, rxDataPtr, 200, nullptr, &txDataPtr)) {
-        LOG(ERROR) << "Sip app receive register request message failed. can't create response message. "
-                   << "id: " << sipContactHeader.id << " ip addr: " << sipContactHeader.ipAddr << " port: " << sipContactHeader.port << ".";
-        return MyStatus_t::FAILED;
-    }
+    pjsip_hdr hdrList;
+    pj_list_init(&hdrList);
 
-    // 向sip 200 ok消息添加Date首部
+    int statusCode = 200;
+
+    // 向sip应答消息添加Date首部
     std::string curTime    = MyTimeHelper::GetCurrentSipHeaderTime();
     pj_str_t    valueTime  = pj_str(const_cast<char*>(curTime.c_str()));
     pj_str_t    keyTime    = pj_str("Date");
 
     SipAppMsgDateHdrPtr dateHdrPtr = (SipAppMsgDateHdrPtr)pjsip_date_hdr_create(rxDataPtr->tp_info.pool, &keyTime, &valueTime);
-    pjsip_msg_add_hdr(txDataPtr->msg, (SipAppMsgHdrPtr)dateHdrPtr);
+    pj_list_push_back(&hdrList, dateHdrPtr);
 
-    // 获取发送sip 200 ok消息的地址
-    pjsip_response_addr respAddr;
-    if(PJ_SUCCESS != pjsip_get_response_addr(txDataPtr->pool, rxDataPtr, &respAddr)) {
-        pjsip_tx_data_dec_ref(txDataPtr);
-        LOG(ERROR) << "Sip app receive register request message failed. get response addr failed. "
+    // 对下级sip服务启用鉴权
+    if (cfgIter->second.lowSipServAuthCfg.enableAuth) {
+        // 下级sip服务注册时未携带鉴权信息
+        if (nullptr == authHeader) {
+            // 填充鉴权信息
+            SipAppMsgAuthHdrPtr authHdrPtr = pjsip_www_authenticate_hdr_create(rxDataPtr->tp_info.pool);
+            authHdrPtr->scheme = pj_str("digest");
+
+            std::string nonce = MyRandomHelper::Get32BitsLenRandomStr();
+            authHdrPtr->challenge.digest.nonce = pj_str(const_cast<char*>(nonce.c_str()));
+            LOG(INFO) << "Nonce: " << nonce;
+
+            authHdrPtr->challenge.digest.realm = pj_str(const_cast<char*>(cfgIter->second.lowSipServAuthCfg.authRealm.c_str()));
+
+            std::string opaque = MyRandomHelper::Get32BitsLenRandomStr();
+            authHdrPtr->challenge.digest.opaque = pj_str(const_cast<char*>(opaque.c_str()));
+            LOG(INFO) << "Opaque: " << opaque;
+
+            authHdrPtr->challenge.digest.algorithm = pj_str("MD5");
+            pj_list_push_back(&hdrList, authHdrPtr);
+
+            statusCode = 401;
+        }
+        else {
+            // 下级sip服务注册时携带鉴权信息
+            pjsip_auth_srv authSrv;
+            pj_str_t realm = pj_str(const_cast<char*>(cfgIter->second.lowSipServAuthCfg.authRealm.c_str()));
+
+            // 鉴权信息初始化
+            if(PJ_SUCCESS != pjsip_auth_srv_init(rxDataPtr->tp_info.pool, &authSrv, &realm, &MySipRegApp::OnRegFillAuthInfoCb, 0)) {
+                LOG(ERROR) << "Sip app receive register request message failed. create auth info failed."
+                           << " id: " << sipContactHeader.id << " ip addr: " << sipContactHeader.ipAddr 
+                           << " port: " << sipContactHeader.port << ".";
+                statusCode = 401;
+            }
+
+            // 鉴权处理
+            pjsip_auth_srv_verify(&authSrv, rxDataPtr, &statusCode);
+
+            // 鉴权失败
+            if (200 != statusCode) {
+                LOG(ERROR) << "Sip app receive register request message failed. auth failed."
+                           << " id: " << sipContactHeader.id << " ip addr: " << sipContactHeader.ipAddr 
+                           << " port: " << sipContactHeader.port << ".";
+            }
+        }
+    }
+    
+    // 发送sip应答消息
+    if (PJ_SUCCESS != pjsip_endpt_respond(sipServEndptPtr, nullptr, rxDataPtr, statusCode, nullptr, &hdrList, nullptr, nullptr)) {
+        LOG(ERROR) << "Sip app receive register request message failed. can't send response message. "
                    << "id: " << sipContactHeader.id << " ip addr: " << sipContactHeader.ipAddr << " port: " << sipContactHeader.port << ".";
         return MyStatus_t::FAILED;
     }
 
-    // 发送sip 200 ok消息
-    if(PJ_SUCCESS != pjsip_endpt_send_response(sipServEndptPtr, &respAddr, txDataPtr, nullptr, nullptr)) {
-        pjsip_tx_data_dec_ref(txDataPtr);
-        LOG(ERROR) << "Sip app receive register request message failed. send response msg failed. "
-                   << "id: " << sipContactHeader.id << " ip addr: " << sipContactHeader.ipAddr << " port: " << sipContactHeader.port << ".";
+    if (200 != statusCode) {
+        LOG(ERROR) << "Sip app receive register request message failed. regist failed. " << " code: " << statusCode
+                   << " id: " << sipContactHeader.id << " ip addr: " << sipContactHeader.ipAddr << " port: " << sipContactHeader.port << ".";
         return MyStatus_t::FAILED;
     }
 
