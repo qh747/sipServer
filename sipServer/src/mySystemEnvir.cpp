@@ -4,11 +4,13 @@
 #include "envir/mySystemConfg.h"
 #include "envir/mySystemPjsip.h"
 #include "envir/mySystemSigCatch.h"
-#include "envir/mySystemServManage.h"
-#include "envir/mySystemAppManage.h"
+#include "manager/myServManage.h"
+#include "manager/myAppManage.h"
 #include "envir/mySystemEnvir.h"
 using MY_COMMON::MyStatus_t;
 using MY_COMMON::MyServLogCfg_dt;
+using MY_MANAGER::MyAppManage;
+using MY_MANAGER::MyServManage;
 
 namespace MY_ENVIR {
 
@@ -59,13 +61,13 @@ MyStatus_t MySystemEnvir::Init(int argc, char** argv)
     }
 
     // --------------------------------------------------- 服务管理初始化 ------------------------------------------------------
-    if (MyStatus_t::SUCCESS != MySystemServManage::Init()) {
+    if (MyStatus_t::SUCCESS != MyServManage::Init()) {
         LOG(ERROR) << "Server envirment init failed. system server init failed";
         return MyStatus_t::FAILED;
     }
 
     // --------------------------------------------------- 应用管理初始化 ------------------------------------------------------
-    if (MyStatus_t::SUCCESS != MySystemAppManage::Init()) {
+    if (MyStatus_t::SUCCESS != MyAppManage::Init()) {
         LOG(ERROR) << "Server envirment init failed. system app init failed";
         return MyStatus_t::FAILED;
     }
@@ -76,14 +78,14 @@ MyStatus_t MySystemEnvir::Init(int argc, char** argv)
 MyStatus_t MySystemEnvir::Run()
 {
     // 运行服务管理
-    if (MyStatus_t::SUCCESS != MySystemServManage::Run()) {
-        LOG(ERROR) << "Server run failed. MySystemServManage::Run() failed";
+    if (MyStatus_t::SUCCESS != MyServManage::Run()) {
+        LOG(ERROR) << "Server run failed. MyServManage::Run() failed";
         return MyStatus_t::FAILED;
     }
 
     // 运行应用管理
-    if (MyStatus_t::SUCCESS != MySystemAppManage::Run()) {
-        LOG(ERROR) << "Server run failed. MySystemAppManage::Run() failed";
+    if (MyStatus_t::SUCCESS != MyAppManage::Run()) {
+        LOG(ERROR) << "Server run failed. MyAppManage::Run() failed";
         return MyStatus_t::FAILED;
     }
 
@@ -99,10 +101,10 @@ MyStatus_t MySystemEnvir::Run()
 MyStatus_t MySystemEnvir::Shutdown()
 {
     // 应用管理关闭
-    MySystemAppManage::Shutdown();
+    MyAppManage::Shutdown();
 
     // 服务管理关闭
-    MySystemServManage::Shutdown();
+    MyServManage::Shutdown();
 
     // pjsip环境关闭
     MySystemPjsip::Shutdown();

@@ -1,8 +1,7 @@
 #pragma once
 #include <string>
 #include <memory>
-#include <pjsip.h>
-#include "common/myDataDef.h"
+#include "common/myTypeDef.h"
 
 namespace MY_SERVER { class MySipServer; };
 
@@ -14,15 +13,8 @@ namespace MY_APP {
 class MySipMsgProcApp : public std::enable_shared_from_this<MySipMsgProcApp>
 {
 public:
-    typedef pjsip_event*                                    SipAppEvPtr;
-    typedef pjsip_transaction*                              SipAppTsxPtr;
-    typedef pjsip_endpoint*                                 SipAppEndptPtr;
-    typedef pjsip_rx_data*                                  SipAppRxDataPtr;
-    typedef pjsip_tx_data*                                  SipAppTxDataPtr;
     typedef std::weak_ptr<MY_SERVER::MySipServer>           SipServSmtWkPtr;
     typedef std::shared_ptr<MY_SERVER::MySipServer>         SipServSmtPtr;
-    typedef std::shared_ptr<pjsip_module>                   SipAppModSmtPtr;
-    typedef std::shared_ptr<MY_COMMON::MySipAppIdCfg_dt>    SipAppIdSmtPtr;
     typedef std::shared_ptr<MySipMsgProcApp>                SipMsgProcAppSmtPtr;
     typedef std::weak_ptr<MySipMsgProcApp>                  SipMsgProcAppSmtWkPtr;
 
@@ -77,7 +69,7 @@ public:
      * @return                              加载结果，0-success，-1-failed
      * @param endpt                         pjsip endpoint
      */
-    static pj_status_t                      OnAppModuleLoadCb(SipAppEndptPtr endpt);
+    static pj_status_t                      OnAppModuleLoadCb(MY_COMMON::SipEndptPtr endpt);
 
     /**
      * @brief                               回调函数：模块卸载
@@ -102,45 +94,45 @@ public:
      * @return                              接收请求消息结果，0-success，-1-failed
      * @param rdata                         接收到的请求消息
      */
-    static pj_bool_t                        OnAppModuleRecvReqCb(SipAppRxDataPtr rdata);
+    static pj_bool_t                        OnAppModuleRecvReqCb(MY_COMMON::SipRxDataPtr rdata);
 
     /**
      * @brief                               回调函数：模块接收应答消息
      * @return                              接收应答消息结果，0-success，-1-failed
      * @param rdata                         接收到的应答消息
      */
-    static pj_bool_t                        OnAppModuleRecvRespCb(SipAppRxDataPtr rdata);
+    static pj_bool_t                        OnAppModuleRecvRespCb(MY_COMMON::SipRxDataPtr rdata);
 
     /**
      * @brief                               回调函数：模块发送请求消息
      * @return                              发送请求消息结果，0-success，-1-failed
      * @param tdata                         待发送的请求消息
      */
-    static pj_status_t                      OnAppModuleSendReqCb(SipAppTxDataPtr tdata);
+    static pj_status_t                      OnAppModuleSendReqCb(MY_COMMON::SipTxDataPtr tdata);
 
     /**
      * @brief                               回调函数：模块发送应答消息
      * @return                              发送应答消息结果，0-success，-1-failed
      * @param tdata                         待发送的应答消息
      */
-    static pj_status_t                      OnAppModuleSendRespCb(SipAppTxDataPtr tdata);
+    static pj_status_t                      OnAppModuleSendRespCb(MY_COMMON::SipTxDataPtr tdata);
 
     /**
      * @brief                               回调函数：模块事务状态改变
      * @param tsx                           事务
      * @param event                         事件
      */
-    static void                             OnAppModuleTsxStateChangeCb(SipAppTsxPtr tsx, SipAppEvPtr event);
+    static void                             OnAppModuleTsxStateChangeCb(MY_COMMON::SipTsxPtr tsx, MY_COMMON::SipEvPtr event);
 
 private:
     //                                      应用模块ID
-    SipAppIdSmtPtr                          m_appIdPtr;
+    MY_COMMON::SipIdSmtPtr                  m_appIdPtr;
 
     //                                      启动状态 
     std::atomic<MY_COMMON::MyStatus_t>      m_status; 
 
     //                                      应用模块指针
-    SipAppModSmtPtr                         m_appModPtr;
+    MY_COMMON::SipModSmtPtr                 m_appModPtr;
 
     //                                      服务指针
     SipServSmtWkPtr                         m_servSmtWkPtr;

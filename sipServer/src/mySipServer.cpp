@@ -5,19 +5,25 @@
 #define GLOG_USE_GLOG_EXPORT
 #include <glog/logging.h>
 #include <gflags/gflags.h>
-#include "envir/mySystemAppManage.h"
+#include "manager/myAppManage.h"
 #include "utils/mySipServerHelper.h"
 #include "app/mySipRegApp.h"
 #include "server/mySipServer.h"
 using MY_COMMON::MyStatus_t;
+using MY_COMMON::SipEvThdCbParamPtr;
+using MY_COMMON::SipServAddrCfg;
+using MY_COMMON::SipEvThdMemCfg;
+using MY_COMMON::SipPoolPtr;
+using MY_COMMON::SipEndptPtr;
+using MY_COMMON::SipRxDataPtr;
 using MY_ENVIR::MySystemPjsip;
-using MY_ENVIR::MySystemAppManage;
+using MY_MANAGER::MyAppManage;
 using MY_UTILS::MySipServerHelper;
 using MY_APP::MySipRegApp;
 
 namespace MY_SERVER {
 
-int MySipServer::OnSipServerEvCb(SipServEvThreadCbParamPtr args)
+int MySipServer::OnSipServerEvCb(SipEvThdCbParamPtr args)
 {
     // 检查服务是否已经初始化完成
     SipServPtr servPtr = static_cast<SipServPtr>(args);
@@ -35,7 +41,7 @@ int MySipServer::OnSipServerEvCb(SipServEvThreadCbParamPtr args)
         }
 
         pj_time_val timeout = {0, 500};
-        SipServEndptPtr endptPtr = servPtr->getSipServEndptPtr();
+        SipEndptPtr endptPtr = servPtr->getSipServEndptPtr();
         
         if(nullptr == endptPtr || PJ_SUCCESS != pjsip_endpt_handle_events(endptPtr, &timeout)) {
             LOG(ERROR) << "SipServer listen failed, pjsip_endpt_handle_events() error.";
@@ -59,7 +65,7 @@ MySipServer::~MySipServer()
     }
 }
 
-MyStatus_t MySipServer::init(const SipServAddrCfg& addrCfg, const SipServEvThdMemCfg& evThdMemCfg)
+MyStatus_t MySipServer::init(const SipServAddrCfg& addrCfg, const SipEvThdMemCfg& evThdMemCfg)
 {
     if (MyStatus_t::SUCCESS == m_status.load()) {
         LOG(WARNING) << "SipServer has been inited.";
@@ -172,9 +178,9 @@ MyStatus_t MySipServer::shutdown()
     return MyStatus_t::SUCCESS;
 }
 
-MyStatus_t MySipServer::onRecvSipRegMsg(SipAppRxDataPtr regReqMsgPtr)
+MyStatus_t MySipServer::onRecvSipRegMsg(SipRxDataPtr regReqMsgPtr)
 {
-    auto sipRegAppWkPtr = MySystemAppManage::GetSipRegApp(m_servAddrCfgPtr->id);
+    auto sipRegAppWkPtr = MyAppManage::GetSipRegApp(m_servAddrCfgPtr->id);
     if (sipRegAppWkPtr.expired()) {
         LOG(ERROR) << "SipServer onRecvSipRegReq() failed. sipRegAppWkPtr expired.";
         return MyStatus_t::FAILED;

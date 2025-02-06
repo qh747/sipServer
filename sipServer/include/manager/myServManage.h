@@ -8,12 +8,12 @@
 
 namespace MY_SERVER { class MySipServer; };
 
-namespace MY_ENVIR {
+namespace MY_MANAGER {
 
 /**
  * 服务管理类
  */
-class MySystemServManage : public MY_UTILS::MyNonConstructableAndNonCopyable
+class MyServManage : public MY_UTILS::MyNonConstructableAndNonCopyable
 {
 public:
     typedef std::shared_ptr<MY_SERVER::MySipServer> SipServSmtPtr;
@@ -23,7 +23,7 @@ public:
     /**
      * 服务管理对象类
      */
-    class MySystemServManageObject;
+    class MyServManageObject;
 
 public:         
     /**         
@@ -54,7 +54,7 @@ public:
     static SipServSmtWkPtr                          GetSipServer(const std::string& servId);
 };
 
-}; // namespace MY_ENVIR
+}; // namespace MY_MANAGER
 
 
 

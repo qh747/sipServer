@@ -6,14 +6,16 @@
 #include "envir/mySystemPjsip.h"
 using MY_COMMON::MyStatus_t;
 using MY_COMMON::MySipStackCfg_dt;
+using MY_COMMON::SipEndptPtr;
+using MY_COMMON::SipMediaEndptPtr;
 using MY_ENVIR::MySystemConfig;
 
 namespace MY_ENVIR {
 
-std::atomic<MyStatus_t>                     MySystemPjsip::SysPjsipState(MyStatus_t::FAILED);
-pj_caching_pool                             MySystemPjsip::SysPjsipCachingPool;
-MySystemPjsip::SysPjsipEndpointPtr          MySystemPjsip::SysPjsipEndptPtr      = nullptr;
-MySystemPjsip::SysPjsipMediaEndpointPtr     MySystemPjsip::SysPjsipMediaEndptPtr = nullptr;
+std::atomic<MyStatus_t>     MySystemPjsip::SysPjsipState(MyStatus_t::FAILED);
+pj_caching_pool             MySystemPjsip::SysPjsipCachingPool;
+SipEndptPtr                 MySystemPjsip::SysPjsipEndptPtr      = nullptr;
+SipMediaEndptPtr            MySystemPjsip::SysPjsipMediaEndptPtr = nullptr;
 
 MyStatus_t MySystemPjsip::Init()
 {

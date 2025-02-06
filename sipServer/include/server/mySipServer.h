@@ -3,9 +3,7 @@
 #include <atomic>
 #include <memory>
 #include <cstdbool>
-#include <pjsip.h>
-#include "common/myDataDef.h"
-#include "common/myConfigDef.h"
+#include "common/myTypeDef.h"
 #include "envir/mySystemPjsip.h"
 
 namespace MY_SERVER {
@@ -16,19 +14,9 @@ namespace MY_SERVER {
 class MySipServer : public std::enable_shared_from_this<MySipServer>
 {
 public:
-    typedef pjsip_rx_data*                      SipAppRxDataPtr;
-    typedef pjsip_endpoint*                     SipServEndptPtr;
-    typedef pj_thread_t*                        SipServEvThreadPtr;  
-    typedef pj_pool_t*                          SipServThreadPoolPtr;
-    typedef void*                               SipServEvThreadCbParamPtr;
-    typedef MY_COMMON::MySipServAddrCfg_dt      SipServAddrCfg;
-    typedef std::shared_ptr<SipServAddrCfg>     SipServAddrCfgPtr;
-    typedef MY_COMMON::MySipEvThdMemCfg_dt      SipServEvThdMemCfg;
+    typedef MySipServer*                        SipServPtr;
     typedef std::shared_ptr<MySipServer>        SipServSmtPtr;
     typedef std::weak_ptr<MySipServer>          SipServSmtWkPtr;
-
-private:
-    typedef MySipServer*                        SipServPtr;
 
 public:         
     /**         
@@ -36,7 +24,7 @@ public:
      * @return                              0-success，-1-failed
      * @param args                          线程函数传入参数
      */         
-    static int                              OnSipServerEvCb(SipServEvThreadCbParamPtr args);
+    static int                              OnSipServerEvCb(MY_COMMON::SipEvThdCbParamPtr args);
 
 public:         
     MySipServer();          
@@ -49,7 +37,7 @@ public:
      * @param addrCfg                       sip服务地址配置
      * @param evThdMemCfg                   sip服务事件线程内存配置
      */             
-    MY_COMMON::MyStatus_t                   init(const SipServAddrCfg& addrCfg, const SipServEvThdMemCfg& evThdMemCfg);
+    MY_COMMON::MyStatus_t                   init(const MY_COMMON::SipServAddrCfg& addrCfg, const MY_COMMON::SipEvThdMemCfg& evThdMemCfg);
 
     /**
      * @brief                               启动sip服务
@@ -69,7 +57,7 @@ public:
      * @return                              处理结果，0-success，-1-failed
      * @param regReqMsgPtr                  注册请求消息指针
      */
-    MY_COMMON::MyStatus_t                   onRecvSipRegMsg(SipAppRxDataPtr regReqMsgPtr);
+    MY_COMMON::MyStatus_t                   onRecvSipRegMsg(MY_COMMON::SipRxDataPtr regReqMsgPtr);
 
 public:     
     /**     
@@ -88,29 +76,29 @@ public:
      * @brief                               获取sip服务地址配置
      * @return                              sip服务地址配置
      */
-    inline const SipServAddrCfg&            getSipServAddrCfg() const { return *m_servAddrCfgPtr; }
+    inline const MY_COMMON::SipServAddrCfg& getSipServAddrCfg() const { return *m_servAddrCfgPtr; }
 
     /**
      * @brief                               获取sip服务端点
      * @return                              sip服务端点
      */
-    inline SipServEndptPtr                  getSipServEndptPtr() { return m_servEndptPtr; }
+    inline MY_COMMON::SipEndptPtr           getSipServEndptPtr() { return m_servEndptPtr; }
 
 private:
     //                                      启动状态 
     std::atomic<MY_COMMON::MyStatus_t>      m_status;  
 
     //                                      sip服务地址配置
-    SipServAddrCfgPtr                       m_servAddrCfgPtr;
+    MY_COMMON::SipServAddrCfgSmtPtr         m_servAddrCfgPtr;
 
     //                                      pjsip服务端点
-    SipServEndptPtr                         m_servEndptPtr;
+    MY_COMMON::SipEndptPtr                  m_servEndptPtr;
 
     //                                      pjsip事件回调函数所在线程
-    SipServEvThreadPtr                      m_servEvThdPtr;   
+    MY_COMMON::SipThdPtr                    m_servEvThdPtr;   
 
     //                                      pjsip事件回调函数所在线程使用的内存地址
-    SipServThreadPoolPtr                    m_servThdPoolPtr;
+    MY_COMMON::SipPoolPtr                   m_servThdPoolPtr;
 };
 
 }; //namespace MY_SERVER

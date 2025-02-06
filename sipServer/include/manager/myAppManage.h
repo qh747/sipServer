@@ -11,18 +11,18 @@ class MySipRegApp;
 
 }; // namespace MY_APP
 
-namespace MY_ENVIR {
+namespace MY_MANAGER {
 
 /**
  * 应用管理类
  */
-class MySystemAppManage : public MY_UTILS::MyNonConstructableAndNonCopyable
+class MyAppManage : public MY_UTILS::MyNonConstructableAndNonCopyable
 {
 public:
     /**
      * 应用管理对象类
      */
-    class MySystemAppManageObject;
+    class MyAppManageObject;
 
 public:
     typedef std::weak_ptr<MY_APP::MySipRegApp>      MySipRegAppWkPtr;
@@ -64,4 +64,4 @@ public:
     static MySipMsgProcAppWkPtr                     GetSipMsgProcApp(const std::string& servId);
 };
 
-}; // namespace MY_ENVIR
+}; // namespace MY_MANAGER

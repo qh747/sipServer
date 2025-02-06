@@ -7,29 +7,30 @@
 #include "utils/myJsonHelper.h"
 #include "utils/mySipServerHelper.h"
 #include "envir/mySystemConfg.h"
-#include "envir/mySystemServManage.h"
+#include "manager/myServManage.h"
 using MY_COMMON::MyStatus_t;
 using MY_COMMON::MySipServAddrCfg_dt;
 using MY_COMMON::MySipRegUpServCfg_dt;
 using MY_COMMON::MySipRegLowServCfg_dt;
+using MY_ENVIR::MySystemConfig;
 using MY_SERVER::MySipServer;
 using MY_UTILS::MyJsonHelper;
 using MY_UTILS::MySipServerHelper;
 
-namespace MY_ENVIR {
+namespace MY_MANAGER {
 
 /**
  * 服务管理对象类
  */
-class MySystemServManage::MySystemServManageObject
+class MyServManage::MyServManageObject
 {
 public:
-    typedef std::map<std::string, MySystemServManage::SipServSmtPtr>     SipServMap;
-    typedef std::map<std::string, std::vector<MySipRegUpServCfg_dt>>     RegUpServBindMap;
-    typedef std::map<std::string, std::vector<MySipRegLowServCfg_dt>>    RegLowServBindMap;
+    typedef std::map<std::string, MyServManage::SipServSmtPtr>          SipServMap;
+    typedef std::map<std::string, std::vector<MySipRegUpServCfg_dt>>    RegUpServBindMap;
+    typedef std::map<std::string, std::vector<MySipRegLowServCfg_dt>>   RegLowServBindMap;
 
 public:
-    void addSipServ(const std::string& servId, MySystemServManage::SipServSmtPtr sipServPtr, const RegUpServBindMap& upRegServMap, const RegLowServBindMap& lowRegServMap) {
+    void addSipServ(const std::string& servId, MyServManage::SipServSmtPtr sipServPtr, const RegUpServBindMap& upRegServMap, const RegLowServBindMap& lowRegServMap) {
         boost::unique_lock<boost::shared_mutex> lock(m_rwMutex);
 
         if (m_sipServMap.end() == m_sipServMap.find(servId)) {
@@ -63,14 +64,14 @@ public:
         LOG(ERROR) << "delSipServ failed, servId: " << servId << " not exist.";
     }
 
-    MySystemServManage::SipServSmtWkPtr getSipServ(const std::string& servId) {
+    MyServManage::SipServSmtWkPtr getSipServ(const std::string& servId) {
         boost::shared_lock<boost::shared_mutex> lock(m_rwMutex);
 
         auto iter = m_sipServMap.find(servId);
         if (iter != m_sipServMap.end()) {
             return iter->second->getSipServer();
         }
-        return MySystemServManage::SipServSmtWkPtr();
+        return MyServManage::SipServSmtWkPtr();
     }
 
     MyStatus_t hasSipServ(const std::string& servId) {
@@ -118,16 +119,16 @@ private:
     RegLowServBindMap                                   m_sipServRegLowBindMap;
 };
 
-static MySystemServManage::MySystemServManageObject ManageObject;
+static MyServManage::MyServManageObject ManageObject;
 
-MyStatus_t MySystemServManage::Init()
+MyStatus_t MyServManage::Init()
 {
     // 初始化sip服务
     const MySipServAddrCfg_dt& sipServAddrCfg = MySystemConfig::GetSipServAddrCfg();
 
     if (MyStatus_t::SUCCESS != ManageObject.hasSipServ(sipServAddrCfg.id)) {
         
-        MySystemServManageObject::RegUpServBindMap regUpBindMap;
+        MyServManageObject::RegUpServBindMap regUpBindMap;
         const MyJsonHelper::SipRegUpServJsonMap& regUpServMap = MySystemConfig::GetSipUpRegServCfgMap();
         if (!regUpServMap.empty()) {
             std::vector<MY_COMMON::MySipRegUpServCfg_dt> regUpBindVec;
@@ -139,7 +140,7 @@ MyStatus_t MySystemServManage::Init()
             regUpBindMap.insert(std::make_pair(sipServAddrCfg.id, regUpBindVec));
         }
 
-        MySystemServManageObject::RegLowServBindMap regLowBindMap;
+        MyServManageObject::RegLowServBindMap regLowBindMap;
         const MyJsonHelper::SipRegLowServJsonMap& regLowServMap = MySystemConfig::GetSipLowRegServCfgMap();
         if (!regLowServMap.empty()) {
             std::vector<MY_COMMON::MySipRegLowServCfg_dt> regLowBindVec;
@@ -162,23 +163,23 @@ MyStatus_t MySystemServManage::Init()
     return MyStatus_t::SUCCESS;
 }
 
-MyStatus_t MySystemServManage::Run()
+MyStatus_t MyServManage::Run()
 {
     // 启动sip服务
     ManageObject.startSipServ();
     return MyStatus_t::SUCCESS;
 }
     
-MyStatus_t MySystemServManage::Shutdown()
+MyStatus_t MyServManage::Shutdown()
 {
     // 关闭sip服务
     ManageObject.stopSipServ();
     return MyStatus_t::SUCCESS;
 }
 
-MySystemServManage::SipServSmtWkPtr MySystemServManage::GetSipServer(const std::string& servId)
+MyServManage::SipServSmtWkPtr MyServManage::GetSipServer(const std::string& servId)
 {
     return ManageObject.getSipServ(servId);
 }
 
-}; // namespace MY_ENVIR
+}; // namespace MY_MANAGER

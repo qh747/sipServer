@@ -10,22 +10,23 @@
 #include "app/mySipMsgProcApp.h"
 #include "utils/mySipServerHelper.h"
 #include "envir/mySystemConfg.h"
-#include "envir/mySystemServManage.h"
-#include "envir/mySystemAppManage.h"
+#include "manager/myServManage.h"
+#include "manager/myAppManage.h"
 using MY_COMMON::MyStatus_t;
 using MY_COMMON::MySipServAddrCfg_dt;
 using MY_UTILS::MySipServerHelper;
+using MY_ENVIR::MySystemConfig;
 using MY_SERVER::MySipServer;
 using MY_APP::MySipMsgProcApp;
 using MY_APP::MySipRegApp;
 
-namespace MY_ENVIR {
+namespace MY_MANAGER {
 
 /**
  * 应用管理对象类
  * @todo 将app抽象出基类，方便扩展
  */
-class MySystemAppManage::MySystemAppManageObject
+class MyAppManage::MyAppManageObject
 {
 private:
     template <typename ServIdType, typename SipAppSmtPtrType, typename SipAppSmtPtrMapType>
@@ -159,21 +160,21 @@ private:
     std::map<std::string, MySipRegApp::SipRegAppSmtPtr>         m_sipRegAppSmtPtrMap;
 };
 
-static MySystemAppManage::MySystemAppManageObject ManageObject;
+static MyAppManage::MyAppManageObject ManageObject;
 
-MyStatus_t MySystemAppManage::Init()
+MyStatus_t MyAppManage::Init()
 {
     // 获取sip服务配置
     const MySipServAddrCfg_dt& sipServAddrCfg = MySystemConfig::GetSipServAddrCfg();
 
     // 获取sip服务
-    MySystemServManage::SipServSmtWkPtr sipServSmtWkPtr = MySystemServManage::GetSipServer(sipServAddrCfg.id);
+    MyServManage::SipServSmtWkPtr sipServSmtWkPtr = MyServManage::GetSipServer(sipServAddrCfg.id);
     if (sipServSmtWkPtr.expired()) {
         LOG(ERROR) << "Init sip app failed. sip server is not exists. " << MySipServerHelper::GetSipServInfo(sipServAddrCfg) << ".";
         return MyStatus_t::FAILED;
     }
 
-    MySystemServManage::SipServSmtPtr sipServSmtPtr = sipServSmtWkPtr.lock();
+    MyServManage::SipServSmtPtr sipServSmtPtr = sipServSmtWkPtr.lock();
     if (MyStatus_t::SUCCESS != sipServSmtPtr->getState()) {
         LOG(ERROR) << "Init sip app failed. sip server is not ready. " << MySipServerHelper::GetSipServInfo(sipServAddrCfg) << ".";
         return MyStatus_t::FAILED;
@@ -198,7 +199,7 @@ MyStatus_t MySystemAppManage::Init()
     return MyStatus_t::SUCCESS;
 }                    
 
-MyStatus_t MySystemAppManage::Run()
+MyStatus_t MyAppManage::Run()
 {
     // 启动sip消息处理应用
     ManageObject.startSipMsgProcApp();
@@ -209,7 +210,7 @@ MyStatus_t MySystemAppManage::Run()
     return MyStatus_t::SUCCESS;
 }
 
-MyStatus_t MySystemAppManage::Shutdown()
+MyStatus_t MyAppManage::Shutdown()
 {
     // 停止sip消息处理应用
     ManageObject.stopSipMsgProcApp();
@@ -220,14 +221,14 @@ MyStatus_t MySystemAppManage::Shutdown()
     return MyStatus_t::SUCCESS;
 }
 
-MySystemAppManage::MySipRegAppWkPtr MySystemAppManage::GetSipRegApp(const std::string& servId)
+MyAppManage::MySipRegAppWkPtr MyAppManage::GetSipRegApp(const std::string& servId)
 {
     return ManageObject.getSipRegApp(servId);
 }
 
-MySystemAppManage::MySipMsgProcAppWkPtr MySystemAppManage::GetSipMsgProcApp(const std::string& servId)
+MyAppManage::MySipMsgProcAppWkPtr MyAppManage::GetSipMsgProcApp(const std::string& servId)
 {
     return ManageObject.getSipMsgProcApp(servId);
 }
 
-}; // namespace MY_ENVIR
+}; // namespace MY_MANAGER

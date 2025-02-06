@@ -3,7 +3,7 @@
 #include <gflags/gflags.h>
 #include <pjsip/sip_msg.h>
 #include <pjsip/sip_uri.h>
-#include "envir/mySystemServManage.h"
+#include "manager/myServManage.h"
 #include "utils/mySipAppHelper.h"
 #include "utils/mySipMsgHelper.h"
 #include "server/mySipServer.h"
@@ -11,7 +11,12 @@
 using MY_COMMON::MyStatus_t;
 using MY_COMMON::MySipMsgUri_dt;
 using MY_COMMON::MySipAppIdCfg_dt;
-using MY_ENVIR::MySystemServManage;
+using MY_COMMON::SipEndptPtr;
+using MY_COMMON::SipRxDataPtr;
+using MY_COMMON::SipTxDataPtr;
+using MY_COMMON::SipTsxPtr;
+using MY_COMMON::SipEvPtr;
+using MY_MANAGER::MyServManage;
 using MY_UTILS::MySipAppHelper;
 using MY_UTILS::MySipMsgHelper;
 using MY_SERVER::MySipServer;
@@ -46,7 +51,7 @@ MyStatus_t MySipMsgProcApp::init(SipServSmtWkPtr servPtr, const std::string& nam
         return MyStatus_t::FAILED;
     }
 
-    SipAppEndptPtr endptPtr = strongServPtr->getSipServEndptPtr();
+    SipEndptPtr endptPtr = strongServPtr->getSipServEndptPtr();
     if (nullptr == endptPtr) {
         LOG(ERROR) << "Sip app module init failed. invalid endpoint.";
         return MyStatus_t::FAILED;
@@ -110,7 +115,7 @@ MyStatus_t MySipMsgProcApp::shutdown()
 
     SipServSmtPtr strongServPtr = m_servSmtWkPtr.lock();
     if (nullptr == strongServPtr) {
-        SipAppEndptPtr endptPtr = strongServPtr->getSipServEndptPtr();
+        SipEndptPtr endptPtr = strongServPtr->getSipServEndptPtr();
         if (nullptr != endptPtr) {
             pjsip_endpt_unregister_module(endptPtr, m_appModPtr.get());
         }
@@ -121,7 +126,7 @@ MyStatus_t MySipMsgProcApp::shutdown()
     return MyStatus_t::SUCCESS;
 }
 
-pj_status_t MySipMsgProcApp::OnAppModuleLoadCb(SipAppEndptPtr endpt)
+pj_status_t MySipMsgProcApp::OnAppModuleLoadCb(SipEndptPtr endpt)
 {
     return PJ_SUCCESS;
 }
@@ -141,7 +146,7 @@ pj_status_t MySipMsgProcApp::OnAppModuleStopCb(void)
     return PJ_SUCCESS;
 }
 
-pj_bool_t MySipMsgProcApp::OnAppModuleRecvReqCb(SipAppRxDataPtr rdata)
+pj_bool_t MySipMsgProcApp::OnAppModuleRecvReqCb(SipRxDataPtr rdata)
 {
     // 收到sip regist请求消息
     if (PJSIP_REGISTER_METHOD == rdata->msg_info.msg->line.req.method.id) {
@@ -156,7 +161,7 @@ pj_bool_t MySipMsgProcApp::OnAppModuleRecvReqCb(SipAppRxDataPtr rdata)
             return PJ_FALSE;
         }
 
-        auto sipServWkPtr = MySystemServManage::GetSipServer(sipUri.id);
+        auto sipServWkPtr = MyServManage::GetSipServer(sipUri.id);
         if (sipServWkPtr.expired()) {
             LOG(ERROR) << "Sip app module find sip server by sip regist request failed. uri: " << buf << ".";
             return PJ_FALSE;
@@ -177,22 +182,22 @@ pj_bool_t MySipMsgProcApp::OnAppModuleRecvReqCb(SipAppRxDataPtr rdata)
     }    
 }
 
-pj_bool_t MySipMsgProcApp::OnAppModuleRecvRespCb(SipAppRxDataPtr rdata)
+pj_bool_t MySipMsgProcApp::OnAppModuleRecvRespCb(SipRxDataPtr rdata)
 {
     return PJ_SUCCESS;
 }
 
-pj_status_t MySipMsgProcApp::OnAppModuleSendReqCb(SipAppTxDataPtr tdata)
+pj_status_t MySipMsgProcApp::OnAppModuleSendReqCb(SipTxDataPtr tdata)
 {
     return PJ_SUCCESS;
 }
 
-pj_status_t MySipMsgProcApp::OnAppModuleSendRespCb(SipAppTxDataPtr tdata)
+pj_status_t MySipMsgProcApp::OnAppModuleSendRespCb(SipTxDataPtr tdata)
 {
     return PJ_SUCCESS;
 }
 
-void MySipMsgProcApp::OnAppModuleTsxStateChangeCb(SipAppTsxPtr tsx, SipAppEvPtr event)
+void MySipMsgProcApp::OnAppModuleTsxStateChangeCb(SipTsxPtr tsx, SipEvPtr event)
 {
 
 }
