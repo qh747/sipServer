@@ -34,13 +34,13 @@ public:
      * @brief                                   获取pjsip endpoint指针
      * @return                                  pjsip endpoint指针
      */ 
-    inline static MY_COMMON::SipEndptPtr        GetPjsipEndptPtr() { return SysPjsipEndptPtr; }
+    inline static MY_COMMON::MySipEndptPtr      GetPjsipEndptPtr() { return SysPjsipEndptPtr; }
 
     /** 
      * @brief                                   获取pjsip media endpoint指针
      * @return                                  pjsip media endpoint指针
      */ 
-    inline static MY_COMMON::SipMediaEndptPtr   GetPjsipMediaEndptPtr() { return SysPjsipMediaEndptPtr; }
+    inline static MY_COMMON::MySipMediaEndptPtr GetPjsipMediaEndptPtr() { return SysPjsipMediaEndptPtr; }
 
 private:    
     /**         
@@ -63,10 +63,10 @@ private:
     static pj_caching_pool                      SysPjsipCachingPool;
 
     //                                          pjsip endpoint指针
-    static MY_COMMON::SipEndptPtr               SysPjsipEndptPtr;
+    static MY_COMMON::MySipEndptPtr             SysPjsipEndptPtr;
 
     //                                          pjsip media endpoint指针
-    static MY_COMMON::SipMediaEndptPtr          SysPjsipMediaEndptPtr;
+    static MY_COMMON::MySipMediaEndptPtr        SysPjsipMediaEndptPtr;
 };
 
 }; // namespace MY_ENVIR

@@ -1,5 +1,6 @@
 {
-    "registerServer": {
+    "registerServer-1": {
+      "id": "10000100001000010000",
       "upperServer": [
         {
           "id": "10000100001000010001",
@@ -8,7 +9,6 @@
           "name": "sipUpServerFst",
           "domain": "sipUpServerFst.com",
           "proto": "udp",
-          "expired": "3600",
           "auth": "true",
           "authName": "admin",
           "authPwd": "123456",

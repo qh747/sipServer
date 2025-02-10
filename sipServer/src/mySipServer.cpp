@@ -9,13 +9,7 @@
 #include "utils/mySipServerHelper.h"
 #include "app/mySipRegApp.h"
 #include "server/mySipServer.h"
-using MY_COMMON::MyStatus_t;
-using MY_COMMON::SipEvThdCbParamPtr;
-using MY_COMMON::SipServAddrCfg;
-using MY_COMMON::SipEvThdMemCfg;
-using MY_COMMON::SipPoolPtr;
-using MY_COMMON::SipEndptPtr;
-using MY_COMMON::SipRxDataPtr;
+using namespace MY_COMMON;
 using MY_ENVIR::MySystemPjsip;
 using MY_MANAGER::MyAppManage;
 using MY_UTILS::MySipServerHelper;
@@ -23,37 +17,8 @@ using MY_APP::MySipRegApp;
 
 namespace MY_SERVER {
 
-int MySipServer::OnSipServerEvCb(SipEvThdCbParamPtr args)
-{
-    // 检查服务是否已经初始化完成
-    SipServPtr servPtr = static_cast<SipServPtr>(args);
-    if (MyStatus_t::SUCCESS != servPtr->getState()) {
-        LOG(ERROR) << "SipServer start listen failed. server is not init.";
-        return static_cast<int>(MyStatus_t::FAILED);
-    }
-    LOG(INFO) << "SipServer start listen success. " << MySipServerHelper::GetSipServInfo(servPtr->getSipServAddrCfg()) << ".";
-
-    while (true) {
-        // 服务如果停止则取消监听事件
-        if (MyStatus_t::SUCCESS != servPtr->getState()) {
-            LOG(INFO) << "SipServer stop listen. " << MySipServerHelper::GetSipServInfo(servPtr->getSipServAddrCfg()) << ".";
-            break;
-        }
-
-        pj_time_val timeout = {0, 500};
-        SipEndptPtr endptPtr = servPtr->getSipServEndptPtr();
-        
-        if(nullptr == endptPtr || PJ_SUCCESS != pjsip_endpt_handle_events(endptPtr, &timeout)) {
-            LOG(ERROR) << "SipServer listen failed, pjsip_endpt_handle_events() error.";
-            return static_cast<int>(MyStatus_t::FAILED);
-        }
-    }
-    return static_cast<int>(MyStatus_t::SUCCESS);
-}
-
 MySipServer::MySipServer() : m_status(MyStatus_t::FAILED), m_servThdPoolPtr(nullptr),
-                             m_servEvThdPtr(nullptr), m_servEndptPtr(nullptr),
-                             m_servAddrCfgPtr(nullptr)
+                             m_servEvThdPtr(nullptr), m_servEndptPtr(nullptr)
 {
     
 }
@@ -65,7 +30,7 @@ MySipServer::~MySipServer()
     }
 }
 
-MyStatus_t MySipServer::init(const SipServAddrCfg& addrCfg, const SipEvThdMemCfg& evThdMemCfg)
+MyStatus_t MySipServer::init(const MySipServAddrCfg_dt& addrCfg, const MySipEvThdMemCfg_dt& evThdMemCfg)
 {
     if (MyStatus_t::SUCCESS == m_status.load()) {
         LOG(WARNING) << "SipServer has been inited.";
@@ -73,12 +38,12 @@ MyStatus_t MySipServer::init(const SipServAddrCfg& addrCfg, const SipEvThdMemCfg
     }
 
     // 服务配置初始化
-    m_servAddrCfgPtr = std::make_shared<SipServAddrCfg>(addrCfg);
+    m_servAddrCfg = addrCfg;
 
     // pjsip模块初始化
     m_servEndptPtr = MySystemPjsip::GetPjsipEndptPtr();
     if (nullptr == m_servEndptPtr) {
-        LOG(ERROR) << "SipServer init failed. m_endpointPtr is null.";
+        LOG(ERROR) << "SipServer init failed. m_endpointPtr is invalid.";
         return MyStatus_t::FAILED;
     }
 
@@ -86,11 +51,11 @@ MyStatus_t MySipServer::init(const SipServAddrCfg& addrCfg, const SipEvThdMemCfg
     pj_sockaddr_in addr;
     pj_bzero(&addr, sizeof(addr));
 
-    pj_str_t addrstr = pj_str(const_cast<char *>(m_servAddrCfgPtr->ipAddr.c_str()));
+    pj_str_t addrstr = pj_str(const_cast<char *>(m_servAddrCfg.ipAddr.c_str()));
     pj_inet_pton(PJ_AF_INET, &addrstr, &addr.sin_addr);
 
     addr.sin_family = pj_AF_INET();
-    addr.sin_port   = pj_htons(m_servAddrCfgPtr->port);
+    addr.sin_port   = pj_htons(m_servAddrCfg.port);
 
     // 用于本地消息发送和接收
     if(PJ_SUCCESS != pjsip_udp_transport_start(m_servEndptPtr, &addr, nullptr, 1, nullptr)) {
@@ -103,15 +68,15 @@ MyStatus_t MySipServer::init(const SipServAddrCfg& addrCfg, const SipEvThdMemCfg
         return MyStatus_t::FAILED;
     }
 
-    if (m_servAddrCfgPtr->regPort > 0) {
+    if (m_servAddrCfg.regPort > 0) {
         pj_sockaddr_in regAddr;
         pj_bzero(&regAddr, sizeof(regAddr));
     
-        pj_str_t regAddrstr = pj_str(const_cast<char *>(m_servAddrCfgPtr->ipAddr.c_str()));
+        pj_str_t regAddrstr = pj_str(const_cast<char *>(m_servAddrCfg.ipAddr.c_str()));
         pj_inet_pton(PJ_AF_INET, &regAddrstr, &addr.sin_addr);
     
         regAddr.sin_family = pj_AF_INET();
-        regAddr.sin_port   = pj_htons(m_servAddrCfgPtr->regPort);
+        regAddr.sin_port   = pj_htons(m_servAddrCfg.regPort);
     
         // 用于监听下级sip服务注册
         if(PJ_SUCCESS != pjsip_udp_transport_start(m_servEndptPtr, &regAddr, nullptr, 1, nullptr)) {
@@ -126,7 +91,7 @@ MyStatus_t MySipServer::init(const SipServAddrCfg& addrCfg, const SipEvThdMemCfg
     }
 
     // 事件线程池初始化
-    m_servThdPoolPtr = pjsip_endpt_create_pool(m_servEndptPtr, MySipServerHelper::GetSipServThdPoolName(*m_servAddrCfgPtr).c_str(), 
+    m_servThdPoolPtr = pjsip_endpt_create_pool(m_servEndptPtr, MySipServerHelper::GetSipServThdPoolName(m_servAddrCfg).c_str(), 
                                                evThdMemCfg.sipEvThdInitSize, evThdMemCfg.sipEvThdIncreSize);
     if (nullptr == m_servThdPoolPtr) {
         LOG(ERROR) << "SipServer init failed. pjsip_endpt_create_pool error.";
@@ -134,19 +99,13 @@ MyStatus_t MySipServer::init(const SipServAddrCfg& addrCfg, const SipEvThdMemCfg
     }
 
     m_status.store(MyStatus_t::SUCCESS);
-    LOG(INFO) << "SipServer init success. " << MySipServerHelper::GetSipServInfo(*m_servAddrCfgPtr) << ".";
+    LOG(INFO) << "SipServer init success. " << MySipServerHelper::GetSipServInfo(m_servAddrCfg) << ".";
 
     return MyStatus_t::SUCCESS;
 }
 
 MyStatus_t MySipServer::run()
 {
-    if (PJ_SUCCESS != pj_thread_create(m_servThdPoolPtr, MySipServerHelper::GetSipServEvThdName(*m_servAddrCfgPtr).c_str(), 
-                                       &MySipServer::OnSipServerEvCb, this, PJ_THREAD_DEFAULT_STACK_SIZE, 0, &m_servEvThdPtr)) {
-        LOG(ERROR) << "SipServer run failed. pj_thread_create() error.";
-        return MyStatus_t::FAILED;
-    }
-
     return MyStatus_t::SUCCESS;
 }
 
@@ -174,13 +133,13 @@ MyStatus_t MySipServer::shutdown()
 
     m_servEndptPtr = nullptr;
 
-    LOG(INFO) << "SipServer shutdown success. " << MySipServerHelper::GetSipServInfo(*m_servAddrCfgPtr) << ".";
+    LOG(INFO) << "SipServer shutdown success. " << MySipServerHelper::GetSipServInfo(m_servAddrCfg) << ".";
     return MyStatus_t::SUCCESS;
 }
 
-MyStatus_t MySipServer::onRecvSipRegMsg(SipRxDataPtr regReqMsgPtr)
+MyStatus_t MySipServer::onRecvSipRegMsg(MySipRxDataPtr regReqMsgPtr)
 {
-    auto sipRegAppWkPtr = MyAppManage::GetSipRegApp(m_servAddrCfgPtr->id);
+    auto sipRegAppWkPtr = MyAppManage::GetSipRegApp(m_servAddrCfg.id);
     if (sipRegAppWkPtr.expired()) {
         LOG(ERROR) << "SipServer onRecvSipRegReq() failed. sipRegAppWkPtr expired.";
         return MyStatus_t::FAILED;

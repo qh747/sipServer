@@ -1,15 +1,11 @@
 #pragma once
 #include <string>
 #include <memory>
-#include "common/myDataDef.h"
+#include "common/myTypeDef.h"
 #include "utils/myBaseHelper.h"
-
-namespace MY_APP { 
-
-class MySipMsgProcApp;
-class MySipRegApp;
-
-}; // namespace MY_APP
+#include "app/mySipRegApp.h"
+#include "app/mySipMsgProcApp.h"
+using namespace MY_APP; 
 
 namespace MY_MANAGER {
 
@@ -23,10 +19,6 @@ public:
      * 应用管理对象类
      */
     class MyAppManageObject;
-
-public:
-    typedef std::weak_ptr<MY_APP::MySipRegApp>      MySipRegAppWkPtr;
-    typedef std::weak_ptr<MY_APP::MySipMsgProcApp>  MySipMsgProcAppWkPtr;
 
 public:         
     /**         
@@ -54,14 +46,14 @@ public:
      * @return                                      sip注册应用弱引用指针
      * @param servId                                sip服务id
      */
-    static MySipRegAppWkPtr                         GetSipRegApp(const std::string& servId);
+    static MySipRegApp::SmtWkPtr                    GetSipRegApp(const std::string& servId);
 
     /**
      * @brief                                       获取sip消息处理应用
      * @return                                      sip消息处理应用弱引用指针
      * @param servId                                sip服务id
      */
-    static MySipMsgProcAppWkPtr                     GetSipMsgProcApp(const std::string& servId);
+    static MySipMsgProcApp::SmtWkPtr                GetSipMsgProcApp(const std::string& servId);
 };
 
 }; // namespace MY_MANAGER

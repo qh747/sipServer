@@ -16,10 +16,10 @@ class MySipAppHelper : public MyNonConstructableAndNonCopyable
 {
 public: 
     /**                         
-     * @brief                                           获取sip服务信息
-     * @return                                          sip服务信息
-     */                     
-    static std::string                                  GetSipAppInfo(const MY_COMMON::MySipAppIdCfg_dt& sipAppId);
+     * @brief           获取sip服务信息
+     * @return          sip服务信息
+     */                 
+    static std::string  GetSipAppInfo(const MY_COMMON::MySipAppIdCfg_dt& sipAppId);
 };
 
 }; // namespace MY_UTILS

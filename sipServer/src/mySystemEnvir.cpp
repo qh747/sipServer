@@ -71,7 +71,6 @@ MyStatus_t MySystemEnvir::Init(int argc, char** argv)
         LOG(ERROR) << "Server envirment init failed. system app init failed";
         return MyStatus_t::FAILED;
     }
-
     return MyStatus_t::SUCCESS;
 }
 
@@ -94,7 +93,6 @@ MyStatus_t MySystemEnvir::Run()
         LOG(ERROR) << "Server run failed. signal catcher failed";
         return MyStatus_t::FAILED;
     }
-
     return MyStatus_t::SUCCESS;
 }
 
@@ -111,7 +109,6 @@ MyStatus_t MySystemEnvir::Shutdown()
 
     // glog环境关闭
     google::ShutdownGoogleLogging();
-    
     return MyStatus_t::SUCCESS;
 }
 

@@ -44,6 +44,11 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../thirdP
 target_link_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../thirdParty/jsoncpp/lib)
 target_link_libraries(${PROJECT_NAME} PRIVATE jsoncpp)
 
+# 链接tinyxml2依赖库
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../thirdParty/tinyxml2/include)
+target_link_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../thirdParty/tinyxml2/lib)
+target_link_libraries(${PROJECT_NAME} PRIVATE tinyxml2)
+
 # 链接ZLToolkit依赖库
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../thirdParty/ZLToolKit/include)
 target_link_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../thirdParty/ZLToolKit/lib)

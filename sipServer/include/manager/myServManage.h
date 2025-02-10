@@ -5,8 +5,8 @@
 #include <vector>
 #include "common/myDataDef.h"
 #include "utils/myBaseHelper.h"
-
-namespace MY_SERVER { class MySipServer; };
+#include "server/mySipServer.h"
+using MY_SERVER::MySipServer;
 
 namespace MY_MANAGER {
 
@@ -15,10 +15,6 @@ namespace MY_MANAGER {
  */
 class MyServManage : public MY_UTILS::MyNonConstructableAndNonCopyable
 {
-public:
-    typedef std::shared_ptr<MY_SERVER::MySipServer> SipServSmtPtr;
-    typedef std::weak_ptr<MY_SERVER::MySipServer>   SipServSmtWkPtr;
-
 public:
     /**
      * 服务管理对象类
@@ -49,9 +45,23 @@ public:
     /**
      * @brief                                       获取SipServer对象
      * @return                                      std::weak_ptr<MY_SERVER::MySipServer>
-     * @param servId                                SipServer ID
+     * @param servId                                sip服务ID
      */
-    static SipServSmtWkPtr                          GetSipServer(const std::string& servId);
+    static MySipServer::SmtWkPtr                    GetSipServer(const std::string& servId);
+
+    /**
+     * @brief                                       获取SipServer地址配置
+     * @return                                      MY_COMMON::MySipServAddrCfg_dt
+     * @param servId                                sip服务ID
+     */
+    static MY_COMMON::MySipServAddrCfg_dt           GetSipServAddrCfg(const std::string& servId);
+
+    /**
+     * @brief                                       SipServer对象是否存在
+     * @return                                      MyStatus_t状态码
+     * @param servId                                sip服务ID
+     */
+    static MY_COMMON::MyStatus_t                    HasSipServer(const std::string& servId);
 };
 
 }; // namespace MY_MANAGER

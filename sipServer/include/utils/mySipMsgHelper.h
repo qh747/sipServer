@@ -64,6 +64,14 @@ public:
      * @param   sipExpireHeader     解析后的sip expire header值
      */     
     static MY_COMMON::MyStatus_t    ParseSipMsgExpireHdr(const std::string& expireHeader, double& sipExpireHeader);
+
+public:
+    /**
+     * @brief                       打印sip消息contact首部
+     * @return                      sip contact header字符串
+     * @param   sipContactHeader    sip contact header结构体
+     */
+    static std::string              PrintSipMsgContactHdr(const MY_COMMON::MySipMsgContactHdr_dt& sipContactHeader);
 };
     
 }; // namespace MY_UTILS

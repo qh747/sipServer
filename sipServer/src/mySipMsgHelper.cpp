@@ -88,5 +88,13 @@ MyStatus_t MySipMsgHelper::ParseSipMsgExpireHdr(const std::string& expireHeader,
         return MyStatus_t::FAILED;
     }
 }
+
+std::string MySipMsgHelper::PrintSipMsgContactHdr(const MY_COMMON::MySipMsgContactHdr_dt& sipContactHeader)
+{
+    std::stringstream ss;
+    ss << "id: " << sipContactHeader.id << " ip addr: " << sipContactHeader.ipAddr << " port: " << sipContactHeader.port;
+
+    return ss.str();
+}
     
 }; // namespace MY_UTILS
