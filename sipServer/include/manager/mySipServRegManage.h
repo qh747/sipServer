@@ -35,7 +35,8 @@ public:
     /**
      * @brief                               获取本级服务id
      * @return                              本级服务id
-     * @param upRegServId                   上级服务注册id
+     * @param regServId                     注册服务注册id
+     * @param isUpRegServ                   是否为上级注册服务
      */ 
     static std::string                      GetSipLocalServId(const std::string& regServId, bool isUpRegServ);
 

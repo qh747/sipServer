@@ -59,6 +59,14 @@ public:
      */ 
     inline SmtWkPtr                             getSipMsgProcApp() { return this->shared_from_this(); }
 
+public:
+    /**
+     * @brief                                   回调函数：处理sip请求消息
+     * @return                                  处理结果，0-success，-1-failed
+     * @param rdata                             接收到的sip请求消息
+     */
+    MY_COMMON::MyStatus_t                       onProcSipReqMsg(MY_COMMON::MySipRxDataPtr rdataPtr);
+
 public: 
     /** 
      * @brief                                   回调函数：模块加载

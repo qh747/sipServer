@@ -1,9 +1,11 @@
+#include "utils/myStrHelper.h"
 #include "utils/myXmlHelper.h"
 using namespace tinyxml2;
+using namespace MY_COMMON;
 
 namespace MY_UTILS {
 
-std::string MyXmlHelper::GenerateSipKeepAliveBody(const std::string& idx, const std::string& localServId)
+std::string MyXmlHelper::GenerateSipKeepAliveMsgBody(const std::string& idx, const std::string& localServId)
 {
     // 创建一个 XML 文档对象
     tinyxml2::XMLDocument doc;
@@ -45,6 +47,44 @@ std::string MyXmlHelper::GenerateSipKeepAliveBody(const std::string& idx, const 
     doc.Print(&printer);
     std::string xmlString = printer.CStr();
     return xmlString;
+}
+
+MyStatus_t MyXmlHelper::ParseSipKeepAliveMsgBody(const std::string& xmlStr, MySipKeepAliveMsgBidy_dt& keepAliveMsgBody)
+{
+    tinyxml2::XMLDocument doc;
+
+    // 解析XML数据
+    if (tinyxml2::XML_SUCCESS != doc.Parse(xmlStr.c_str())) {
+        return MyStatus_t::FAILED;
+    }
+
+    // 获取根元素
+    tinyxml2::XMLElement* root = doc.RootElement();
+    if (nullptr == root) {
+        return MyStatus_t::FAILED;
+    }
+
+    // 获取子元素
+    tinyxml2::XMLElement* cmdTypeElement = root->FirstChildElement("CmdType");
+    if (nullptr != cmdTypeElement) {
+        keepAliveMsgBody.cmdType = cmdTypeElement->GetText();
+    }
+
+    tinyxml2::XMLElement* deviceIDElement = root->FirstChildElement("DeviceID");
+    if (nullptr != deviceIDElement) {
+        keepAliveMsgBody.deviceId = deviceIDElement->GetText();
+    }
+
+    tinyxml2::XMLElement* snElement = root->FirstChildElement("SN");
+    if (nullptr != snElement) {
+        keepAliveMsgBody.sn = snElement->GetText();
+    }
+
+    tinyxml2::XMLElement* statusElement = root->FirstChildElement("Status");
+    if (nullptr != statusElement) {
+        keepAliveMsgBody.status = ("OK" == MyStrHelper::ConvertToUpStr(statusElement->GetText()) ? true : false);
+    }
+    return MyStatus_t::SUCCESS;
 }
 
 }; // namespace MY_UTILS

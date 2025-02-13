@@ -1,18 +1,22 @@
 #define GLOG_USE_GLOG_EXPORT
 #include <glog/logging.h>
 #include <gflags/gflags.h>
+#include "common/mySipMsgDef.h"
 #include "envir/mySystemPjsip.h"
+#include "manager/myAppManage.h"
 #include "manager/myServManage.h"
+#include "manager/mySipServRegManage.h"
+#include "utils/myXmlHelper.h"
+#include "utils/myStrHelper.h"
 #include "utils/mySipAppHelper.h"
 #include "utils/mySipMsgHelper.h"
 #include "server/mySipServer.h"
 #include "app/mySipMsgProcApp.h"
+using namespace MY_UTILS;
 using namespace MY_COMMON;
-using MY_ENVIR::MySystemPjsip;
-using MY_MANAGER::MyServManage;
-using MY_UTILS::MySipAppHelper;
-using MY_UTILS::MySipMsgHelper;
+using namespace MY_MANAGER;
 using MY_SERVER::MySipServer;
+using MY_ENVIR::MySystemPjsip;
 
 namespace MY_APP {
 
@@ -108,6 +112,79 @@ MyStatus_t MySipMsgProcApp::shutdown()
     return MyStatus_t::SUCCESS;
 }
 
+MyStatus_t MySipMsgProcApp::onProcSipReqMsg(MY_COMMON::MySipRxDataPtr rdataPtr)
+{
+    // 收到sip regist请求消息
+    if (PJSIP_REGISTER_METHOD == rdataPtr->msg_info.msg->line.req.method.id) {
+        // sip regist uri解析
+        char buf[256];
+        pjsip_uri_print(PJSIP_URI_IN_REQ_URI, rdataPtr->msg_info.msg->line.req.uri, buf, sizeof(buf));
+        LOG(INFO) << "Sip app module recv sip regist request. uri: " << buf;
+
+        MySipMsgUri_dt sipUri;
+        if (MyStatus_t::SUCCESS != MySipMsgHelper::ParseSipMsgURL(buf, sipUri)) {
+            LOG(ERROR) << "Sip app module parse sip regist request uri failed. uri: " << buf << ".";
+            return MyStatus_t::FAILED;
+        }
+
+        auto sipServWkPtr = MyServManage::GetSipServer(sipUri.id);
+        if (sipServWkPtr.expired()) {
+            LOG(ERROR) << "Sip app module find sip server by sip regist request failed. uri: " << buf << ".";
+            return MyStatus_t::FAILED;
+        }
+        
+        // 处理sip注册请求成功
+        auto sipServPtr = sipServWkPtr.lock();
+        if (MyStatus_t::SUCCESS == sipServPtr->onRecvSipRegMsg(rdataPtr)) {
+            return MyStatus_t::SUCCESS;
+        }
+        // 处理sip注册请求失败
+        return MyStatus_t::FAILED;
+    }
+    // 收到其他请求消息
+    else if (PJSIP_OTHER_METHOD == rdataPtr->msg_info.msg->line.req.method.id) {
+        MySipKeepAliveMsgBidy_dt keepAliveMsgBody;
+        if (MyStatus_t::SUCCESS != MyXmlHelper::ParseSipKeepAliveMsgBody(static_cast<char*>(rdataPtr->msg_info.msg->body->data), keepAliveMsgBody)) {
+            LOG(ERROR) << "Sip app module recv unknown message. parse keepalive msg failed.";
+            return MyStatus_t::FAILED;
+        }
+        LOG(INFO) << "Sip app module recv keepalive message. " << MySipMsgHelper::PrintSipKeepAliveMsgBody(keepAliveMsgBody) << ".";
+
+        if ("keepalive" == MyStrHelper::ConvertToLowStr(keepAliveMsgBody.cmdType)) {
+            if (!keepAliveMsgBody.status) {
+                LOG(ERROR) << "Sip app module recv keepalive message. status is error. " << MySipMsgHelper::PrintSipKeepAliveMsgBody(keepAliveMsgBody) << ".";
+                return MyStatus_t::FAILED;
+            }
+
+            std::string localServId = MySipServRegManage::GetSipLocalServId(keepAliveMsgBody.deviceId, false);
+            if (localServId.empty()) {
+                LOG(ERROR) << "Sip app module recv keepalive message. invalid local serv id. " << MySipMsgHelper::PrintSipKeepAliveMsgBody(keepAliveMsgBody) << ".";
+                return MyStatus_t::FAILED;
+            }
+
+            auto sipServWkPtr = MyServManage::GetSipServer(localServId);
+            if (sipServWkPtr.expired()) {
+                LOG(ERROR) << "Sip app module find sip server by keepalive message failed. local serv id: " << localServId << ".";
+                return MyStatus_t::FAILED;
+            }
+
+            // 处理sip注册请求成功
+            auto sipServPtr = sipServWkPtr.lock();
+            if (MyStatus_t::SUCCESS == sipServPtr->onRecvSipKeepAliveMsg(rdataPtr)) {
+                return MyStatus_t::SUCCESS;
+            }
+            // 处理sip注册请求失败
+            return MyStatus_t::FAILED;
+        }
+        return MyStatus_t::SUCCESS;
+    }
+    // 收到未知请求消息
+    else {
+        LOG(ERROR) << "Sip app module recv unknown message.";
+        return MyStatus_t::FAILED;
+    }    
+}
+
 pj_status_t MySipMsgProcApp::OnAppModuleLoadCb(MySipEndptPtr endpt)
 {
     return PJ_SUCCESS;
@@ -130,38 +207,38 @@ pj_status_t MySipMsgProcApp::OnAppModuleStopCb(void)
 
 pj_bool_t MySipMsgProcApp::OnAppModuleRecvReqCb(MySipRxDataPtr rdataPtr)
 {
-    // 收到sip regist请求消息
-    if (PJSIP_REGISTER_METHOD == rdataPtr->msg_info.msg->line.req.method.id) {
-        // sip regist uri解析
+    if (PJSIP_REQUEST_MSG == rdataPtr->msg_info.msg->type) {
+        // sip 消息uri解析
         char buf[256];
         pjsip_uri_print(PJSIP_URI_IN_REQ_URI, rdataPtr->msg_info.msg->line.req.uri, buf, sizeof(buf));
-        LOG(INFO) << "Sip app module recv sip regist request. uri: " << buf;
 
         MySipMsgUri_dt sipUri;
         if (MyStatus_t::SUCCESS != MySipMsgHelper::ParseSipMsgURL(buf, sipUri)) {
-            LOG(ERROR) << "Sip app module parse sip regist request uri failed. uri: " << buf << ".";
+            LOG(ERROR) << "Sip msg proc app module sip request message failed. parse uri failed. uri: " << buf << ".";
             return PJ_FALSE;
         }
 
-        auto sipServWkPtr = MyServManage::GetSipServer(sipUri.id);
-        if (sipServWkPtr.expired()) {
-            LOG(ERROR) << "Sip app module find sip server by sip regist request failed. uri: " << buf << ".";
+        // 消息处理app获取
+        auto sipMsgProcAppWkPtr = MyAppManage::GetSipMsgProcApp(sipUri.id);
+        auto sipMsgProcAppPtr = sipMsgProcAppWkPtr.lock();
+        if (nullptr == sipMsgProcAppPtr) {
+            LOG(ERROR) << "Sip msg proc app module sip request message failed. invalid msg proc app. uri: " << buf << ".";
             return PJ_FALSE;
         }
 
-        auto sipServPtr = sipServWkPtr.lock();
-        
-        // 处理sip注册请求成功
-        if (MyStatus_t::SUCCESS == sipServPtr->onRecvSipRegMsg(rdataPtr)) {
-            return PJ_SUCCESS;
+        // 消息处理
+        if (MyStatus_t::SUCCESS != sipMsgProcAppPtr->onProcSipReqMsg(rdataPtr)) {
+            LOG(ERROR) << "Sip msg proc app module sip request message failed. proc msg failed. uri: " << buf << ".";
+            return PJ_FALSE;
         }
-        // 处理sip注册请求失败
-        return PJ_FALSE;
     }
     else {
-        LOG(ERROR) << "Sip app module recv unknown message.";
+        // todo: sip response message process
+        LOG(ERROR) << "Sip msg proc app module sip request message failed. current not support recv resp msg.";
         return PJ_FALSE;
-    }    
+    }
+    
+    return PJ_SUCCESS;
 }
 
 pj_bool_t MySipMsgProcApp::OnAppModuleRecvRespCb(MySipRxDataPtr rdataPtr)

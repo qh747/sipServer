@@ -19,7 +19,8 @@ MyStatus_t MyJsonHelper::ParseSipServAddrJsonFile(const std::string& filePath, M
     Json::Value rootNode;
     ifs >> rootNode;
 
-    for (unsigned int i = 1; i < rootNode.size(); ++i) {
+    int size = rootNode.size();
+    for (unsigned int i = 1; i <= rootNode.size(); ++i) {
         // 解析json根节点
         std::string sRootNodeName = std::string("sipServer-") + std::to_string(i);
         if (!(rootNode.isMember(sRootNodeName.c_str()))) {
@@ -60,7 +61,7 @@ MyStatus_t MyJsonHelper::ParseSipServRegJsonFile(const std::string& filePath, My
     Json::Value rootNode;
     ifs >> rootNode;
 
-    for (unsigned int i = 1; i < rootNode.size(); ++i) {
+    for (unsigned int i = 1; i <= rootNode.size(); ++i) {
         // 解析json根节点
         std::string sRootNodeName = std::string("registerServer-") + std::to_string(i);
         if (!(rootNode.isMember(sRootNodeName.c_str()))) {

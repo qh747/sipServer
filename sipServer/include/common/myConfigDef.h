@@ -6,6 +6,9 @@
 
 namespace MY_COMMON {
 
+// sip服务注册有效时间（秒） 
+const unsigned int MAX_SIP_SERVER_REG_EXPIRED   = 3600;
+
 /**
  * @brief 传输层协议枚举类型
  */

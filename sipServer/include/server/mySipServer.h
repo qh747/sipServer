@@ -18,6 +18,14 @@ public:
     typedef std::shared_ptr<MySipServer>    SmtPtr;
     typedef std::weak_ptr<MySipServer>      SmtWkPtr;
 
+public:
+    /**
+     * @brief                               sip服务事件线程回调函数
+     * @return                              回调结果，0-success，-1-failed
+     * @param arg                           回调参数
+     */
+    static int                              SipServerThdFunc(MY_COMMON::MySipEvThdCbParamPtr arg);
+
 public:         
     MySipServer();          
     ~MySipServer();         
@@ -52,6 +60,13 @@ public:
      */
     MY_COMMON::MyStatus_t                   onRecvSipRegMsg(MY_COMMON::MySipRxDataPtr regReqMsgPtr);
 
+    /**
+     * @brief                               回调函数: sip保活请求接收
+     * @return                              处理结果，0-success，-1-failed
+     * @param regReqMsgPtr                  保活请求消息指针
+     */
+    MY_COMMON::MyStatus_t                   onRecvSipKeepAliveMsg(MY_COMMON::MySipRxDataPtr keepAliveReqMsgPtr);
+
 public:     
     /**     
      * @brief                               sip服务是否启动
@@ -70,6 +85,12 @@ public:
      * @return                              sip服务地址配置
      */
     inline MY_COMMON::MySipServAddrCfg_dt   getSipServAddrCfg() const { return m_servAddrCfg; }
+    
+    /**
+     * @brief                               获取pjsip服务端点
+     * @return                              pjsip服务端点
+     */
+    inline MY_COMMON::MySipEndptPtr         getSipEndptPtr() const { return m_servEndptPtr; }
 
 private:
     //                                      启动状态 

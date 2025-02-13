@@ -96,5 +96,14 @@ std::string MySipMsgHelper::PrintSipMsgContactHdr(const MY_COMMON::MySipMsgConta
 
     return ss.str();
 }
+
+std::string MySipMsgHelper::PrintSipKeepAliveMsgBody(const MY_COMMON::MySipKeepAliveMsgBidy_dt& keepAliveMsgBody)
+{
+    std::stringstream ss;
+    ss << "cmdType: " << keepAliveMsgBody.cmdType << " DeviceID: " << keepAliveMsgBody.deviceId 
+       << " SN: " << keepAliveMsgBody.sn << " Status: " << keepAliveMsgBody.status;
+
+    return ss.str();
+}
     
 }; // namespace MY_UTILS

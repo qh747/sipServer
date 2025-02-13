@@ -109,6 +109,13 @@ public:
      */
     MY_COMMON::MyStatus_t                   onRecvSipRegReqMsg(MY_COMMON::MySipRxDataPtr rxDataPtr);
 
+    /**             
+     * @brief                               处理下级sip服务的sip保活请求消息
+     * @return                              处理结果，0-success，-1-failed
+     * @param rxDataPtr                     sip保活请求消息
+     */
+    MY_COMMON::MyStatus_t                   onRecvSipKeepAliveReqMsg(MY_COMMON::MySipRxDataPtr rxDataPtr);   
+
 public:             
     /**                     
      * @brief                               sip app是否启动

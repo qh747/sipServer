@@ -91,9 +91,9 @@ public:
         return iter->second;
     }
 
-    MySipServRegManage::MySipLowRegServInfoMap getAllUpRegInfoMap() {
+    MySipServRegManage::MySipUpRegServInfoMap getAllUpRegInfoMap() {
         boost::shared_lock<boost::shared_mutex> lock(m_rwMutex);
-        return m_sipLowRegServInfoMap;
+        return m_sipUpRegServInfoMap;
     }
 
     std::string getUpRegLastRegTime(const std::string& servId, const std::string& upRegServId) {

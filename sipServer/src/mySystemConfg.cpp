@@ -1,4 +1,5 @@
 #include <SimpleIni.h>
+#include <Poller/EventPoller.h>
 #include "utils/myJsonHelper.h"
 #include "envir/mySystemConfg.h"
 using namespace MY_COMMON;
@@ -16,6 +17,8 @@ MySipRegServCfgMap                  MySystemConfig::SipRegServCfgMap;
 MyStatus_t MySystemConfig::Init(const std::string& path)
 {
     boost::unique_lock<boost::shared_mutex> lock(CfgMutex);
+
+    toolkit::EventPollerPool::setPoolSize(4);
 
     // 加载INI文件
     CSimpleIniA SysCfgIni;
