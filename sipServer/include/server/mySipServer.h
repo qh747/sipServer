@@ -1,10 +1,8 @@
 #pragma once
-#include <string>
 #include <atomic>
 #include <memory>
 #include <cstdbool>
 #include "common/myTypeDef.h"
-#include "envir/mySystemPjsip.h"
 
 namespace MY_SERVER {
 
@@ -54,18 +52,25 @@ public:
 
 public:
     /**
-     * @brief                               回调函数: sip注册请求接收
+     * @brief                               回调函数: sip注册请求消息接收
      * @return                              处理结果，0-success，-1-failed
      * @param regReqMsgPtr                  注册请求消息指针
      */
     MY_COMMON::MyStatus_t                   onRecvSipRegMsg(MY_COMMON::MySipRxDataPtr regReqMsgPtr);
 
     /**
-     * @brief                               回调函数: sip保活请求接收
+     * @brief                               回调函数: sip保活请求消息接收
      * @return                              处理结果，0-success，-1-failed
      * @param regReqMsgPtr                  保活请求消息指针
      */
     MY_COMMON::MyStatus_t                   onRecvSipKeepAliveMsg(MY_COMMON::MySipRxDataPtr keepAliveReqMsgPtr);
+
+    /**
+     * @brief                               回调函数: sip设备目录请求消息接收
+     * @return                              处理结果，0-success，-1-failed
+     * @param regReqMsgPtr                  sip设备目录请求消息指针
+     */
+    MY_COMMON::MyStatus_t                   onRecvSipCatalogMsg(MY_COMMON::MySipRxDataPtr catalogReqMsgPtr);
 
 public:     
     /**     
@@ -91,6 +96,12 @@ public:
      * @return                              pjsip服务端点
      */
     inline MY_COMMON::MySipEndptPtr         getSipEndptPtr() const { return m_servEndptPtr; }
+
+    /**
+     * @brief                               获取pjsip服务内存池
+     * @return                              pjsip服务内存池
+     */
+    inline MY_COMMON::MySipPoolPtr          getSipThdPoolPtr() const { return m_servThdPoolPtr; }
 
 private:
     //                                      启动状态 

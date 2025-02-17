@@ -1,6 +1,5 @@
 #pragma once
 #include <string>
-#include <algorithm>
 #include <uuid/uuid.h>
 #include "utils/myBaseHelper.h"
 
@@ -16,7 +15,13 @@ public:
      * @brief                       获取32位长度随机数字符串
      * @return                      32位长度随机数字符串
      */         
-    static std::string              Get32BitsLenRandomStr();
+    static std::string              Get32BytesLenRandomStr();
+
+    /** 
+     * @brief                       获取4位长度随机数字符串
+     * @return                      4位长度随机数字符串
+     */         
+    static std::string              Get4BytesLenRandomStr();
 };
 
 }; // namespace MY_UTILS

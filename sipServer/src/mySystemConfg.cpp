@@ -7,12 +7,16 @@ using MY_UTILS::MyJsonHelper;
 
 namespace MY_ENVIR {
 
-boost::shared_mutex                 MySystemConfig::CfgMutex;
-MyServLogCfg_dt                     MySystemConfig::ServLogCfg;
-MySipStackCfg_dt                    MySystemConfig::SipStackCfg;
-MySipEvThdMemCfg_dt                 MySystemConfig::SipEvThdMemCfg;
-MySipServAddrMap                    MySystemConfig::SipServAddrCfgMap;
-MySipRegServCfgMap                  MySystemConfig::SipRegServCfgMap;
+boost::shared_mutex                     MySystemConfig::CfgMutex;
+MyServLogCfg_dt                         MySystemConfig::ServLogCfg;
+MySipStackCfg_dt                        MySystemConfig::SipStackCfg;
+MySipEvThdMemCfg_dt                     MySystemConfig::SipEvThdMemCfg;
+MySipServAddrMap                        MySystemConfig::SipServAddrCfgMap;
+MySipRegServCfgMap                      MySystemConfig::SipRegServCfgMap;
+MySipServCatalogPlatCfgMap              MySystemConfig::SipCatalogPlatCfgMap;
+MySipServCatalogSubPlatCfgMap           MySystemConfig::SipCatalogSubPlatCfgMap;
+MySipServCatalogSubVirtualPlatCfgMap    MySystemConfig::SipCatalogSubVirtualPlatCfgMap;
+MySipServCatalogDeviceCfgMap            MySystemConfig::SipCatalogDeviceCfgMap;
 
 MyStatus_t MySystemConfig::Init(const std::string& path)
 {
@@ -57,6 +61,20 @@ MyStatus_t MySystemConfig::Init(const std::string& path)
 
     // 解析sip服务注册文件
     if (MyStatus_t::SUCCESS != MyJsonHelper::ParseSipServRegJsonFile(sipServRegfileName, SipRegServCfgMap)) {
+        return MyStatus_t::FAILED;
+    }
+
+    // 读取sip服务设备目录文件配置
+    std::string sipServCatalogfilePath     = SysCfgIni.GetValue("sipServerCatalog", "sipServerCatalogFilePath", ".");
+    std::string sipServCatalogfileName     = SysCfgIni.GetValue("sipServerCatalog", "sipServerCatalogFileName", "servCatalog.json");
+    sipServCatalogfileName                 = sipServCatalogfilePath + std::string("/") + sipServCatalogfileName;
+
+    // 解析sip服务设备目录文件
+    if (MyStatus_t::SUCCESS != MyJsonHelper::ParseSipServCatalogJsonFile(sipServCatalogfileName, 
+                                                                         SipCatalogPlatCfgMap,
+                                                                         SipCatalogSubPlatCfgMap,
+                                                                         SipCatalogSubVirtualPlatCfgMap,
+                                                                         SipCatalogDeviceCfgMap)) {
         return MyStatus_t::FAILED;
     }
     return MyStatus_t::SUCCESS;
@@ -117,6 +135,50 @@ MySipRegLowServCfgMap MySystemConfig::GetSipLowRegServCfgMap(const std::string& 
         return iter->second.lowRegSipServMap;
     }
     return MySipRegLowServCfgMap();
+}
+
+MySipCatalogPlatCfgMap MySystemConfig::GetSipCatalogPlatCfgMap(const std::string& localServId)
+{
+    boost::shared_lock<boost::shared_mutex> lock(CfgMutex);
+
+    auto iter = SipCatalogPlatCfgMap.find(localServId);
+    if (SipCatalogPlatCfgMap.end() != iter) {
+        return iter->second;
+    }
+    return MySipCatalogPlatCfgMap();
+}
+
+MySipCatalogSubPlatCfgMap MySystemConfig::GetSipCatalogSubPlatCfgMap(const std::string& localServId)
+{
+    boost::shared_lock<boost::shared_mutex> lock(CfgMutex);
+
+    auto iter = SipCatalogSubPlatCfgMap.find(localServId);
+    if (SipCatalogSubPlatCfgMap.end() != iter) {
+        return iter->second;
+    }
+    return MySipCatalogSubPlatCfgMap();
+}
+                       
+MySipCatalogSubVirtualPlatCfgMap MySystemConfig::GetSipCatalogSubVirtualPlatCfgMap(const std::string& localServId)
+{
+    boost::shared_lock<boost::shared_mutex> lock(CfgMutex);
+
+    auto iter = SipCatalogSubVirtualPlatCfgMap.find(localServId);
+    if (SipCatalogSubVirtualPlatCfgMap.end() != iter) {
+        return iter->second;
+    }
+    return MySipCatalogSubVirtualPlatCfgMap();
+}
+                              
+MySipCatalogDeviceCfgMap MySystemConfig::GetSipCatalogDeviceCfgMap(const std::string& localServId)
+{
+    boost::shared_lock<boost::shared_mutex> lock(CfgMutex);
+
+    auto iter = SipCatalogDeviceCfgMap.find(localServId);
+    if (SipCatalogDeviceCfgMap.end() != iter) {
+        return iter->second;
+    }
+    return MySipCatalogDeviceCfgMap();
 }
 
 }; // namespace MY_ENVIR

@@ -3,14 +3,10 @@
 #include <glog/logging.h>
 #include <gflags/gflags.h>
 #include <boost/thread/shared_mutex.hpp>
-#include "utils/myJsonHelper.h"
-#include "utils/mySipServerHelper.h"
 #include "envir/mySystemConfg.h"
 #include "manager/myServManage.h"
 using namespace MY_COMMON;
 using MY_ENVIR::MySystemConfig;
-using MY_UTILS::MyJsonHelper;
-using MY_UTILS::MySipServerHelper;
 
 namespace MY_MANAGER {
 
@@ -156,6 +152,15 @@ MySipServAddrCfg_dt MyServManage::GetSipServAddrCfg(const std::string& servId)
         return MySipServAddrCfg_dt();
     }
     return sipServWkPtr.lock()->getSipServAddrCfg();
+}
+
+MySipPoolPtr MyServManage::GetSipServThdPoolPtr(const std::string& servId)
+{
+    auto sipServWkPtr = ManageObject.get(servId);
+    if (sipServWkPtr.expired()) {
+        return nullptr;
+    }
+    return sipServWkPtr.lock()->getSipThdPoolPtr();
 }
 
 MyStatus_t MyServManage::HasSipServer(const std::string& servId)

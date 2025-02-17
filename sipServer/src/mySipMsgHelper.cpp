@@ -1,3 +1,5 @@
+#include <iostream>
+#include <sstream>
 #include <cstdio>
 #include <cstdint>
 #include <cstring>
@@ -49,7 +51,7 @@ MyStatus_t MySipMsgHelper::ParseSipMsgURL(const std::string& uri, MySipMsgUri_dt
     uint16_t port;
     char     transport[16];
 
-    if (sscanf(uri.c_str(), "sip:%[^@]@%[^:]:%hu;transport=%s", id, ipAddr, &port, transport) == 4) {
+    if (4 == sscanf(uri.c_str(), "sip:%[^@]@%[^:]:%hu;transport=%s", id, ipAddr, &port, transport)) {
         sipUri.id     = id;
         sipUri.ipAddr = ipAddr;
         sipUri.port   = port;
@@ -67,7 +69,7 @@ MyStatus_t MySipMsgHelper::ParseSipMsgContactHdr(const std::string& contactHeade
     char     ipAddr[128];
     uint16_t port;
 
-    if (sscanf(contactHeader.c_str(), "Contact: <sip:%[^@]@%[^:]:%hu>", id, ipAddr, &port) == 3) {
+    if (3 == sscanf(contactHeader.c_str(), "Contact: <sip:%[^@]@%[^:]:%hu>", id, ipAddr, &port)) {
         sipContactHeader.id     = id;
         sipContactHeader.ipAddr = ipAddr;
         sipContactHeader.port   = port;
@@ -81,8 +83,22 @@ MyStatus_t MySipMsgHelper::ParseSipMsgContactHdr(const std::string& contactHeade
 MyStatus_t MySipMsgHelper::ParseSipMsgExpireHdr(const std::string& expireHeader, double& sipExpireHeader)
 {
     double expires = 0.0;
-    if (sscanf(expireHeader.c_str(), "Expires: %lf", &expires) == 1) {
+    if (1 == sscanf(expireHeader.c_str(), "Expires: %lf", &expires)) {
         sipExpireHeader = expires;
+        return MyStatus_t::SUCCESS;
+    } else {
+        return MyStatus_t::FAILED;
+    }
+}
+
+MyStatus_t MySipMsgHelper::ParseSipMsgFromHdr(const std::string& fromHeader, std::string& id, std::string& ipAddr)
+{
+    char idBuf[128] = {0};
+    char ipAddrBuf[128] = {0};
+
+    if (2 == sscanf(fromHeader.c_str(), "sip:%[^@]@%s", idBuf, ipAddrBuf)) {
+        id     = idBuf;
+        ipAddr = ipAddrBuf;
         return MyStatus_t::SUCCESS;
     } else {
         return MyStatus_t::FAILED;
@@ -97,11 +113,19 @@ std::string MySipMsgHelper::PrintSipMsgContactHdr(const MY_COMMON::MySipMsgConta
     return ss.str();
 }
 
-std::string MySipMsgHelper::PrintSipKeepAliveMsgBody(const MY_COMMON::MySipKeepAliveMsgBidy_dt& keepAliveMsgBody)
+std::string MySipMsgHelper::PrintSipKeepAliveMsgBody(const MY_COMMON::MySipKeepAliveMsgBody_dt& keepAliveMsgBody)
 {
     std::stringstream ss;
     ss << "cmdType: " << keepAliveMsgBody.cmdType << " DeviceID: " << keepAliveMsgBody.deviceId 
        << " SN: " << keepAliveMsgBody.sn << " Status: " << keepAliveMsgBody.status;
+
+    return ss.str();
+}
+
+std::string MySipMsgHelper::PrintSipCatalogMsgBody(const MY_COMMON::MySipCatalogReqMsgBody_dt& catalogMsgBody)
+{
+    std::stringstream ss;
+    ss << "cmdType: " << catalogMsgBody.cmdType << " DeviceID: " << catalogMsgBody.deviceId  << " SN: " << catalogMsgBody.sn;
 
     return ss.str();
 }

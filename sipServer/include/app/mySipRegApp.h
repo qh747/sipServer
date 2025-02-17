@@ -75,33 +75,7 @@ public:
      */                 
     MY_COMMON::MyStatus_t                   shutdown();
 
-public:
-    /**
-     * @brief                               向上级sip服务发起注册
-     * @return                              注册结果，0-success，-1-failed
-     * @param regUpServCfg                  上级sip注册服务配置
-     * @param localServCfg                  本地sip服务地址配置
-     */             
-    MY_COMMON::MyStatus_t                   regUpServ(const MY_COMMON::MySipRegUpServCfg_dt& regUpServCfg, 
-                                                      const MY_COMMON::MySipServAddrCfg_dt&  localServCfg);
-
-    /**
-     * @brief                               向上级sip服务发起保活
-     * @return                              保活结果，0-success，-1-failed
-     * @param regUpServCfg                  上级sip注册服务配置
-     * @param localServCfg                  本地sip服务地址配置
-     */             
-    MY_COMMON::MyStatus_t                   keepAliveUpServ(const MY_COMMON::MySipRegUpServCfg_dt& regUpServCfg,
-                                                            const MY_COMMON::MySipServAddrCfg_dt&  localServCfg);                                                       
-
 public:             
-
-    /**             
-     * @brief                               定时器回调
-     * @return                              是否继续触发定时器，true-继续，false-停止
-     */             
-    bool                                    onTimer();
-
     /**             
      * @brief                               处理下级sip服务的sip注册请求消息
      * @return                              处理结果，0-success，-1-failed
@@ -130,10 +104,35 @@ public:
     inline std::string                      getId() const { return m_appIdCfg.id; }
 
     /**             
-     * @brief                               获取sip服务实例
-     * @return                              sip服务实例
+     * @brief                               获取sipRegApp实例
+     * @return                              sipRegApp实例
      */             
     inline SmtWkPtr                         getSipRegApp() { return this->shared_from_this(); }
+
+private:
+    /**             
+     * @brief                               定时器回调
+     * @return                              是否继续触发定时器，true-继续，false-停止
+     */             
+    bool                                    onTimer();
+    
+    /**
+     * @brief                               向上级sip服务发起注册
+     * @return                              注册结果，0-success，-1-failed
+     * @param regUpServCfg                  上级sip注册服务配置
+     * @param localServCfg                  本地sip服务地址配置
+     */             
+    MY_COMMON::MyStatus_t                   regUpServ(const MY_COMMON::MySipRegUpServCfg_dt& regUpServCfg, 
+                                                      const MY_COMMON::MySipServAddrCfg_dt&  localServCfg);
+
+    /**
+     * @brief                               向上级sip服务发起保活
+     * @return                              保活结果，0-success，-1-failed
+     * @param regUpServCfg                  上级sip注册服务配置
+     * @param localServCfg                  本地sip服务地址配置
+     */             
+    MY_COMMON::MyStatus_t                   keepAliveUpServ(const MY_COMMON::MySipRegUpServCfg_dt& regUpServCfg,
+                                                            const MY_COMMON::MySipServAddrCfg_dt&  localServCfg);                                                       
 
 private:
     //                                      sip服务ID

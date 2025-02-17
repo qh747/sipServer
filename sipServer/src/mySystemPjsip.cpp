@@ -5,7 +5,6 @@
 #include "envir/mySystemConfg.h"
 #include "envir/mySystemPjsip.h"
 using namespace MY_COMMON;
-using MY_ENVIR::MySystemConfig;
 
 namespace MY_ENVIR {
 

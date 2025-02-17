@@ -4,14 +4,11 @@
 #include <gflags/gflags.h>
 #include <boost/thread/shared_mutex.hpp>
 #include "common/myConfigDef.h"
-#include "utils/mySipServerHelper.h"
 #include "envir/mySystemConfg.h"
 #include "manager/myServManage.h"
 #include "manager/myAppManage.h"
 using namespace MY_COMMON;
 using MY_ENVIR::MySystemConfig;
-using MY_MANAGER::MyServManage;
-using MY_UTILS::MySipServerHelper;
 
 namespace MY_MANAGER {
 
@@ -145,12 +142,48 @@ public:
         return this->stop(m_sipRegAppSmtPtrMap);
     }
 
+    void addSipCatalogApp(const std::string& servId, MySipCatalogApp::SmtPtr sipCatalogAppSmtPtr) {
+        if (MyStatus_t::SUCCESS != this->add(servId, sipCatalogAppSmtPtr, m_sipCatalogAppSmtPtrMap)) {
+            LOG(ERROR) << "addSipCatalogApp failed, servId: " << servId << "appId: " << sipCatalogAppSmtPtr->getId() << " already exist.";
+        }
+    }
+
+    void delSipCatalogApp(const std::string& servId) {
+        if (MyStatus_t::SUCCESS != this->del(servId, m_sipCatalogAppSmtPtrMap)) {
+            LOG(ERROR) << "delSipCatalogApp failed, servId: " << servId << " not exist.";
+        }
+    }
+
+    MySipCatalogApp::SmtWkPtr getSipCatalogApp(const std::string& servId) {
+        boost::shared_lock<boost::shared_mutex> lock(m_rwMutex);
+
+        auto iter = m_sipCatalogAppSmtPtrMap.find(servId);
+        if (m_sipCatalogAppSmtPtrMap.end() != iter) {
+            return iter->second->getSipCatalogApp();
+        }
+        return MySipCatalogApp::SmtWkPtr();
+    }
+
+    MyStatus_t hasSipCatalogApp(const std::string& servId) {
+        return this->has(servId, m_sipCatalogAppSmtPtrMap);
+    }
+
+    MyStatus_t startSipCatalogApp() {
+        return this->start(m_sipCatalogAppSmtPtrMap);
+    }
+
+    MyStatus_t stopSipCatalogApp() {
+        return this->stop(m_sipCatalogAppSmtPtrMap);
+    }
+
 private:
     boost::shared_mutex                             m_rwMutex;
     // key = server id, value = sip msg proc app
     std::map<std::string, MySipMsgProcApp::SmtPtr>  m_sipMsgProcAppSmtPtrMap;
     // key = server id, value = sip reg app
     std::map<std::string, MySipRegApp::SmtPtr>      m_sipRegAppSmtPtrMap;
+    // key = server id, value = sip catalog app
+    std::map<std::string, MySipCatalogApp::SmtPtr>  m_sipCatalogAppSmtPtrMap;
 };
 
 static MyAppManage::MyAppManageObject ManageObject;
@@ -182,6 +215,15 @@ MyStatus_t MyAppManage::Init()
         else{
             ManageObject.addSipRegApp(pair.second.id, sipRegAppSmtPtr);
         }
+
+        // 初始化sip目录应用
+        MySipCatalogApp::SmtPtr sipCatalogAppSmtPtr = std::make_shared<MySipCatalogApp>();
+        if (MyStatus_t::SUCCESS != sipCatalogAppSmtPtr->init(pair.second.id, "sipCatalogApp_1", "sipCatalogApp_1", PJSIP_MOD_PRIORITY_APPLICATION)) {
+            LOG(WARNING) << "Init sip app failed. sip catalog app init failed.";
+        }
+        else{
+            ManageObject.addSipCatalogApp(pair.second.id, sipCatalogAppSmtPtr);
+        }
     }
     return MyStatus_t::SUCCESS;
 }                    
@@ -194,6 +236,9 @@ MyStatus_t MyAppManage::Run()
     // 启动sip注册应用
     ManageObject.startSipRegApp();
 
+    // 启动sip目录应用
+    ManageObject.startSipCatalogApp();
+
     return MyStatus_t::SUCCESS;
 }
 
@@ -204,6 +249,9 @@ MyStatus_t MyAppManage::Shutdown()
 
     // 停止sip注册应用
     ManageObject.stopSipRegApp();
+
+    // 停止sip目录应用
+    ManageObject.stopSipCatalogApp();
 
     return MyStatus_t::SUCCESS;
 }
@@ -216,6 +264,11 @@ MySipRegApp::SmtWkPtr MyAppManage::GetSipRegApp(const std::string& servId)
 MySipMsgProcApp::SmtWkPtr MyAppManage::GetSipMsgProcApp(const std::string& servId)
 {
     return ManageObject.getSipMsgProcApp(servId);
+}
+
+MySipCatalogApp::SmtWkPtr MyAppManage::GetSipCatalogApp(const std::string& servId)
+{
+    return ManageObject.getSipCatalogApp(servId);
 }
 
 }; // namespace MY_MANAGER

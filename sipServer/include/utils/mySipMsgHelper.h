@@ -1,6 +1,5 @@
 #pragma once
 #include <string>
-#include <sstream>
 #include "common/myDataDef.h"
 #include "common/mySipMsgDef.h"
 #include "utils/myBaseHelper.h"
@@ -66,6 +65,15 @@ public:
      */     
     static MY_COMMON::MyStatus_t    ParseSipMsgExpireHdr(const std::string& expireHeader, double& sipExpireHeader);
 
+    /**
+     * @brief                       解析sip消息from首部
+     * @return                      解析结果，success-0，fail-非0
+     * @param fromHeader            from字符串
+     * @param id                    解析后的服务id
+     * @param ipAddr                解析后的服务ip地址
+     */     
+    static MY_COMMON::MyStatus_t    ParseSipMsgFromHdr(const std::string& fromHeader, std::string& id, std::string& ipAddr);
+
 public:
     /**
      * @brief                       打印sip消息contact首部
@@ -79,7 +87,14 @@ public:
      * @return                      sip keepAlive消息体字符串
      * @param keepAliveMsgBody      sip keepAlive消息体结构体
      */
-    static std::string              PrintSipKeepAliveMsgBody(const MY_COMMON::MySipKeepAliveMsgBidy_dt& keepAliveMsgBody);
+    static std::string              PrintSipKeepAliveMsgBody(const MY_COMMON::MySipKeepAliveMsgBody_dt& keepAliveMsgBody);
+
+    /**
+     * @brief                       打印sip消息catalog消息体
+     * @return                      sip catalog消息体字符串
+     * @param keepAliveMsgBody      sip catalog消息体结构体
+     */
+    static std::string              PrintSipCatalogMsgBody(const MY_COMMON::MySipCatalogReqMsgBody_dt& catalogMsgBody);
 };
     
 }; // namespace MY_UTILS

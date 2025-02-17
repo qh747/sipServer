@@ -1,9 +1,8 @@
 #pragma once
 #include <string>
-#include <memory>
-#include "common/myTypeDef.h"
 #include "utils/myBaseHelper.h"
 #include "app/mySipRegApp.h"
+#include "app/mySipCatalogApp.h"
 #include "app/mySipMsgProcApp.h"
 using namespace MY_APP; 
 
@@ -54,6 +53,13 @@ public:
      * @param servId                                sip服务id
      */
     static MySipMsgProcApp::SmtWkPtr                GetSipMsgProcApp(const std::string& servId);
+
+    /**
+     * @brief                                       获取sip设备目录应用
+     * @return                                      sip设备目录应用弱引用指针
+     * @param servId                                sip服务id
+     */
+    static MySipCatalogApp::SmtWkPtr                GetSipCatalogApp(const std::string& servId);
 };
 
 }; // namespace MY_MANAGER

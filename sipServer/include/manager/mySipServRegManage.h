@@ -1,7 +1,6 @@
 #pragma once
 #include <map>
 #include <string>
-#include <memory>
 #include <cstdbool>
 #include "common/myTypeDef.h"
 #include "utils/myBaseHelper.h"
@@ -78,6 +77,14 @@ public:
      * @param servId                        本地服务id
      */ 
     static MY_COMMON::MySipRegUpServCfgMap  GetSipRegUpServCfgMap(const std::string& servId);
+
+    /**     
+     * @brief                               获取上级服务注册配置
+     * @return                              上级服务注册配置
+     * @param servId                        本地服务id
+     * @param upRegServId                   上级服务注册id
+     */ 
+    static MY_COMMON::MySipRegUpServCfg_dt  GetSipRegUpServCfg(const std::string& servId, const std::string& upRegServId);
 
     /**
      * @brief                               获取上级服务注册最后注册时间

@@ -416,6 +416,20 @@ MySipRegUpServCfgMap MySipServRegManage::GetSipRegUpServCfgMap(const std::string
     }
 }
 
+MySipRegUpServCfg_dt MySipServRegManage::GetSipRegUpServCfg(const std::string& servId, const std::string& upRegServId)
+{
+    auto upRegCfgMap = MySipServRegManage::GetSipRegUpServCfgMap(servId);
+    if (upRegCfgMap.empty()) {
+        return MySipRegUpServCfg_dt();
+    }
+
+    auto iter = upRegCfgMap.find(upRegServId);
+    if (upRegCfgMap.end() == iter) {
+        return MySipRegUpServCfg_dt();
+    }
+    return iter->second;
+}
+
 std::string MySipServRegManage::GetSipRegUpServLastRegTime(const std::string& servId, const std::string& upRegServId)
 {
     return ManageObject.getUpRegLastRegTime(servId, upRegServId);

@@ -1,19 +1,16 @@
 #include <thread>
 #include <chrono>
-#include <sstream>
-#include <functional>
 #define GLOG_USE_GLOG_EXPORT
 #include <glog/logging.h>
 #include <gflags/gflags.h>
+#include "envir/mySystemPjsip.h"
 #include "manager/myAppManage.h"
 #include "utils/mySipServerHelper.h"
-#include "app/mySipRegApp.h"
 #include "server/mySipServer.h"
 using namespace MY_COMMON;
 using MY_ENVIR::MySystemPjsip;
 using MY_MANAGER::MyAppManage;
 using MY_UTILS::MySipServerHelper;
-using MY_APP::MySipRegApp;
 
 namespace MY_SERVER {
 
@@ -199,6 +196,16 @@ MyStatus_t MySipServer::onRecvSipKeepAliveMsg(MY_COMMON::MySipRxDataPtr keepAliv
         return MyStatus_t::FAILED;
     }
     return sipRegAppWkPtr.lock()->onRecvSipKeepAliveReqMsg(keepAliveReqMsgPtr);
+}
+
+MyStatus_t MySipServer::onRecvSipCatalogMsg(MY_COMMON::MySipRxDataPtr catalogReqMsgPtr)
+{
+    auto sipCatalogAppWkPtr = MyAppManage::GetSipCatalogApp(m_servAddrCfg.id);
+    if (sipCatalogAppWkPtr.expired()) {
+        LOG(ERROR) << "SipServer onRecvSipCatalogMsg() failed. sipCatalogApp invalid.";
+        return MyStatus_t::FAILED;
+    }
+    return sipCatalogAppWkPtr.lock()->onRecvSipCatalogReqMsg(catalogReqMsgPtr);
 }
 
 }; //namespace MY_SERVER

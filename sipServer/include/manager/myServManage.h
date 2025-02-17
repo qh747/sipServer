@@ -1,8 +1,5 @@
 #pragma once
-#include <map>
 #include <string>
-#include <memory>
-#include <vector>
 #include "common/myDataDef.h"
 #include "utils/myBaseHelper.h"
 #include "server/mySipServer.h"
@@ -55,6 +52,13 @@ public:
      * @param servId                                sip服务ID
      */
     static MY_COMMON::MySipServAddrCfg_dt           GetSipServAddrCfg(const std::string& servId);
+
+    /**
+     * @brief                                       获取SipServer内存池
+     * @return                                      MY_COMMON::MySipPoolPtr
+     * @param servId                                sip服务ID
+     */
+    static MY_COMMON::MySipPoolPtr                  GetSipServThdPoolPtr(const std::string& servId);
 
     /**
      * @brief                                       SipServer对象是否存在
