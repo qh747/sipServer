@@ -58,6 +58,34 @@ MyStatus_t MySystemPjsip::Shutdown()
     return MyStatus_t::SUCCESS;
 }
 
+MyStatus_t MySystemPjsip::GetState(MyStatus_t& status)
+{
+    status = SysPjsipState.load();
+    return MyStatus_t::SUCCESS;
+}
+
+MyStatus_t MySystemPjsip::GetPjsipEndptPtr(MySipEndptPtrAddr endptPtrAddr)
+{
+    if (MyStatus_t::FAILED == SysPjsipState.load()) {
+        LOG(ERROR) << "System pjsip environment is not init.";
+        return MyStatus_t::FAILED;
+    }
+
+    *endptPtrAddr = SysPjsipEndptPtr;
+    return MyStatus_t::SUCCESS;
+}
+
+MyStatus_t MySystemPjsip::GetPjsipMediaEndptPtr(MY_COMMON::MySipMediaEndptPtrAddr mediaEndptPtrAddr)
+{
+    if (MyStatus_t::FAILED == SysPjsipState.load()) {
+        LOG(ERROR) << "System pjsip environment is not init.";
+        return MyStatus_t::FAILED;
+    }
+
+    *mediaEndptPtrAddr = SysPjsipMediaEndptPtr;
+    return MyStatus_t::SUCCESS;
+}
+
 MyStatus_t MySystemPjsip::InitPjsipLib()
 {
     // pjlib 初始化
@@ -72,8 +100,12 @@ MyStatus_t MySystemPjsip::InitPjsipLib()
         return MyStatus_t::FAILED;
     }
 
-    const MySipStackCfg_dt& sipStackCfg = MySystemConfig::GetSipStackCfg();
-
+    MySipStackCfg_dt sipStackCfg;
+    if (MyStatus_t::SUCCESS != MySystemConfig::GetSipStackCfg(sipStackCfg)) {
+        LOG(ERROR) << "System pjsip environment init pjsip lib failed. GetSipStackCfg() error.";
+        return MyStatus_t::FAILED;
+    }
+    
     // pjsip 内存池初始化
     pj_bzero(&SysPjsipCachingPool, sizeof(pj_caching_pool));
     pj_caching_pool_init(&SysPjsipCachingPool, nullptr, sipStackCfg.sipStackSize);

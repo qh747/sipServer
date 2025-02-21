@@ -33,11 +33,12 @@ public:
 public:
     /**
      * @brief                               获取本级服务id
-     * @return                              本级服务id
+     * @return                              获取结果，success-0, failed-非0
      * @param regServId                     注册服务注册id
      * @param isUpRegServ                   是否为上级注册服务
+     * @param servId                        本地服务id
      */ 
-    static std::string                      GetSipLocalServId(const std::string& regServId, bool isUpRegServ);
+    static MY_COMMON::MyStatus_t            GetSipLocalServId(const std::string& regServId, bool isUpRegServ, std::string& servId);
 
 public: 
     /** 
@@ -73,42 +74,47 @@ public:
 
     /**     
      * @brief                               获取上级服务注册配置map
-     * @return                              上级服务注册配置map
+     * @return                              获取结果，success-0, failed-非0
      * @param servId                        本地服务id
+     * @param upRegCfgMap                   上级服务注册配置map
      */ 
-    static MY_COMMON::MySipRegUpServCfgMap  GetSipRegUpServCfgMap(const std::string& servId);
+    static MY_COMMON::MyStatus_t            GetSipRegUpServCfgMap(const std::string& servId, MY_COMMON::MySipRegUpServCfgMap& upRegCfgMap);
 
     /**     
      * @brief                               获取上级服务注册配置
-     * @return                              上级服务注册配置
+     * @return                              获取结果，success-0, failed-非0
      * @param servId                        本地服务id
      * @param upRegServId                   上级服务注册id
+     * @param upRegServCfg                  上级服务注册配置
      */ 
-    static MY_COMMON::MySipRegUpServCfg_dt  GetSipRegUpServCfg(const std::string& servId, const std::string& upRegServId);
+    static MY_COMMON::MyStatus_t            GetSipRegUpServCfg(const std::string& servId, const std::string& upRegServId, MY_COMMON::MySipRegUpServCfg_dt& upRegServCfg);
 
     /**
      * @brief                               获取上级服务注册最后注册时间
-     * @return                              上级服务注册最后注册时间
+     * @return                              获取结果，success-0, failed-非0
      * @param servId                        本地服务id
      * @param upRegServId                   上级服务注册id
+     * @param time                          上级服务注册最后注册时间
      */
-    static std::string                      GetSipRegUpServLastRegTime(const std::string& servId, const std::string& upRegServId);
+    static MY_COMMON::MyStatus_t            GetSipRegUpServLastRegTime(const std::string& servId, const std::string& upRegServId, std::string& time);
 
     /**
      * @brief                               获取上级服务注册时长
-     * @return                              上级服务注册时长
+     * @return                              获取结果，success-0, failed-非0
      * @param servId                        本地服务id
      * @param upRegServId                   上级服务注册id
+     * @param expired                       上级服务注册时长
      */ 
-    static uint32_t                         GetSipRegUpServExpired(const std::string& servId, const std::string& upRegServId);
+    static MY_COMMON::MyStatus_t            GetSipRegUpServExpired(const std::string& servId, const std::string& upRegServId, uint32_t& expired);
 
     /**
      * @brief                               获取上级服务保活索引
-     * @return                              上级服务保活索引
+     * @return                              获取结果，success-0, failed-非0
      * @param servId                        本地服务id
      * @param upRegServId                   上级服务注册id
+     * @param idx                           上级服务保活索引
      */
-    static uint32_t                         GetSipRegUpServKeepAliveIdx(const std::string& servId, const std::string& upRegServId);
+    static MY_COMMON::MyStatus_t            GetSipRegUpServKeepAliveIdx(const std::string& servId, const std::string& upRegServId, uint32_t& idx);
 
     /**
      * @brief                               更新上级服务注册最后注册时间
@@ -168,34 +174,38 @@ public:
 
     /** 
      * @brief                               获取下级服务注册最后注册时间
-     * @return                              下级服务注册最后注册时间
+     * @return                              获取结果，success-0, failed-非0
      * @param servId                        本地服务id
      * @param lowRegServId                  下级服务注册id
+     * @param time                          下级服务注册最后注册时间
      */ 
-    static std::string                      GetSipRegLowServLastRegTime(const std::string& servId, const std::string& lowRegServId);
+    static MY_COMMON::MyStatus_t             GetSipRegLowServLastRegTime(const std::string& servId, const std::string& lowRegServId, std::string& time);
 
     /** 
      * @brief                               获取下级服务注册时长
-     * @return                              下级服务注册时长
+     * @return                              获取结果，success-0, failed-非0
      * @param servId                        本地服务id
      * @param lowRegServId                  下级服务注册id
+     * @param expired                       下级服务注册时长
      */ 
-    static uint32_t                         GetSipRegLowServExpired(const std::string& servId, const std::string& lowRegServId);
+    static MY_COMMON::MyStatus_t            GetSipRegLowServExpired(const std::string& servId, const std::string& lowRegServId, uint32_t& expired);
 
     /**         
      * @brief                               获取下级服务注册配置map
-     * @return                              下级服务注册配置map
+     * @return                              获取结果，success-0, failed-非0
      * @param servId                        本地服务id
+     * @param lowRegCfgMap                  下级服务注册配置map
      */ 
-    static MY_COMMON::MySipRegLowServCfgMap GetSipRegLowServCfgMap(const std::string& servId);
+    static MY_COMMON::MyStatus_t            GetSipRegLowServCfgMap(const std::string& servId, MY_COMMON::MySipRegLowServCfgMap& lowRegCfgMap);
 
     /**     
      * @brief                               获取下级服务注册认证配置
-     * @return                              下级服务注册认证配置
+     * @return                              获取结果，success-0, failed-非0
      * @param name                          认证名称
      * @param realm                         认证域名
+     * @param authCfg                       认证配置
      */     
-    static MY_COMMON::MySipServAuthCfg_dt   GetSipRegLowAuthCfg(const std::string& name, const std::string& realm);
+    static MY_COMMON::MyStatus_t            GetSipRegLowAuthCfg(const std::string& name, const std::string& realm, MY_COMMON::MySipServAuthCfg_dt& authCfg);
 
     /**
      * @brief                               更新下级服务注册最后注册时间

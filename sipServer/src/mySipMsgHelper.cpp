@@ -4,14 +4,11 @@
 #include <cstdint>
 #include <cstring>
 #include "utils/mySipMsgHelper.h"
-using MY_COMMON::MyStatus_t;
-using MY_COMMON::MyTpProto_t;
-using MY_COMMON::MySipMsgUri_dt;
-using MY_COMMON::MySipMsgContactHdr_dt;
+using namespace MY_COMMON;
 
 namespace MY_UTILS {
 
-std::string MySipMsgHelper::GenerateSipMsgURL(const std::string& id, const std::string& ipAddr, uint16_t port, MyTpProto_t type)
+MyStatus_t MySipMsgHelper::GenerateSipMsgURL(const std::string& id, const std::string& ipAddr, uint16_t port, MyTpProto_t type, std::string& url)
 {
     std::stringstream ss;
     if (MyTpProto_t::TCP == type) {
@@ -20,28 +17,36 @@ std::string MySipMsgHelper::GenerateSipMsgURL(const std::string& id, const std::
     else {
         ss << "sip:" << id << "@" << ipAddr << ":" << port << ";transport=udp" << std::endl;
     }
-    return ss.str();
+
+    url = ss.str();
+    return MyStatus_t::SUCCESS;
 }
     
-std::string MySipMsgHelper::GenerateSipMsgFromHeader(const std::string& id, const std::string& ipAddr)
+MyStatus_t MySipMsgHelper::GenerateSipMsgFromHeader(const std::string& id, const std::string& ipAddr, std::string& fromHeader)
 {
     std::stringstream ss;
     ss << "<sip:" << id << "@" << ipAddr << ">" << std::endl;
-    return ss.str();
+
+    fromHeader = ss.str();
+    return MyStatus_t::SUCCESS;
 }
     
-std::string MySipMsgHelper::GenerateSipMsgToHeader(const std::string& id, const std::string& ipAddr)
+MyStatus_t MySipMsgHelper::GenerateSipMsgToHeader(const std::string& id, const std::string& ipAddr, std::string& toHeader)
 {
     std::stringstream ss;
     ss << "<sip:" << id << "@" << ipAddr << ">" << std::endl;
-    return ss.str();
+
+    toHeader = ss.str();
+    return MyStatus_t::SUCCESS;
 }
 
-std::string MySipMsgHelper::GenerateSipMsgContactHeader(const std::string& id, const std::string& natIpAddr, uint16_t natPort)
+MyStatus_t MySipMsgHelper::GenerateSipMsgContactHeader(const std::string& id, const std::string& natIpAddr, uint16_t natPort, std::string& contactHeader)
 {
     std::stringstream ss;
     ss << "<sip:" << id << "@" << natIpAddr << ":" << natPort << ">" << std::endl;
-    return ss.str();
+
+    contactHeader = ss.str();
+    return MyStatus_t::SUCCESS;
 }
 
 MyStatus_t MySipMsgHelper::ParseSipMsgURL(const std::string& uri, MySipMsgUri_dt& sipUri)
@@ -105,29 +110,32 @@ MyStatus_t MySipMsgHelper::ParseSipMsgFromHdr(const std::string& fromHeader, std
     }
 }
 
-std::string MySipMsgHelper::PrintSipMsgContactHdr(const MY_COMMON::MySipMsgContactHdr_dt& sipContactHeader)
+MyStatus_t MySipMsgHelper::PrintSipMsgContactHdr(const MY_COMMON::MySipMsgContactHdr_dt& sipContactHeader, std::string& str)
 {
     std::stringstream ss;
     ss << "id: " << sipContactHeader.id << " ip addr: " << sipContactHeader.ipAddr << " port: " << sipContactHeader.port;
 
-    return ss.str();
+    str = ss.str();
+    return MyStatus_t::SUCCESS;
 }
 
-std::string MySipMsgHelper::PrintSipKeepAliveMsgBody(const MY_COMMON::MySipKeepAliveMsgBody_dt& keepAliveMsgBody)
+MyStatus_t MySipMsgHelper::PrintSipKeepAliveMsgBody(const MY_COMMON::MySipKeepAliveMsgBody_dt& keepAliveMsgBody, std::string& str)
 {
     std::stringstream ss;
     ss << "cmdType: " << keepAliveMsgBody.cmdType << " DeviceID: " << keepAliveMsgBody.deviceId 
        << " SN: " << keepAliveMsgBody.sn << " Status: " << keepAliveMsgBody.status;
 
-    return ss.str();
+    str = ss.str();
+    return MyStatus_t::SUCCESS;
 }
 
-std::string MySipMsgHelper::PrintSipCatalogMsgBody(const MY_COMMON::MySipCatalogReqMsgBody_dt& catalogMsgBody)
+MyStatus_t MySipMsgHelper::PrintSipCatalogMsgBody(const MY_COMMON::MySipCatalogReqMsgBody_dt& catalogMsgBody, std::string& str)
 {
     std::stringstream ss;
     ss << "cmdType: " << catalogMsgBody.cmdType << " DeviceID: " << catalogMsgBody.deviceId  << " SN: " << catalogMsgBody.sn;
 
-    return ss.str();
+    str = ss.str();
+    return MyStatus_t::SUCCESS;
 }
     
 }; // namespace MY_UTILS

@@ -1,5 +1,4 @@
 #pragma once
-#include <map>
 #include <memory>
 #include <string>
 #include <atomic>
@@ -88,26 +87,29 @@ public:
      * @return                              处理结果，0-success，-1-failed
      * @param rxDataPtr                     sip保活请求消息
      */
-    MY_COMMON::MyStatus_t                   onRecvSipKeepAliveReqMsg(MY_COMMON::MySipRxDataPtr rxDataPtr);   
+    MY_COMMON::MyStatus_t                   onSipRegAppRecvSipKeepAliveReqMsg(MY_COMMON::MySipRxDataPtr rxDataPtr);   
 
-public:             
-    /**                     
-     * @brief                               sip app是否启动
-     * @return                              启动结果，0-success，-1-failed
-     */                             
-    inline MY_COMMON::MyStatus_t            getState() const { return m_status.load(); }
-
-    /**             
-     * @brief                               获取应用id
-     * @return                              应用id
-     */                 
-    inline std::string                      getId() const { return m_appIdCfg.id; }
-
-    /**             
-     * @brief                               获取sipRegApp实例
-     * @return                              sipRegApp实例
+public:   
+    /**     
+     * @brief                               应用是否启动
+     * @return                              获取结果，0-success，-1-failed
+     * @param status                        启动结果，0-success，-1-failed
      */             
-    inline SmtWkPtr                         getSipRegApp() { return this->shared_from_this(); }
+    MY_COMMON::MyStatus_t                   getState(MY_COMMON::MyStatus_t& status) const;
+
+    /** 
+     * @brief                               获取应用id
+     * @return                              获取结果，0-success，-1-failed
+     * @param id                            应用id
+     */ 
+    MY_COMMON::MyStatus_t                   getId(std::string& id) const;
+ 
+    /** 
+     * @brief                               获取应用
+     * @return                              获取结果，0-success，-1-failed
+     * @param wkPtr                         应用实例
+     */
+     MY_COMMON::MyStatus_t                  getSipRegApp(SmtWkPtr& wkPtr);
 
 private:
     /**             
@@ -116,6 +118,13 @@ private:
      */             
     bool                                    onTimer();
     
+    /**             
+     * @brief                               下级sip服务注册成功
+     * @return                              处理结果，0-success，-1-failed
+     * @param sipRegLowServCfg              下级sip服务注册配置
+     */
+    MY_COMMON::MyStatus_t                   onLowSipServRegSuccess(const MY_COMMON::MySipRegLowServCfg_dt& sipRegLowServCfg);
+
     /**
      * @brief                               向上级sip服务发起注册
      * @return                              注册结果，0-success，-1-failed

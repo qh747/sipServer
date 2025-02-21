@@ -4,10 +4,11 @@
 #include <cstdlib>
 #include <algorithm>
 #include "utils/myRandomHelper.h"
+using namespace MY_COMMON;
 
 namespace MY_UTILS {
 
-std::string MyRandomHelper::Get32BytesLenRandomStr()
+MyStatus_t MyRandomHelper::Get32BytesLenRandomStr(std::string& str)
 {
     uuid_t uuid;
     char uuid_str[37];
@@ -19,12 +20,12 @@ std::string MyRandomHelper::Get32BytesLenRandomStr()
     uuid_unparse_lower(uuid, uuid_str); 
 
     // 提取UUID的前32位作为随机数（去掉UUID中的'-'符号）
-    std::string random_32bit = uuid_str;
-    random_32bit.erase(std::remove(random_32bit.begin(), random_32bit.end(), '-'), random_32bit.end());
-    return random_32bit;
+    str = uuid_str;
+    str.erase(std::remove(str.begin(), str.end(), '-'), str.end());
+    return MyStatus_t::SUCCESS;
 }
 
-std::string MyRandomHelper::Get4BytesLenRandomStr()
+MyStatus_t MyRandomHelper::Get4BytesLenRandomStr(std::string& str)
 {
     std::srand(static_cast<unsigned int>(std::time(0)));
 
@@ -34,7 +35,8 @@ std::string MyRandomHelper::Get4BytesLenRandomStr()
 
     // 生成 [lower_bound, upper_bound] 范围内的随机数
     int random_number = lower_bound + std::rand() % (upper_bound - lower_bound + 1);
-    return std::to_string(random_number);
+    str = std::to_string(random_number);
+    return MyStatus_t::SUCCESS;
 }
 
 }; // namespace MY_UTILS

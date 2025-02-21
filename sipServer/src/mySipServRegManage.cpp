@@ -81,64 +81,73 @@ public:
         return MyStatus_t::SUCCESS;
     }
 
-    MySipServRegManage::MySipUpRegServInfoSubMap getUpRegInfoMap(const std::string& servId) {
+    MyStatus_t getUpRegInfoMap(const std::string& servId, MySipServRegManage::MySipUpRegServInfoSubMap& upRegServInfoMap) {
         boost::shared_lock<boost::shared_mutex> lock(m_rwMutex);
 
         auto iter = m_sipUpRegServInfoMap.find(servId);
         if (m_sipUpRegServInfoMap.end() == iter) {
-            return MySipServRegManage::MySipUpRegServInfoSubMap();
+            return MyStatus_t::FAILED;
         }
-        return iter->second;
+        upRegServInfoMap = iter->second;
+        return MyStatus_t::SUCCESS;
     }
 
-    MySipServRegManage::MySipUpRegServInfoMap getAllUpRegInfoMap() {
+    MyStatus_t getAllUpRegInfoMap(MySipServRegManage::MySipUpRegServInfoMap& upRegServInfoMap) {
         boost::shared_lock<boost::shared_mutex> lock(m_rwMutex);
-        return m_sipUpRegServInfoMap;
+
+        upRegServInfoMap = m_sipUpRegServInfoMap;
+        return MyStatus_t::SUCCESS;
     }
 
-    std::string getUpRegLastRegTime(const std::string& servId, const std::string& upRegServId) {
+    MyStatus_t getUpRegLastRegTime(const std::string& servId, const std::string& upRegServId, std::string& time) {
         boost::shared_lock<boost::shared_mutex> lock(m_rwMutex);
 
         auto iter = m_sipUpRegServInfoMap.find(servId);
         if (m_sipUpRegServInfoMap.end() == iter) {
-            return "";
+            return MyStatus_t::FAILED;
         }
         
         auto subIter = iter->second.find(upRegServId);
         if (iter->second.end() == subIter) {
-            return "";
+            return MyStatus_t::FAILED;
         }
-        return subIter->second->sipRegUpServLastRegTime;
+
+        time = subIter->second->sipRegUpServLastRegTime;
+        return MyStatus_t::SUCCESS;
     }
 
-    uint32_t getUpRegExpired(const std::string& servId, const std::string& upRegServId) {
+    MyStatus_t getUpRegExpired(const std::string& servId, const std::string& upRegServId, uint32_t& expired) {
         boost::shared_lock<boost::shared_mutex> lock(m_rwMutex);
 
         auto iter = m_sipUpRegServInfoMap.find(servId);
         if (m_sipUpRegServInfoMap.end() == iter) {
-            return 0;
+            return MyStatus_t::FAILED;
         }
         
         auto subIter = iter->second.find(upRegServId);
         if (iter->second.end() == subIter) {
-            return 0;
+            return MyStatus_t::FAILED;
         }
-        return subIter->second->sipRegUpServExpired;
+
+        expired = subIter->second->sipRegUpServExpired;
+        return MyStatus_t::SUCCESS;
     }
 
-    uint32_t getUpRegKeepAliveIdx(const std::string& servId, const std::string& upRegServId) {
+    MyStatus_t getUpRegKeepAliveIdx(const std::string& servId, const std::string& upRegServId, uint32_t& idx) {
         boost::shared_lock<boost::shared_mutex> lock(m_rwMutex);
 
         auto iter = m_sipUpRegServInfoMap.find(servId);
         if (m_sipUpRegServInfoMap.end() == iter) {
-            return 0;
+            return MyStatus_t::FAILED;
         }
         
         auto subIter = iter->second.find(upRegServId);
         if (iter->second.end() == subIter) {
-            return 0;
+            return MyStatus_t::FAILED;
         }
-        return subIter->second->sipRegUpServKeepAliveIdx;
+
+        idx = subIter->second->sipRegUpServKeepAliveIdx;
+        return MyStatus_t::SUCCESS;
     }
 
     void uptUpRegLastRegTime(const std::string& servId, const std::string& upRegServId, const std::string& time) {
@@ -257,49 +266,57 @@ public:
         return MyStatus_t::SUCCESS;
     }
 
-    std::string getLowRegLastRegTime(const std::string& servId, const std::string& lowRegServId) {
+    MyStatus_t getLowRegLastRegTime(const std::string& servId, const std::string& lowRegServId, std::string& time) {
         boost::shared_lock<boost::shared_mutex> lock(m_rwMutex);
 
         auto iter = m_sipLowRegServInfoMap.find(servId);
         if (m_sipLowRegServInfoMap.end() == iter) {
-            return "";
+            return MyStatus_t::FAILED;
         }
         
         auto subIter = iter->second.find(lowRegServId);
         if (iter->second.end() == subIter) {
-            return "";
+            return MyStatus_t::FAILED;
         }
-        return subIter->second->sipRegLowServLastRegTime;
+
+        time = subIter->second->sipRegLowServLastRegTime;
+        return MyStatus_t::SUCCESS;
     }
 
-    uint32_t getLowRegExpired(const std::string& servId, const std::string& lowRegServId) {
+    MyStatus_t getLowRegExpired(const std::string& servId, const std::string& lowRegServId, uint32_t& expired) {
         boost::shared_lock<boost::shared_mutex> lock(m_rwMutex);
 
         auto iter = m_sipLowRegServInfoMap.find(servId);
         if (m_sipLowRegServInfoMap.end() == iter) {
-            return 0;
+            return MyStatus_t::FAILED;
         }
         
         auto subIter = iter->second.find(lowRegServId);
         if (iter->second.end() == subIter) {
-            return 0;
+            return MyStatus_t::FAILED;
         }
-        return subIter->second->sipRegLowServExpired;
+
+        expired = subIter->second->sipRegLowServExpired;
+        return MyStatus_t::SUCCESS;
     }
 
-    MySipServRegManage::MySipLowRegServInfoSubMap getLowRegInfoMap(const std::string& servId) {
+    MyStatus_t getLowRegInfoMap(const std::string& servId, MySipServRegManage::MySipLowRegServInfoSubMap& lowRegServInfoMap) {
         boost::shared_lock<boost::shared_mutex> lock(m_rwMutex);
 
         auto iter = m_sipLowRegServInfoMap.find(servId);
         if (m_sipLowRegServInfoMap.end() == iter) {
-            return MySipServRegManage::MySipLowRegServInfoSubMap();
+            return MyStatus_t::FAILED;
         }
-        return iter->second;
+
+        lowRegServInfoMap = iter->second;
+        return MyStatus_t::SUCCESS;
     }
 
-    MySipServRegManage::MySipLowRegServInfoMap getAllLowRegInfoMap() {
+    MyStatus_t getAllLowRegInfoMap(MySipServRegManage::MySipLowRegServInfoMap& lowRegServInfoMap) {
         boost::shared_lock<boost::shared_mutex> lock(m_rwMutex);
-        return m_sipLowRegServInfoMap;
+
+        lowRegServInfoMap = m_sipLowRegServInfoMap;
+        return MyStatus_t::SUCCESS;
     }
 
     void uptLowRegLastRegTime(const std::string& servId, const std::string& lowRegServId, const std::string& time) {
@@ -360,25 +377,35 @@ private:
 
 static MySipServRegManage::MySipServRegManageObject ManageObject;
 
-std::string MySipServRegManage::GetSipLocalServId(const std::string& regServId, bool isUpRegServ)
+MyStatus_t MySipServRegManage::GetSipLocalServId(const std::string& regServId, bool isUpRegServ, std::string& servId)
 {
     if (isUpRegServ) {
-        auto upRegServMap = ManageObject.getAllUpRegInfoMap();
+        MySipServRegManage::MySipUpRegServInfoMap upRegServMap;
+        if (MyStatus_t::SUCCESS != ManageObject.getAllUpRegInfoMap(upRegServMap)) {
+            return MyStatus_t::FAILED;
+        }
+
         for (const auto& pair : upRegServMap) {
             if (pair.second.end() != pair.second.find(regServId)) {
-                return pair.first;
+                servId = pair.first;
+                return MyStatus_t::SUCCESS;
             }
         }
     }
     else {
-        auto lowRegServMap = ManageObject.getAllLowRegInfoMap();
+        MySipServRegManage::MySipLowRegServInfoMap lowRegServMap;
+        if (MyStatus_t::SUCCESS != ManageObject.getAllLowRegInfoMap(lowRegServMap)) {
+            return MyStatus_t::FAILED;
+        }
+
         for (const auto& pair : lowRegServMap) {
             if (pair.second.end() != pair.second.find(regServId)) {
-                return pair.first;
+                servId = pair.first;
+                return MyStatus_t::SUCCESS;
             }
         }
     }
-    return "";
+    return MyStatus_t::FAILED;
 }
 
 MyStatus_t MySipServRegManage::AddSipRegUpServInfo(const std::string& servId, const MySipUpRegServInfo_dt& upRegServInfo)
@@ -401,48 +428,57 @@ MyStatus_t MySipServRegManage::HasSipRegUpServInfo(const std::string& servId, co
     return ManageObject.hasUpRegInfo(servId, upRegServId);
 }
 
-MySipRegUpServCfgMap MySipServRegManage::GetSipRegUpServCfgMap(const std::string& servId)
+MyStatus_t MySipServRegManage::GetSipRegUpServCfgMap(const std::string& servId, MySipRegUpServCfgMap& upRegCfgMap)
 {
-    auto upRegInfoMap = ManageObject.getUpRegInfoMap(servId);
+    MySipServRegManage::MySipUpRegServInfoSubMap upRegInfoMap;
+    if (MyStatus_t::SUCCESS != ManageObject.getUpRegInfoMap(servId, upRegInfoMap)) {
+        return MyStatus_t::FAILED;
+    }
+
     if (upRegInfoMap.empty()) {
-        return MySipRegUpServCfgMap();
+        return MyStatus_t::FAILED;
     }
     else {
-        MySipRegUpServCfgMap upRegCfgMap;
         for (const auto& pair : upRegInfoMap) {
             upRegCfgMap.insert(std::make_pair(pair.first, pair.second->sipRegUpServCfg));
         }
-        return upRegCfgMap;
+        return MyStatus_t::SUCCESS;
     }
 }
 
-MySipRegUpServCfg_dt MySipServRegManage::GetSipRegUpServCfg(const std::string& servId, const std::string& upRegServId)
+MyStatus_t MySipServRegManage::GetSipRegUpServCfg(const std::string& servId, const std::string& upRegServId, MySipRegUpServCfg_dt& upRegCfg)
 {
-    auto upRegCfgMap = MySipServRegManage::GetSipRegUpServCfgMap(servId);
+    MySipRegUpServCfgMap upRegCfgMap;
+    if(MyStatus_t::SUCCESS != MySipServRegManage::GetSipRegUpServCfgMap(servId, upRegCfgMap)) {
+        return MyStatus_t::FAILED;
+    }
+
     if (upRegCfgMap.empty()) {
-        return MySipRegUpServCfg_dt();
+        return MyStatus_t::FAILED;
     }
 
     auto iter = upRegCfgMap.find(upRegServId);
     if (upRegCfgMap.end() == iter) {
-        return MySipRegUpServCfg_dt();
+        return MyStatus_t::FAILED;
     }
-    return iter->second;
+
+    upRegCfg = iter->second;
+    return MyStatus_t::SUCCESS;
 }
 
-std::string MySipServRegManage::GetSipRegUpServLastRegTime(const std::string& servId, const std::string& upRegServId)
+MyStatus_t MySipServRegManage::GetSipRegUpServLastRegTime(const std::string& servId, const std::string& upRegServId, std::string& time)
 {
-    return ManageObject.getUpRegLastRegTime(servId, upRegServId);
+    return ManageObject.getUpRegLastRegTime(servId, upRegServId, time);
 }
 
-uint32_t MySipServRegManage::GetSipRegUpServExpired(const std::string& servId, const std::string& upRegServId)
+MyStatus_t MySipServRegManage::GetSipRegUpServExpired(const std::string& servId, const std::string& upRegServId, uint32_t& expired)
 {
-    return ManageObject.getUpRegExpired(servId, upRegServId);
+    return ManageObject.getUpRegExpired(servId, upRegServId, expired);
 }
 
-uint32_t MySipServRegManage::GetSipRegUpServKeepAliveIdx(const std::string& servId, const std::string& upRegServId)
+MyStatus_t MySipServRegManage::GetSipRegUpServKeepAliveIdx(const std::string& servId, const std::string& upRegServId, uint32_t& idx)
 {
-    return ManageObject.getUpRegKeepAliveIdx(servId, upRegServId);
+    return ManageObject.getUpRegKeepAliveIdx(servId, upRegServId, idx);
 }
 
 void MySipServRegManage::UpdateSipRegUpServLastRegTime(const std::string& servId, const std::string& upRegServId, const std::string& time)
@@ -480,44 +516,55 @@ MyStatus_t MySipServRegManage::HasSipRegLowServInfo(const std::string& servId, c
     return ManageObject.hasLowRegInfo(servId, lowRegServId);
 }
 
-std::string MySipServRegManage::GetSipRegLowServLastRegTime(const std::string& servId, const std::string& lowRegServId)
+MyStatus_t MySipServRegManage::GetSipRegLowServLastRegTime(const std::string& servId, const std::string& lowRegServId, std::string& time)
 {
-    return ManageObject.getLowRegLastRegTime(servId, lowRegServId);
+    return ManageObject.getLowRegLastRegTime(servId, lowRegServId, time);
 }
 
-uint32_t MySipServRegManage::GetSipRegLowServExpired(const std::string& servId, const std::string& lowRegServId)
+MyStatus_t MySipServRegManage::GetSipRegLowServExpired(const std::string& servId, const std::string& lowRegServId, uint32_t& expired)
 {
-    return ManageObject.getLowRegExpired(servId, lowRegServId);
+    return ManageObject.getLowRegExpired(servId, lowRegServId, expired);
 }
 
-MySipRegLowServCfgMap MySipServRegManage::GetSipRegLowServCfgMap(const std::string& servId)
+MyStatus_t MySipServRegManage::GetSipRegLowServCfgMap(const std::string& servId, MySipRegLowServCfgMap& lowRegCfgMap)
 {
-    auto lowRegInfoMap = ManageObject.getLowRegInfoMap(servId);
+    MySipServRegManage::MySipLowRegServInfoSubMap lowRegInfoMap;
+    if (MyStatus_t::SUCCESS != ManageObject.getLowRegInfoMap(servId, lowRegInfoMap)) {
+        return MyStatus_t::FAILED;
+    }
+
     if (lowRegInfoMap.empty()) {
-        return MySipRegLowServCfgMap();
+        return MyStatus_t::FAILED;
     }
     else {
-        MySipRegLowServCfgMap lowRegCfgMap;
         for (const auto& pair : lowRegInfoMap) {
             lowRegCfgMap.insert(std::make_pair(pair.first, pair.second->sipRegLowServCfg));
         }
-        return lowRegCfgMap;
+        return MyStatus_t::SUCCESS;
     }
 }
 
-MySipServAuthCfg_dt MySipServRegManage::GetSipRegLowAuthCfg(const std::string& name, const std::string& realm)
+MyStatus_t MySipServRegManage::GetSipRegLowAuthCfg(const std::string& name, const std::string& realm, MySipServAuthCfg_dt& authCfg)
 {
-    MySipLowRegServInfoMap lowRegServInfoMap = ManageObject.getAllLowRegInfoMap();
+    MySipLowRegServInfoMap lowRegServInfoMap;
+    if (MyStatus_t::SUCCESS != ManageObject.getAllLowRegInfoMap(lowRegServInfoMap)) {
+        return MyStatus_t::FAILED;
+    }
+
+    if (lowRegServInfoMap.empty()) {
+        return MyStatus_t::FAILED;
+    }
+
     for (const auto& pair : lowRegServInfoMap) {
-        const auto& cfgMap = pair.second;
-        for (const auto& subPair : cfgMap) {
-            if (subPair.second->sipRegLowServCfg.lowSipServAuthCfg.authName == name &&
+        for (const auto& subPair : pair.second) {
+            if (subPair.second->sipRegLowServCfg.lowSipServAuthCfg.authName  == name &&
                 subPair.second->sipRegLowServCfg.lowSipServAuthCfg.authRealm == realm) {
-                return subPair.second->sipRegLowServCfg.lowSipServAuthCfg;
+                authCfg = subPair.second->sipRegLowServCfg.lowSipServAuthCfg;
+                return MyStatus_t::SUCCESS;
             }
         }
     }
-    return MySipServAuthCfg_dt();
+    return MyStatus_t::FAILED;
 }
 
 void MySipServRegManage::UpdateSipRegLowServLastRegTime(const std::string& servId, const std::string& lowRegServId, const std::string& time)

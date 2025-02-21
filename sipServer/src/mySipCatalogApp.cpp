@@ -4,6 +4,7 @@
 #include <gflags/gflags.h>
 #include "envir/mySystemConfg.h"
 #include "envir/mySystemPjsip.h"
+#include "envir/mySystemThreadPool.h"
 #include "utils/myXmlHelper.h"
 #include "utils/mySipAppHelper.h"
 #include "utils/mySipMsgHelper.h"
@@ -12,11 +13,11 @@
 #include "manager/mySipServRegManage.h"
 #include "manager/mySipServCatalogManager.h"
 #include "app/mySipCatalogApp.h"
-using namespace toolkit;
 using namespace MY_UTILS;
 using namespace MY_COMMON;
 using MY_ENVIR::MySystemPjsip;
 using MY_ENVIR::MySystemConfig;
+using MY_ENVIR::MySystemThdPool;
 using MY_MANAGER::MyServManage;
 using MY_MANAGER::MySipServRegManage;
 using MY_MANAGER::MySipServCatalogManage;
@@ -42,22 +43,49 @@ typedef MySipCatalogThdParam_dt*    MySipCatalogThdParamPtr;
 
 int MySipCatalogApp::SipCatalogAppThdFunc(MY_COMMON::MySipEvThdCbParamPtr arg)
 {
-    MySipCatalogThdParamPtr     thdParamPtr  = (MySipCatalogThdParamPtr)arg;
+    // pjsip要求自定义线程进行注册才能使用
+    pj_thread_desc desc;
+    if(!pj_thread_is_registered()) {
+        MySipThdPtr thdPtr = nullptr;
+        pj_thread_register(nullptr, desc, &thdPtr);
+    }
+
+    MySipCatalogThdParamPtr thdParamPtr = (MySipCatalogThdParamPtr)arg;
+    if (nullptr == thdParamPtr) {
+        LOG(ERROR) << "Sip catalog app push local server catalog failed. thd param is null.";
+        return -1;
+    }
+
+    // 内存管理, new in function: MySipCatalogApp::onSipCatalogAppRecvSipCatalogQueryReqMsg()
+    std::unique_ptr<MySipCatalogThdParam_dt> memManagePtr(thdParamPtr);
+
     const std::string&          sn           = thdParamPtr->sn;
     const MySipRegUpServCfg_dt& regUpServCfg = thdParamPtr->regUpServCfg;
     const MySipServAddrCfg_dt&  servAddrCfg  = thdParamPtr->servAddrCfg;
 
+    std::string upRegServInfo;
+    MySipServerHelper::GetSipUpRegServInfo(regUpServCfg, upRegServInfo);
+
     // 获取endpoint
-    MySipEndptPtr endptPtr = MySystemPjsip::GetPjsipEndptPtr();
-    if (nullptr == endptPtr) {
-        LOG(ERROR) << "Sip catalog app push local server catalog failed. get pjsip endpoint failed. " 
-                   << MySipServerHelper::GetSipUpRegServInfo(regUpServCfg) << ".";
+    MySipEndptPtr endptPtr = nullptr;
+    if (MyStatus_t::SUCCESS != MySystemPjsip::GetPjsipEndptPtr(&endptPtr)) {
+        LOG(ERROR) << "Sip catalog app push local server catalog failed. get pjsip endpoint failed. " << upRegServInfo << ".";
         return -1;
     }
 
     // 获取设备目录配置
-    MySipCatalogPlatCfgMap    platCfgMap    = MySipServCatalogManage::GetSipServCatalogPlatCfgMap(servAddrCfg.id);
-    MySipCatalogSubPlatCfgMap subPlatCfgMap = MySipServCatalogManage::GetSipServCatalogSubPlatCfgMap(servAddrCfg.id);
+    MySipCatalogPlatCfgMap platCfgMap;
+    if (MyStatus_t::SUCCESS != MySipServCatalogManage::GetSipServCatalogPlatCfgMap(servAddrCfg.id, platCfgMap)) {
+        LOG(ERROR) << "Sip catalog app push local server catalog failed. get catalog plat cfg failed. "  << upRegServInfo << ".";
+        return -1;
+    }
+
+    MySipCatalogSubPlatCfgMap subPlatCfgMap;
+    if (MyStatus_t::SUCCESS != MySipServCatalogManage::GetSipServCatalogSubPlatCfgMap(servAddrCfg.id, subPlatCfgMap)) {
+        LOG(ERROR) << "Sip catalog app push local server catalog failed. get catalog sub plat cfg failed. " << upRegServInfo << ".";
+        return -1;
+    }
+
     auto subPlatCfgMapIter = subPlatCfgMap.begin();
     while (subPlatCfgMapIter != subPlatCfgMap.end()) {
         // 删除无效子平台
@@ -69,7 +97,12 @@ int MySipCatalogApp::SipCatalogAppThdFunc(MY_COMMON::MySipEvThdCbParamPtr arg)
         }
     }
 
-    MySipCatalogSubVirtualPlatCfgMap subVirtualCfgMap = MySipServCatalogManage::GetSipServCatalogSubVirtualPlatCfgMap(servAddrCfg.id);
+    MySipCatalogSubVirtualPlatCfgMap subVirtualCfgMap;
+    if (MyStatus_t::SUCCESS != MySipServCatalogManage::GetSipServCatalogSubVirtualPlatCfgMap(servAddrCfg.id, subVirtualCfgMap)) {
+        LOG(ERROR) << "Sip catalog app push local server catalog failed. get catalog sub virtual plat cfg failed. " << upRegServInfo << ".";
+        return -1;
+    }
+
     auto subVirtualCfgMapIter = subVirtualCfgMap.begin();
     while (subVirtualCfgMapIter != subVirtualCfgMap.end()) {
         // 删除无效虚拟子平台
@@ -82,14 +115,19 @@ int MySipCatalogApp::SipCatalogAppThdFunc(MY_COMMON::MySipEvThdCbParamPtr arg)
         }
     }
 
-    MySipCatalogDeviceCfgMap deviceCfgMap = MySipServCatalogManage::GetSipServCatalogDeviceCfgMap(servAddrCfg.id);
+    MySipCatalogDeviceCfgMap deviceCfgMap;
+    if (MyStatus_t::SUCCESS != MySipServCatalogManage::GetSipServCatalogDeviceCfgMap(servAddrCfg.id, deviceCfgMap)) {
+        LOG(ERROR) << "Sip catalog app push local server catalog failed. get catalog device cfg failed. " << upRegServInfo << ".";
+        return -1;
+    }
+
     auto deviceCfgMapIter = deviceCfgMap.begin();
     while (deviceCfgMapIter != deviceCfgMap.end()) {
         // 删除无效设备
         if (platCfgMap.end() == platCfgMap.find(deviceCfgMapIter->second.parentID) &&
             subPlatCfgMap.end() == subPlatCfgMap.find(deviceCfgMapIter->second.parentID) &&
             subVirtualCfgMap.end() == subVirtualCfgMap.find(deviceCfgMapIter->second.parentID)) {
-                deviceCfgMapIter = deviceCfgMap.erase(deviceCfgMapIter);
+            deviceCfgMapIter = deviceCfgMap.erase(deviceCfgMapIter);
         }
         else {
             ++deviceCfgMapIter;
@@ -97,13 +135,18 @@ int MySipCatalogApp::SipCatalogAppThdFunc(MY_COMMON::MySipEvThdCbParamPtr arg)
     }
 
     // 获取设备目录总数
-    std::size_t sumNum     = platCfgMap.size() + subPlatCfgMap.size() + subVirtualCfgMap.size() + deviceCfgMap.size();
+    std::size_t sumNum = platCfgMap.size() + subPlatCfgMap.size() + subVirtualCfgMap.size() + deviceCfgMap.size();
 
     // sip catalog消息首部生成
-    std::string sURL       = MySipMsgHelper::GenerateSipMsgURL(regUpServCfg.upSipServAddrCfg.id, regUpServCfg.upSipServAddrCfg.ipAddr, 
-                                                               regUpServCfg.upSipServAddrCfg.port, regUpServCfg.proto);
-    std::string sFromHdr   = MySipMsgHelper::GenerateSipMsgFromHeader(servAddrCfg.id, servAddrCfg.ipAddr);
-    std::string sToHdr     = MySipMsgHelper::GenerateSipMsgToHeader(servAddrCfg.id, servAddrCfg.ipAddr);
+    std::string sURL;
+    MySipMsgHelper::GenerateSipMsgURL(regUpServCfg.upSipServAddrCfg.id, regUpServCfg.upSipServAddrCfg.ipAddr, 
+                                      regUpServCfg.upSipServAddrCfg.port, regUpServCfg.proto, sURL);
+
+    std::string sFromHdr;
+    MySipMsgHelper::GenerateSipMsgFromHeader(servAddrCfg.id, servAddrCfg.ipAddr, sFromHdr);
+
+    std::string sToHdr;
+    MySipMsgHelper::GenerateSipMsgToHeader(servAddrCfg.id, servAddrCfg.ipAddr, sToHdr);
 
     pj_str_t sipMsgURL     = pj_str(const_cast<char*>(sURL.c_str()));
     pj_str_t sipMsgFromHdr = pj_str(const_cast<char*>(sFromHdr.c_str()));
@@ -116,13 +159,13 @@ int MySipCatalogApp::SipCatalogAppThdFunc(MY_COMMON::MySipEvThdCbParamPtr arg)
         // sip catalog消息创建
         MySipTxDataPtr txDataPtr = nullptr;
         if(PJ_SUCCESS != pjsip_endpt_create_request(endptPtr, &sipMethod, &sipMsgURL, &sipMsgFromHdr, &sipMsgToHdr, nullptr, nullptr, -1, nullptr, &txDataPtr)) {
-            LOG(ERROR) << "Sip catalog app push local server catalog platform config failed. create pjsip request failed. "
-                       << MySipServerHelper::GetSipUpRegServInfo(regUpServCfg) << ".";
+            LOG(ERROR) << "Sip catalog app push local server catalog platform config failed. create pjsip request failed. " << upRegServInfo << ".";
             continue;
         }
 
         // sip catalog消息内容填充
-        std::string msgBody = MyXmlHelper::GenerateSipCatalogPlatCfgMsgBody(platCfgPair.second, sn, sumNum);
+        std::string msgBody;
+        MyXmlHelper::GenerateSipCatalogPlatCfgMsgBody(platCfgPair.second, sn, sumNum, msgBody);
 
         pj_str_t type    = pj_str(const_cast<char*>("Application"));
         pj_str_t subtype = pj_str(const_cast<char*>("MANSCDP+xml"));
@@ -132,8 +175,7 @@ int MySipCatalogApp::SipCatalogAppThdFunc(MY_COMMON::MySipEvThdCbParamPtr arg)
 
         // sip catalog消息发送
         if(PJ_SUCCESS != pjsip_endpt_send_request(endptPtr, txDataPtr, -1, nullptr, nullptr)) {
-            LOG(ERROR) << "Sip catalog app push local server catalog platform config failed. send pjsip request failed. "
-                       << MySipServerHelper::GetSipUpRegServInfo(regUpServCfg) << ".";
+            LOG(ERROR) << "Sip catalog app push local server catalog platform config failed. send pjsip request failed. " << upRegServInfo << ".";
             continue;
         }
     }
@@ -143,13 +185,13 @@ int MySipCatalogApp::SipCatalogAppThdFunc(MY_COMMON::MySipEvThdCbParamPtr arg)
         // sip catalog消息创建
         MySipTxDataPtr txDataPtr = nullptr;
         if(PJ_SUCCESS != pjsip_endpt_create_request(endptPtr, &sipMethod, &sipMsgURL, &sipMsgFromHdr, &sipMsgToHdr, nullptr, nullptr, -1, nullptr, &txDataPtr)) {
-            LOG(ERROR) << "Sip catalog app push local server catalog subPlatform config failed. create pjsip request failed. "
-                       << MySipServerHelper::GetSipUpRegServInfo(regUpServCfg) << ".";
+            LOG(ERROR) << "Sip catalog app push local server catalog subPlatform config failed. create pjsip request failed. " << upRegServInfo << ".";
             continue;
         }
 
         // sip catalog消息内容填充
-        std::string msgBody = MyXmlHelper::GenerateSipCatalogSubPlatCfgMsgBody(subPlatCfgPair.second, sn, sumNum);
+        std::string msgBody;
+        MyXmlHelper::GenerateSipCatalogSubPlatCfgMsgBody(subPlatCfgPair.second, sn, sumNum, msgBody);
 
         pj_str_t type    = pj_str(const_cast<char*>("Application"));
         pj_str_t subtype = pj_str(const_cast<char*>("MANSCDP+xml"));
@@ -159,8 +201,7 @@ int MySipCatalogApp::SipCatalogAppThdFunc(MY_COMMON::MySipEvThdCbParamPtr arg)
 
         // sip catalog消息发送
         if(PJ_SUCCESS != pjsip_endpt_send_request(endptPtr, txDataPtr, -1, nullptr, nullptr)) {
-            LOG(ERROR) << "Sip catalog app push local server catalog subPlatform config failed. send pjsip request failed. "
-                       << MySipServerHelper::GetSipUpRegServInfo(regUpServCfg) << ".";
+            LOG(ERROR) << "Sip catalog app push local server catalog subPlatform config failed. send pjsip request failed. " << upRegServInfo << ".";
             continue;
         }
     }
@@ -170,13 +211,13 @@ int MySipCatalogApp::SipCatalogAppThdFunc(MY_COMMON::MySipEvThdCbParamPtr arg)
         // sip catalog消息创建
         MySipTxDataPtr txDataPtr = nullptr;
         if(PJ_SUCCESS != pjsip_endpt_create_request(endptPtr, &sipMethod, &sipMsgURL, &sipMsgFromHdr, &sipMsgToHdr, nullptr, nullptr, -1, nullptr, &txDataPtr)) {
-            LOG(ERROR) << "Sip catalog app push local server catalog subVirtualPlatform config failed. create pjsip request failed. "
-                       << MySipServerHelper::GetSipUpRegServInfo(regUpServCfg) << ".";
+            LOG(ERROR) << "Sip catalog app push local server catalog subVirtualPlatform config failed. create pjsip request failed. " << upRegServInfo << ".";
             continue;
         }
 
         // sip catalog消息内容填充
-        std::string msgBody = MyXmlHelper::GenerateSipCatalogSubVirtualPlatCfgMsgBody(subVirtualPlatCfgPair.second, sn, sumNum);
+        std::string msgBody;
+        MyXmlHelper::GenerateSipCatalogSubVirtualPlatCfgMsgBody(subVirtualPlatCfgPair.second, sn, sumNum, msgBody);
 
         pj_str_t type    = pj_str(const_cast<char*>("Application"));
         pj_str_t subtype = pj_str(const_cast<char*>("MANSCDP+xml"));
@@ -186,8 +227,7 @@ int MySipCatalogApp::SipCatalogAppThdFunc(MY_COMMON::MySipEvThdCbParamPtr arg)
 
         // sip catalog消息发送
         if(PJ_SUCCESS != pjsip_endpt_send_request(endptPtr, txDataPtr, -1, nullptr, nullptr)) {
-            LOG(ERROR) << "Sip catalog app push local server catalog subVirtualPlatform config failed. send pjsip request failed. "
-                       << MySipServerHelper::GetSipUpRegServInfo(regUpServCfg) << ".";
+            LOG(ERROR) << "Sip catalog app push local server catalog subVirtualPlatform config failed. send pjsip request failed. " << upRegServInfo << ".";
             continue;
         }
     }
@@ -197,13 +237,13 @@ int MySipCatalogApp::SipCatalogAppThdFunc(MY_COMMON::MySipEvThdCbParamPtr arg)
         // sip catalog消息创建
         MySipTxDataPtr txDataPtr = nullptr;
         if(PJ_SUCCESS != pjsip_endpt_create_request(endptPtr, &sipMethod, &sipMsgURL, &sipMsgFromHdr, &sipMsgToHdr, nullptr, nullptr, -1, nullptr, &txDataPtr)) {
-            LOG(ERROR) << "Sip catalog app push local server catalog device config failed. create pjsip request failed. "
-                       << MySipServerHelper::GetSipUpRegServInfo(regUpServCfg) << ".";
+            LOG(ERROR) << "Sip catalog app push local server catalog device config failed. create pjsip request failed. " << upRegServInfo << ".";
             continue;
         }
 
         // sip catalog消息内容填充
-        std::string msgBody = MyXmlHelper::GenerateSipCatalogDeviceCfgMsgBody(deviceCfgPair.second, sn, sumNum);
+        std::string msgBody;
+        MyXmlHelper::GenerateSipCatalogDeviceCfgMsgBody(deviceCfgPair.second, sn, sumNum, msgBody);
 
         pj_str_t type    = pj_str(const_cast<char*>("Application"));
         pj_str_t subtype = pj_str(const_cast<char*>("MANSCDP+xml"));
@@ -213,14 +253,10 @@ int MySipCatalogApp::SipCatalogAppThdFunc(MY_COMMON::MySipEvThdCbParamPtr arg)
 
         // sip catalog消息发送
         if(PJ_SUCCESS != pjsip_endpt_send_request(endptPtr, txDataPtr, -1, nullptr, nullptr)) {
-            LOG(ERROR) << "Sip catalog app push local server catalog device config failed. send pjsip request failed. "
-                       << MySipServerHelper::GetSipUpRegServInfo(regUpServCfg) << ".";
+            LOG(ERROR) << "Sip catalog app push local server catalog device config failed. send pjsip request failed. " << upRegServInfo << ".";
             continue;
         }
     }
-
-    // new in function: MySipCatalogApp::onRecvSipCatalogReqMsg()
-    delete thdParamPtr;
     return 0;
 }
 
@@ -244,8 +280,8 @@ MyStatus_t MySipCatalogApp::init(const std::string& servId, const std::string& i
     }
 
     // 获取endpoint
-    MySipEndptPtr endptPtr = MySystemPjsip::GetPjsipEndptPtr();
-    if (nullptr == endptPtr) {
+    MySipEndptPtr endptPtr = nullptr;
+    if (MyStatus_t::SUCCESS != MySystemPjsip::GetPjsipEndptPtr(&endptPtr)) {
         LOG(ERROR) << "Sip catalog app module init failed. invalid endpoint.";
         return MyStatus_t::FAILED;
     }
@@ -258,7 +294,100 @@ MyStatus_t MySipCatalogApp::init(const std::string& servId, const std::string& i
     m_appIdCfg.name     = name;   
     m_appIdCfg.priority = priority;
 
-    LOG(INFO) << "Sip catalog app module init success. " << MySipAppHelper::GetSipAppInfo(m_appIdCfg) << ".";
+    // 创建设备目录信息
+    MySipCatalogInfo_dt catalogInfo;
+
+    // 添加设备目录平台信息
+    MySipCatalogPlatCfgMap platCfgMap;
+    MySystemConfig::GetSipCatalogPlatCfgMap(m_servId, platCfgMap);
+
+    for (const auto& platCfgPair : platCfgMap) {
+        // 确保平台id与服务id一致
+        if (platCfgPair.first != m_servId) {
+            continue;
+        }
+
+        // 确保平台id未重复
+        if (catalogInfo.sipPlatMap.end() != catalogInfo.sipPlatMap.find(platCfgPair.first)) {
+            continue;
+        }
+
+        // 插入设备目录平台配置
+        catalogInfo.sipPlatMap.insert(std::make_pair(platCfgPair.first, platCfgPair.second));
+    }
+
+    const auto& sipPlatMap = catalogInfo.sipPlatMap;
+
+    // 添加设备目录子平台信息
+    MySipCatalogSubPlatCfgMap subPlatCfgMap;
+    MySystemConfig::GetSipCatalogSubPlatCfgMap(m_servId, subPlatCfgMap);
+    
+    for (const auto& subPlatCfgPair : subPlatCfgMap) {
+        // 确保子平台id关联的平台id存在
+        if (sipPlatMap.end() == sipPlatMap.find(subPlatCfgPair.second.parentID)) {
+            continue;
+        }
+
+        // 确保子平台id未重复
+        if (catalogInfo.sipSubPlatMap.end() != catalogInfo.sipSubPlatMap.find(subPlatCfgPair.first)) {
+            continue;
+        }
+
+        // 插入设备目录子平台配置
+        catalogInfo.sipSubPlatMap.insert(std::make_pair(subPlatCfgPair.first, subPlatCfgPair.second));
+    }
+
+    const auto& sipSubPlatMap = catalogInfo.sipSubPlatMap;
+
+    // 添加设备目录虚拟子平台信息
+    MySipCatalogSubVirtualPlatCfgMap subVirtualCfgMap;
+    MySystemConfig::GetSipCatalogSubVirtualPlatCfgMap(m_servId, subVirtualCfgMap);
+
+    for (const auto& subVirtualCfgPair : subVirtualCfgMap) {
+        // 确保虚拟子平台id关联的平台/子平台id存在
+        if (sipSubPlatMap.end() == sipSubPlatMap.find(subVirtualCfgPair.second.parentID) &&
+            sipPlatMap.end() == sipPlatMap.find(subVirtualCfgPair.second.parentID)) {
+            continue;
+        }
+
+        // 确保虚拟子平台id未重复
+        if (catalogInfo.sipSubVirtualPlatMap.end() != catalogInfo.sipSubVirtualPlatMap.find(subVirtualCfgPair.first)) {
+            continue;
+        }
+
+        // 插入设备目录虚拟子平台配置
+        catalogInfo.sipSubVirtualPlatMap.insert(std::make_pair(subVirtualCfgPair.first, subVirtualCfgPair.second));
+    }
+
+    const auto& sipSubVirtualPlatMap = catalogInfo.sipSubVirtualPlatMap;
+
+    // 添加设备目录设备信息
+    MySipCatalogDeviceCfgMap deviceCfgMap;
+    MySystemConfig::GetSipCatalogDeviceCfgMap(m_servId, deviceCfgMap);
+
+    for (const auto& deviceCfgPair : deviceCfgMap) {
+        // 确保设备id关联的虚拟子平台/子平台/平台id存在
+        if (sipSubVirtualPlatMap.end() == sipSubVirtualPlatMap.find(deviceCfgPair.second.parentID) &&
+            sipSubPlatMap.end() == sipSubPlatMap.find(deviceCfgPair.second.parentID) &&
+            sipPlatMap.end() == sipPlatMap.find(deviceCfgPair.second.parentID)) {
+            continue;
+        }
+
+        // 确保设备id未重复
+        if (catalogInfo.sipDeviceMap.end() != catalogInfo.sipDeviceMap.find(deviceCfgPair.first)) {
+            continue;
+        }
+
+        // 插入设备目录设备配置
+        catalogInfo.sipDeviceMap.insert(std::make_pair(deviceCfgPair.first, deviceCfgPair.second));
+    }
+
+    // 添加设备目录信息
+    MySipServCatalogManage::AddSipServCatalogInfo(m_servId, catalogInfo);
+
+    std::string sipAppInfo;
+    MySipAppHelper::GetSipAppInfo(m_appIdCfg, sipAppInfo);
+    LOG(INFO) << "Sip catalog app module init success. " << sipAppInfo << ".";
 
     m_status.store(MyStatus_t::SUCCESS);
     return MyStatus_t::SUCCESS;
@@ -266,24 +395,6 @@ MyStatus_t MySipCatalogApp::init(const std::string& servId, const std::string& i
 
 MyStatus_t MySipCatalogApp::run()
 {
-    // 定时器初启动
-    if (nullptr == m_timePtr) {
-        MySipCatalogApp::SmtWkPtr weakSelf = this->getSipCatalogApp();
-        m_timePtr = std::make_shared<Timer>(60 * 5, [weakSelf]() -> bool {
-            if (weakSelf.expired()) {
-                return false;
-            }
-
-            // pjsip要求自定义线程进行注册才能使用
-            pj_thread_desc desc;
-            if(!pj_thread_is_registered()) {
-                MySipThdPtr thdPtr = nullptr;
-                pj_thread_register(nullptr, desc, &thdPtr);
-            }
-
-            return weakSelf.lock()->onTimer();
-        }, EventPollerPool::Instance().getFirstPoller());
-    }
     return MyStatus_t::SUCCESS;
 }
 
@@ -297,10 +408,10 @@ MyStatus_t MySipCatalogApp::shutdown()
     return MyStatus_t::SUCCESS;
 }
 
-MyStatus_t MySipCatalogApp::onRecvSipCatalogReqMsg(MySipRxDataPtr rxDataPtr)
+MyStatus_t MySipCatalogApp::onSipCatalogAppRecvSipCatalogQueryReqMsg(MySipRxDataPtr rxDataPtr)
 {
     MySipCatalogReqMsgBody_dt catalogMsgBody;
-    if (MyStatus_t::SUCCESS != MyXmlHelper::ParseSipCatalogReqMsgBody(static_cast<char*>(rxDataPtr->msg_info.msg->body->data), catalogMsgBody)) {
+    if (MyStatus_t::SUCCESS != MyXmlHelper::ParseSipCatalogQueryReqMsgBody(static_cast<char*>(rxDataPtr->msg_info.msg->body->data), catalogMsgBody)) {
         LOG(ERROR) << "Sip catalog app module recv catalog message. parse catalog msg failed.";
         return MyStatus_t::FAILED;
     }
@@ -322,112 +433,41 @@ MyStatus_t MySipCatalogApp::onRecvSipCatalogReqMsg(MySipRxDataPtr rxDataPtr)
         return MyStatus_t::FAILED;
     }
 
-    auto upServRegCfg = MySipServRegManage::GetSipRegUpServCfg(m_servId, upRegServId);
+    MySipRegUpServCfg_dt upServRegCfg;
+    if (MyStatus_t::SUCCESS != MySipServRegManage::GetSipRegUpServCfg(m_servId, upRegServId, upServRegCfg)) {
+        LOG(ERROR) << "Sip catalog app module recv catalog message. get up reg serv cfg failed. " << upRegServId << ".";
+        return MyStatus_t::FAILED;
+    }
+
     if (upServRegCfg.upSipServAddrCfg.id.empty()) {
         LOG(ERROR) << "Sip catalog app module recv catalog message. invalid up reg serv id. " << upRegServId << ".";
         return MyStatus_t::FAILED;
     }
 
     // 获取本地服务配置
-    auto localServCfg = MyServManage::GetSipServAddrCfg(m_servId);
+    MySipServAddrCfg_dt localServCfg;
+    if (MyStatus_t::SUCCESS != MyServManage::GetSipServAddrCfg(m_servId, localServCfg)) {
+        LOG(ERROR) << "Sip catalog app module recv catalog message. get local serv cfg failed. " << m_servId << ".";
+        return MyStatus_t::FAILED;
+    }
+    
     if (localServCfg.id.empty()) {
         LOG(ERROR) << "Sip catalog app module recv catalog message. invalid local serv id. " << m_servId << ".";
         return MyStatus_t::FAILED;
     }
 
-    // 更新设备目录信息
-    if (MyStatus_t::SUCCESS == MySipServCatalogManage::HasSipServCatalogInfo(m_servId)) {
-        // 更新SN号
-        MySipServCatalogManage::UpdateSipServCatalogSN(m_servId, catalogMsgBody.sn);
-    }
-    else {
-        // 获取设备目录配置
-        MySipCatalogPlatCfgMap           platCfgMap       = MySystemConfig::GetSipCatalogPlatCfgMap(m_servId);
-        MySipCatalogSubPlatCfgMap        subPlatCfgMap    = MySystemConfig::GetSipCatalogSubPlatCfgMap(m_servId);
-        MySipCatalogSubVirtualPlatCfgMap subVirtualCfgMap = MySystemConfig::GetSipCatalogSubVirtualPlatCfgMap(m_servId);
-        MySipCatalogDeviceCfgMap         deviceCfgMap     = MySystemConfig::GetSipCatalogDeviceCfgMap(m_servId);
-
-        MySipCatalogInfo_dt catalogInfo;
-
-        // 添加设备目录sn号
-        catalogInfo.sn = catalogMsgBody.sn;
-
-        // 添加设备目录平台信息
-        for (const auto& platCfgPair : platCfgMap) {
-            // 确保平台id与服务id一致
-            if (platCfgPair.first != m_servId) {
-                continue;
-            }
-
-            // 确保平台id未重复
-            if (catalogInfo.sipPlatMap.end() != catalogInfo.sipPlatMap.find(platCfgPair.first)) {
-                continue;
-            }
-
-            // 插入设备目录平台配置
-            catalogInfo.sipPlatMap.insert(std::make_pair(platCfgPair.first, platCfgPair.second));
-        }
-
-        // 添加设备目录子平台信息
-        const auto& sipPlatMap = catalogInfo.sipPlatMap;
-        for (const auto& subPlatCfgPair : subPlatCfgMap) {
-            // 确保子平台id关联的平台id存在
-            if (sipPlatMap.end() == sipPlatMap.find(subPlatCfgPair.second.parentID)) {
-                continue;
-            }
-
-            // 确保子平台id未重复
-            if (catalogInfo.sipSubPlatMap.end() != catalogInfo.sipSubPlatMap.find(subPlatCfgPair.first)) {
-                continue;
-            }
-
-            // 插入设备目录子平台配置
-            catalogInfo.sipSubPlatMap.insert(std::make_pair(subPlatCfgPair.first, subPlatCfgPair.second));
-        }
-
-        // 添加设备目录虚拟子平台信息
-        const auto& sipSubPlatMap = catalogInfo.sipSubPlatMap;
-        for (const auto& subVirtualCfgPair : subVirtualCfgMap) {
-            // 确保虚拟子平台id关联的平台/子平台id存在
-            if (sipSubPlatMap.end() == sipSubPlatMap.find(subVirtualCfgPair.second.parentID) &&
-                sipPlatMap.end() == sipPlatMap.find(subVirtualCfgPair.second.parentID)) {
-                continue;
-            }
-
-            // 确保虚拟子平台id未重复
-            if (catalogInfo.sipSubVirtualPlatMap.end() != catalogInfo.sipSubVirtualPlatMap.find(subVirtualCfgPair.first)) {
-                continue;
-            }
-
-            // 插入设备目录虚拟子平台配置
-            catalogInfo.sipSubVirtualPlatMap.insert(std::make_pair(subVirtualCfgPair.first, subVirtualCfgPair.second));
-        }
-
-        // 添加设备目录设备信息
-        const auto& sipSubVirtualPlatMap = catalogInfo.sipSubVirtualPlatMap;
-        for (const auto& deviceCfgPair : deviceCfgMap) {
-            // 确保设备id关联的虚拟子平台/子平台/平台id存在
-            if (sipSubVirtualPlatMap.end() == sipSubVirtualPlatMap.find(deviceCfgPair.second.parentID) &&
-                sipSubPlatMap.end() == sipSubPlatMap.find(deviceCfgPair.second.parentID) &&
-                sipPlatMap.end() == sipPlatMap.find(deviceCfgPair.second.parentID)) {
-                continue;
-            }
-
-            // 确保设备id未重复
-            if (catalogInfo.sipDeviceMap.end() != catalogInfo.sipDeviceMap.find(deviceCfgPair.first)) {
-                continue;
-            }
-
-            // 插入设备目录设备配置
-            catalogInfo.sipDeviceMap.insert(std::make_pair(deviceCfgPair.first, deviceCfgPair.second));
-        }
-
-        // 添加设备目录服务信息
-        MySipServCatalogManage::AddSipServCatalogInfo(m_servId, catalogInfo);
+    // 设备目录信息不存在
+    if (MyStatus_t::SUCCESS != MySipServCatalogManage::HasSipServCatalogInfo(m_servId)) {
+        LOG(ERROR) << "Sip catalog app module recv catalog message. invalid catalog info. local serv id. " << m_servId << ".";
+        return MyStatus_t::FAILED;
     }
 
     // 获取endpoint
-    MySipEndptPtr endptPtr = MySystemPjsip::GetPjsipEndptPtr();
+    MySipEndptPtr endptPtr = nullptr;
+    if (MyStatus_t::SUCCESS != MySystemPjsip::GetPjsipEndptPtr(&endptPtr)) {
+        LOG(ERROR) << "Sip catalog app module recv catalog message. get pjsip endpt ptr failed. ";
+        return MyStatus_t::FAILED;
+    }
 
     // 发送sip应答消息
     if (PJ_SUCCESS != pjsip_endpt_respond(endptPtr, nullptr, rxDataPtr, 200, nullptr, nullptr, nullptr, nullptr)) {
@@ -441,50 +481,82 @@ MyStatus_t MySipCatalogApp::onRecvSipCatalogReqMsg(MySipRxDataPtr rxDataPtr)
     thdParamPtr->regUpServCfg           = upServRegCfg;
     thdParamPtr->servAddrCfg            = localServCfg;
 
-    // 创建发送sip设备目录消息线程
-    auto servThdPoolPtr = MyServManage::GetSipServThdPoolPtr(m_servId);
-    if (PJ_SUCCESS != pj_thread_create(servThdPoolPtr, nullptr, &MySipCatalogApp::SipCatalogAppThdFunc, thdParamPtr, 0, 0, nullptr)) {
-        LOG(ERROR) << "Sip catalog app receive catalog message failed. can't create send catalog message thread. ";
-        return MyStatus_t::FAILED;
-    }
+    // 更新SN号
+    MySipServCatalogManage::UpdateSipServCatalogSN(m_servId, catalogMsgBody.sn);
+
+    // 添加上级服务信息
+    MySipServCatalogManage::AddSipUpQueryServInfo(m_servId, upServRegCfg.upSipServAddrCfg);
+
+    // 发送sip设备目录消息
+    MySystemThdPool::ThreadPoolTaskFunc thdPoolFunc = [thdParamPtr]() {
+        MySipCatalogApp::SipCatalogAppThdFunc(thdParamPtr);
+    };
+    
+    MySystemThdPool::ExecuteTask(thdPoolFunc);
+
+    // 消息处理成功
     return MyStatus_t::SUCCESS;
 }
 
-bool MySipCatalogApp::onTimer()
+MyStatus_t MySipCatalogApp::onSipCatalogAppRecvSipCatalogResponseReqMsg(MySipRxDataPtr rxDataPtr)
 {
-    if (MyStatus_t::SUCCESS != m_status.load()) {
-        return false;
-    }
+    // 获取消息内容
+    std::string msgBodyStr = static_cast<const char*>(rxDataPtr->msg_info.msg->body->data);
 
-    // 获取本地服务配置
-    auto localServCfg = MyServManage::GetSipServAddrCfg(m_servId);
-    if (localServCfg.id.empty()) {
-        return false;
-    }
 
-    // 获取下级sip服务配置
-    MySipRegLowServCfgMap regLowServMap = MySipServRegManage::GetSipRegLowServCfgMap(m_servId);
-    for (const auto& pair : regLowServMap) {
-        this->reqLowServCatalog(pair.second, localServCfg);
-    }
-    return true;
+    return MyStatus_t::SUCCESS;
 }
 
-MyStatus_t MySipCatalogApp::reqLowServCatalog(const MySipRegLowServCfg_dt& regLowServCfg, const MySipServAddrCfg_dt& localServCfg)
+MyStatus_t MySipCatalogApp::getState(MyStatus_t& status) const
 {
+    status = m_status.load();
+    return MyStatus_t::SUCCESS;
+}
+
+MyStatus_t MySipCatalogApp::getId(std::string& id) const
+{
+    if (MyStatus_t::SUCCESS != m_status.load()) {
+        LOG(ERROR) << "Sip app module get id failed. MySipCatalogApp is not init.";
+        return MyStatus_t::FAILED;
+    }
+
+    id = m_appIdCfg.id;
+    return MyStatus_t::SUCCESS;
+}
+
+MyStatus_t MySipCatalogApp::getSipCatalogApp(MySipCatalogApp::SmtWkPtr& wkPtr)
+{
+    if (MyStatus_t::SUCCESS != m_status.load()) {
+        LOG(WARNING) << "Sip app module get work pointer failed. MySipCatalogApp is not init.";
+        return MyStatus_t::FAILED;
+    }
+
+    wkPtr = this->shared_from_this();
+    return MyStatus_t::SUCCESS;
+}
+
+MyStatus_t MySipCatalogApp::onSipCatalogAppReqLowServCatalog(const MySipRegLowServCfg_dt& regLowServCfg, const MySipServAddrCfg_dt& localServCfg)
+{
+    std::string lowRegServInfo;
+    MySipServerHelper::GetSipLowRegServInfo(regLowServCfg, lowRegServInfo);
+
     // 获取endpoint
-    MySipEndptPtr endptPtr = MySystemPjsip::GetPjsipEndptPtr();
-    if (nullptr == endptPtr) {
-        LOG(ERROR) << "Sip catalog app request low server catalog failed. get pjsip endpoint failed. " 
-                   << MySipServerHelper::GetSipLowRegServInfo(regLowServCfg) << ".";
+    MySipEndptPtr endptPtr = nullptr;
+    if (MyStatus_t::SUCCESS != MySystemPjsip::GetPjsipEndptPtr(&endptPtr)) {
+        LOG(ERROR) << "Sip catalog app request low server catalog failed. get pjsip endpoint failed. " << lowRegServInfo << ".";
         return MyStatus_t::FAILED;
     }
 
     // sip catalog消息首部生成
-    std::string sURL     = MySipMsgHelper::GenerateSipMsgURL(regLowServCfg.lowSipServAddrCfg.id, regLowServCfg.lowSipServAddrCfg.ipAddr, 
-                                                             regLowServCfg.lowSipServAddrCfg.port, regLowServCfg.proto);
-    std::string sFromHdr = MySipMsgHelper::GenerateSipMsgFromHeader(localServCfg.id, localServCfg.ipAddr);
-    std::string sToHdr   = MySipMsgHelper::GenerateSipMsgToHeader(localServCfg.id, localServCfg.ipAddr);
+    std::string sURL;
+    MySipMsgHelper::GenerateSipMsgURL(regLowServCfg.lowSipServAddrCfg.id, regLowServCfg.lowSipServAddrCfg.ipAddr, 
+                                      regLowServCfg.lowSipServAddrCfg.port, regLowServCfg.proto, sURL);
+
+    std::string sFromHdr;
+    MySipMsgHelper::GenerateSipMsgFromHeader(localServCfg.id, localServCfg.ipAddr, sFromHdr);
+
+    std::string sToHdr;
+    MySipMsgHelper::GenerateSipMsgToHeader(localServCfg.id, localServCfg.ipAddr, sToHdr);
 
     pj_str_t sipMsgURL     = pj_str(const_cast<char*>(sURL.c_str()));
     pj_str_t sipMsgFromHdr = pj_str(const_cast<char*>(sFromHdr.c_str()));
@@ -495,13 +567,13 @@ MyStatus_t MySipCatalogApp::reqLowServCatalog(const MySipRegLowServCfg_dt& regLo
     // sip catalog消息创建
     MySipTxDataPtr txDataPtr = nullptr;
     if(PJ_SUCCESS != pjsip_endpt_create_request(endptPtr, &sipMethod, &sipMsgURL, &sipMsgFromHdr, &sipMsgToHdr, nullptr, nullptr, -1, nullptr, &txDataPtr)) {
-        LOG(ERROR) << "Sip catalog app request low server catalog failed. create pjsip request failed. "
-                   << MySipServerHelper::GetSipLowRegServInfo(regLowServCfg) << ".";
+        LOG(ERROR) << "Sip catalog app request low server catalog failed. create pjsip request failed. " << lowRegServInfo << ".";
         return MyStatus_t::FAILED;
     }
 
     // sip catalog消息内容填充
-    std::string msgBody = MyXmlHelper::GenerateSipCatalogReqMsgBody(regLowServCfg.lowSipServAddrCfg.id);
+    std::string msgBody;
+    MyXmlHelper::GenerateSipCatalogQueryReqMsgBody(regLowServCfg.lowSipServAddrCfg.id, msgBody);
 
     pj_str_t type    = pj_str(const_cast<char*>("Application"));
     pj_str_t subtype = pj_str(const_cast<char*>("MANSCDP+xml"));
@@ -511,8 +583,7 @@ MyStatus_t MySipCatalogApp::reqLowServCatalog(const MySipRegLowServCfg_dt& regLo
 
     // sip catalog消息发送
     if(PJ_SUCCESS != pjsip_endpt_send_request(endptPtr, txDataPtr, -1, nullptr, nullptr)) {
-        LOG(ERROR) << "Sip catalog app request low server catalog failed. send pjsip request failed. "
-                   << MySipServerHelper::GetSipLowRegServInfo(regLowServCfg) << ".";
+        LOG(ERROR) << "Sip catalog app request low server catalog failed. send pjsip request failed. " << lowRegServInfo << ".";
         return MyStatus_t::FAILED;
     }
     return MyStatus_t::SUCCESS;

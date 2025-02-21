@@ -14,11 +14,10 @@ namespace MY_COMMON {
  */
 typedef enum class MyStatusType : int
 {
-    //                                      成功
-    SUCCESS                                 = 0,  
-
-    //                                      失败
-    FAILED                                  = -1,           
+    //                                                      成功
+    SUCCESS                                                 = 0,            
+    //                                                      失败
+    FAILED                                                  = -1,           
 
 } MyStatus_t;
 
@@ -27,17 +26,14 @@ typedef enum class MyStatusType : int
  */
 typedef struct MySipMessageUriDataType 
 {
-    //                                      sip服务ID
-    std::string                             id;
-
-    //                                      sip服务ip地址
-    std::string                             ipAddr; 
-
-    //                                      sip服务端口
-    uint16_t                                port;
-
-    //                                      sip服务传输协议类型
-    MyTpProto_t                             proto;                    
+    //                                                      sip服务ID
+    std::string                                             id;
+    //                                                      sip服务ip地址
+    std::string                                             ipAddr; 
+    //                                                      sip服务端口
+    uint16_t                                                port;
+    //                                                      sip服务传输协议类型
+    MyTpProto_t                                             proto;                    
 
 } MySipMsgUri_dt; 
 
@@ -46,14 +42,12 @@ typedef struct MySipMessageUriDataType
  */
 typedef struct MySipMessageContactHeaderDataType 
 {
-    //                                      sip服务ID
-    std::string                             id;
-
-    //                                      sip服务ip地址
-    std::string                             ipAddr; 
-
-    //                                      sip服务端口
-    uint16_t                                port;                  
+    //                                                      sip服务ID
+    std::string                                             id;
+    //                                                      sip服务ip地址
+    std::string                                             ipAddr; 
+    //                                                      sip服务端口
+    uint16_t                                                port;                  
 
 } MySipMsgContactHdr_dt; 
 
@@ -62,14 +56,12 @@ typedef struct MySipMessageContactHeaderDataType
  */
 typedef struct MySipAppIdentifyDataType 
 {
-    //                                      app ID
-    std::string                             id;
-
-    //                                      app名称
-    std::string                             name;    
-
-    //                                      app优先级
-    pjsip_module_priority                   priority;                    
+    //                                                      app ID
+    std::string                                             id;
+    //                                                      app名称
+    std::string                                             name;    
+    //                                                      app优先级
+    pjsip_module_priority                                   priority;                    
 
 } MySipAppIdCfg_dt; 
 
@@ -78,17 +70,14 @@ typedef struct MySipAppIdentifyDataType
  */
 typedef struct MySipUpperRegisterServerInfoDataType 
 {
-    //                                      sip上级注册服务配置
-    MySipRegUpServCfg_dt                    sipRegUpServCfg;
-
-    //                                      sip上级注册有效时长
-    uint32_t                                sipRegUpServExpired;
-
-    //                                      sip上级注册服务最近一次注册时间(格式：yyyy-mm-dd hh:mm:ss)
-    std::string                             sipRegUpServLastRegTime;    
-
-    //                                      sip上级注册服务保活定时器索引
-    uint32_t                                sipRegUpServKeepAliveIdx;
+    //                                                      sip上级注册服务配置
+    MySipRegUpServCfg_dt                                    sipRegUpServCfg;
+    //                                                      sip上级注册有效时长
+    uint32_t                                                sipRegUpServExpired;
+    //                                                      sip上级注册服务最近一次注册时间(格式：yyyy-mm-dd hh:mm:ss)
+    std::string                                             sipRegUpServLastRegTime;    
+    //                                                      sip上级注册服务保活定时器索引
+    uint32_t                                                sipRegUpServKeepAliveIdx;
 
 } MySipUpRegServInfo_dt; 
 
@@ -97,14 +86,12 @@ typedef struct MySipUpperRegisterServerInfoDataType
  */
 typedef struct MySipLowerRegisterServerInfoDataType 
 {
-    //                                      sip下级注册服务配置
-    MySipRegLowServCfg_dt                   sipRegLowServCfg;
-
-    //                                      sip下级注册有效时长
-    uint32_t                                sipRegLowServExpired;
-
-    //                                      sip下级注册服务最近一次注册时间(格式：yyyy-mm-dd hh:mm:ss)
-    std::string                             sipRegLowServLastRegTime;
+    //                                                      sip下级注册服务配置
+    MySipRegLowServCfg_dt                                   sipRegLowServCfg;
+    //                                                      sip下级注册有效时长
+    uint32_t                                                sipRegLowServExpired;
+    //                                                      sip下级注册服务最近一次注册时间(格式：yyyy-mm-dd hh:mm:ss)
+    std::string                                             sipRegLowServLastRegTime;
 
 } MySipLowRegServInfo_dt; 
 
@@ -113,20 +100,16 @@ typedef struct MySipLowerRegisterServerInfoDataType
  */
 typedef struct MySipCatalogInfoDataType 
 {
-    //                                                  上级平台发送请求携带的sn号
-    std::string                                         sn;
-
-    //                                                  本级平台设备目录信息，key = device id, value = platform info
-    std::map<std::string, MySipCatalogPlatCfg_dt>              sipPlatMap;
-
-    //                                                  本级子平台设备目录信息，key = device id, value = sub platform info
-    std::map<std::string, MySipCatalogSubPlatCfg_dt>           sipSubPlatMap;
-
-    //                                                  本级虚拟子平台设备目录信息，key = device id, value = virtual sub platform info
-    std::map<std::string, MySipCatalogVirtualSubPlatCfg_dt>    sipSubVirtualPlatMap;
-
-    //                                                  本级设备设备目录信息，key = device id, value = device info
-    std::map<std::string, MySipCatalogDeviceCfg_dt>            sipDeviceMap;
+    //                                                      上级平台发送请求携带的sn号
+    std::string                                             sn;
+    //                                                      本级平台设备目录信息，key = device id, value = platform info
+    std::map<std::string, MySipCatalogPlatCfg_dt>           sipPlatMap;
+    //                                                      本级子平台设备目录信息，key = device id, value = sub platform info
+    std::map<std::string, MySipCatalogSubPlatCfg_dt>        sipSubPlatMap;
+    //                                                      本级虚拟子平台设备目录信息，key = device id, value = virtual sub platform info
+    std::map<std::string, MySipCatalogVirtualSubPlatCfg_dt> sipSubVirtualPlatMap;
+    //                                                      本级设备设备目录信息，key = device id, value = device info
+    std::map<std::string, MySipCatalogDeviceCfg_dt>         sipDeviceMap;
 
 } MySipCatalogInfo_dt; 
 

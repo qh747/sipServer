@@ -20,18 +20,21 @@ typedef         pj_pool_t*                                                  MySi
 typedef         pjsip_event*                                                MySipEvPtr;
 typedef         pjsip_cred_info*                                            MySipCredInfoPtr;
 typedef         pjsip_endpoint*                                             MySipEndptPtr; 
+typedef         pjsip_endpoint**                                            MySipEndptPtrAddr; 
 typedef         pjmedia_endpt*                                              MySipMediaEndptPtr;
+typedef         pjmedia_endpt**                                             MySipMediaEndptPtrAddr;
 typedef         pjsip_regc*                                                 MySipRegcPtr;
 typedef         pjsip_hdr*                                                  MySipMsgHdrPtr;
 typedef         pjsip_rx_data*                                              MySipRxDataPtr;
 typedef         pjsip_tx_data*                                              MySipTxDataPtr;
 typedef         pjsip_date_hdr*                                             MySipMsgDateHdrPtr;
 typedef         pjsip_www_authenticate_hdr*                                 MySipMsgAuthHdrPtr;
-typedef struct  pjsip_regc_cbparam*                                         MySipRegCbParamPtr;
+typedef         pjsip_regc_cbparam*                                         MySipRegCbParamPtr;
 typedef         pjsip_transaction*                                          MySipTsxPtr;
 typedef         pj_thread_t*                                                MySipThdPtr; 
 typedef         void*                                                       MySipEvThdCbParamPtr;
 
+typedef         MySipServAddrCfg_dt*                                        MySipServAddrCfgPtr;
 typedef         MySipRegUpServCfg_dt*                                       MySipRegUpServCfgPtr;
 typedef         std::shared_ptr<pjsip_module>                               MySipModSmtPtr;
 typedef         std::shared_ptr<MySipUpRegServInfo_dt>                      MySipUpRegServInfoSmtPtr;

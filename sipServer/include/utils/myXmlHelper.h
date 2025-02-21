@@ -16,10 +16,19 @@ class MyXmlHelper : public MyNonConstructableAndNonCopyable
 public:
     /**
      * @brief                           获取sip消息内容类型
-     * @return                          sip消息内容类型
+     * @return                          获取结果，0-success，-1-failed
      * @param xmlStr                    xml字符串
+     * @param msgBodyType               sip消息内容类型
      */             
-    static MY_COMMON::MySipMsgBody_t    GetSipMsgBodyType(const std::string& xmlStr);
+    static MY_COMMON::MyStatus_t        GetSipMsgBodyType(const std::string& xmlStr, MY_COMMON::MySipMsgBody_t& msgBodyType);
+
+    /**
+     * @brief                           获取sip catalog响应请求消息设备id
+     * @return                          获取结果，0-success，-1-failed
+     * @param xmlStr                    xml字符串
+     * @param deviceId                  设备id
+     */  
+    static MY_COMMON::MyStatus_t        GetSipCatalogRespMsgDeviceId(const std::string& xmlStr, std::string& deviceId);
 
 public:             
     /**             
@@ -33,11 +42,12 @@ public:
      *                                  </Notify>
      *                  
      * @brief                           sip keepalive消息生成
-     * @return                          sip keepalive消息体
+     * @return                          生成结果，0-success，-1-failed
      * @param idx                       消息索引编号
      * @param id                        本级服务id
+     * @param msgBody                   sip keepalive消息体
      */                 
-    static std::string                  GenerateSipKeepAliveMsgBody(const std::string& idx, const std::string& localServId);
+    static MY_COMMON::MyStatus_t        GenerateSipKeepAliveMsgBody(const std::string& idx, const std::string& localServId, std::string& msgBody);
 
     /**                 
      * @brief                           sip keepalive消息解析
@@ -58,20 +68,21 @@ public:
      *                                    <DeviceID>12345678909876543210</DeviceID>
      *                                  </Query>
      *                  
-     * @brief                           sip catalog请求消息生成
-     * @return                          sip catalog请求消息体
+     * @brief                           sip catalog查询请求消息生成
+     * @return                          生成结果，0-success，-1-failed
      * @param id                        下级服务id
+     * @param msgBody                   sip catalog查询请求消息体
      */                 
-    static std::string                  GenerateSipCatalogReqMsgBody(const std::string& id);
+    static MY_COMMON::MyStatus_t        GenerateSipCatalogQueryReqMsgBody(const std::string& id, std::string& msgBody);
 
     /**             
-     * @brief                           sip catalog请求消息解析
+     * @brief                           sip catalog查询请求消息解析
      * @return                          解析结果
      * @param xmlStr                    字符串格式消息内容
-     * @param catalogReqMsgBody         sip catalog请求消息内容
+     * @param catalogReqMsgBody         sip catalog查询请求消息内容
      */                 
-    static MY_COMMON::MyStatus_t        ParseSipCatalogReqMsgBody(const std::string&                    xmlStr, 
-                                                                  MY_COMMON::MySipCatalogReqMsgBody_dt& catalogReqMsgBody);
+    static MY_COMMON::MyStatus_t        ParseSipCatalogQueryReqMsgBody(const std::string&                    xmlStr, 
+                                                                       MY_COMMON::MySipCatalogReqMsgBody_dt& catalogReqMsgBody);
 
 public:                 
     /**                 
@@ -101,14 +112,16 @@ public:
      *                                  </Response>
      *                  
      * @brief                           sip catalog平台配置推送消息生成
-     * @return                          sip catalog平台配置推送消息体
+     * @return                          生成结果，0-success，-1-failed
      * @param platCfg                   sip设备目录平台配置
      * @param sn                        消息索引编号
      * @param sumNum                    sip设备目录平台配置数量
+     * @param msgBody                   sip catalog平台配置推送消息体
      */                 
-    static std::string                  GenerateSipCatalogPlatCfgMsgBody(const MY_COMMON::MySipCatalogPlatCfg_dt& platCfg, 
+    static MY_COMMON::MyStatus_t        GenerateSipCatalogPlatCfgMsgBody(const MY_COMMON::MySipCatalogPlatCfg_dt& platCfg, 
                                                                          const std::string&                       sn,
-                                                                         std::size_t                              sumNum);
+                                                                         std::size_t                              sumNum, 
+                                                                         std::string&                             msgBody);
 
     /**             
      * @brief                           sip catalog平台配置消息解析
@@ -147,14 +160,16 @@ public:
      *                                  </Response>
      *                  
      * @brief                           sip catalog子平台配置推送消息生成
-     * @return                          sip catalog子平台配置推送消息体
+     * @return                          生成结果，0-success，-1-failed
      * @param subPlatCfg                sip设备目录子平台配置
      * @param sn                        消息索引编号
      * @param sumNum                    sip设备目录子平台配置数量
+     * @param msgBody                   sip catalog子平台配置推送消息体
      */                 
-    static std::string                  GenerateSipCatalogSubPlatCfgMsgBody(const MY_COMMON::MySipCatalogSubPlatCfg_dt& subPlatCfg, 
+    static MY_COMMON::MyStatus_t        GenerateSipCatalogSubPlatCfgMsgBody(const MY_COMMON::MySipCatalogSubPlatCfg_dt& subPlatCfg, 
                                                                             const std::string&                          sn,
-                                                                            std::size_t                                 sumNum);
+                                                                            std::size_t                                 sumNum,
+                                                                            std::string&                                msgBody);
 
     /**             
      * @brief                           sip catalog子平台配置消息解析
@@ -193,14 +208,16 @@ public:
      *                                  </Response>
      *                  
      * @brief                           sip catalog虚拟子平台配置推送消息生成
-     * @return                          sip catalog虚拟子平台配置推送消息体
+     * @return                          生成结果，0-success，-1-failed
      * @param subVirtualPlatCfg         sip设备目录虚拟子平台配置
      * @param sn                        消息索引编号
      * @param sumNum                    sip设备目录虚拟子平台配置数量
+     * @param msgBody                   sip catalog虚拟子平台配置推送消息体
      */                 
-    static std::string                  GenerateSipCatalogSubVirtualPlatCfgMsgBody(const MY_COMMON::MySipCatalogVirtualSubPlatCfg_dt& subVirtualPlatCfg, 
+    static MY_COMMON::MyStatus_t        GenerateSipCatalogSubVirtualPlatCfgMsgBody(const MY_COMMON::MySipCatalogVirtualSubPlatCfg_dt& subVirtualPlatCfg, 
                                                                                    const std::string&                                 sn,
-                                                                                   std::size_t                                        sumNum);
+                                                                                   std::size_t                                        sumNum,
+                                                                                   std::string&                                       msgBody);
 
     /**             
      * @brief                                  sip catalog虚拟子平台配置消息解析
@@ -239,14 +256,16 @@ public:
      *                                  </Response>
      *                  
      * @brief                           sip catalog设备配置推送消息生成
-     * @return                          sip catalog设备配置推送消息体
+     * @return                          生成结果，0-success，-1-failed
      * @param subPlatCfg                sip设备目录设备配置
      * @param sn                        消息索引编号
      * @param sumNum                    sip设备目录设备配置数量
+     * @param msgBody                   sip catalog设备配置推送消息体
      */                 
-    static std::string                  GenerateSipCatalogDeviceCfgMsgBody(const MY_COMMON::MySipCatalogDeviceCfg_dt& deviceCfg, 
+    static MY_COMMON::MyStatus_t        GenerateSipCatalogDeviceCfgMsgBody(const MY_COMMON::MySipCatalogDeviceCfg_dt& deviceCfg, 
                                                                            const std::string&                         sn,
-                                                                           std::size_t                                sumNum);
+                                                                           std::size_t                                sumNum,
+                                                                           std::string&                               msgBody);
 
     /**             
      * @brief                           sip catalog设备配置消息解析

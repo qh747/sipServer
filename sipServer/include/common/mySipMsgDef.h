@@ -12,12 +12,12 @@ typedef enum class MySipMessageBodyType : int
 {
     //                                              未定义
     SIP_MSG_UNKNOWN                                 = -1,
-
     //                                              keepAlive消息
     SIP_MSG_KEEPALIVE                               = 0,  
-
-    //                                              catalog消息
-    SIP_MSG_CATALOG                                 = 1,           
+    //                                              catalog请求消息
+    SIP_MSG_CATALOG_QUERY                           = 1, 
+    //                                              catalog响应消息
+    SIP_MSG_CATALOG_RESPONSE                        = 2,
 
 } MySipMsgBody_t;
 
@@ -28,13 +28,10 @@ typedef struct MySipKeepAliveMsgBodyDataType
 {
     //                                              消息类型cmdType
     std::string                                     cmdType;
-
     //                                              下级服务id DeviceID
     std::string                                     deviceId;
-
     //                                              消息索引SN
     std::string                                     sn;
-
     //                                              保活状态Status
     bool                                            status = false;                 
 
@@ -47,10 +44,8 @@ typedef struct MySipCatalogReqMsgBodyDataType
 {
     //                                              消息类型cmdType
     std::string                                     cmdType;
-
     //                                              下级服务id DeviceID
     std::string                                     deviceId;
-
     //                                              消息索引SN
     std::string                                     sn;         
 
@@ -63,19 +58,14 @@ typedef struct MySipCatalogPlatformConfigMsgBodyDataType
 {
     //                                              消息类型cmdType
     std::string                                     cmdType;
-
     //                                              下级服务id DeviceID
     std::string                                     deviceId;
-
     //                                              消息索引SN
     std::string                                     sn;
-
     //                                              设备总数
     std::size_t                                     sumNum;
-
     //                                              设备列表
     std::size_t                                     deviceList;
-
     //                                              平台配置信息
     MySipCatalogPlatCfgMap                          platCfgMap;
 
@@ -88,19 +78,14 @@ typedef struct MySipCatalogSubPlatformConfigMsgBodyDataType
 {
     //                                              消息类型cmdType
     std::string                                     cmdType;
-
     //                                              下级服务id DeviceID
     std::string                                     deviceId;
-
     //                                              消息索引SN
     std::string                                     sn;
-
     //                                              设备总数
     std::size_t                                     sumNum;
-
     //                                              设备列表
     std::size_t                                     deviceList;
-
     //                                              子平台配置信息
     MySipCatalogSubPlatCfgMap                       subPlatCfgMap;
 
@@ -113,19 +98,14 @@ typedef struct MySipCatalogSubVirtualPlatformConfigMsgBodyDataType
 {
     //                                              消息类型cmdType
     std::string                                     cmdType;
-
     //                                              下级服务id DeviceID
     std::string                                     deviceId;
-
     //                                              消息索引SN
     std::string                                     sn;
-
     //                                              设备总数
     std::size_t                                     sumNum;
-
     //                                              设备列表
     std::size_t                                     deviceList;
-
     //                                              虚拟子平台配置信息
     MySipCatalogSubVirtualPlatCfgMap                subVirtualPlatCfgMap;
 
@@ -138,19 +118,14 @@ typedef struct MySipCatalogDeviceConfigMsgBodyDataType
 {
     //                                              消息类型cmdType
     std::string                                     cmdType;
-
     //                                              下级服务id DeviceID
     std::string                                     deviceId;
-
     //                                              消息索引SN
     std::string                                     sn;
-
     //                                              设备总数
     std::size_t                                     sumNum;
-
     //                                              设备列表
     std::size_t                                     deviceList;
-
     //                                              设备配置信息
     MySipCatalogDeviceCfgMap                        deviceCfgMap;
 

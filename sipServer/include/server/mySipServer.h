@@ -54,54 +54,60 @@ public:
     /**
      * @brief                               回调函数: sip注册请求消息接收
      * @return                              处理结果，0-success，-1-failed
-     * @param regReqMsgPtr                  注册请求消息指针
+     * @param regReqMsgPtr                  注册请求消息
      */
-    MY_COMMON::MyStatus_t                   onRecvSipRegMsg(MY_COMMON::MySipRxDataPtr regReqMsgPtr);
+    MY_COMMON::MyStatus_t                   onSipServRecvSipRegisterReqMsg(MY_COMMON::MySipRxDataPtr regReqMsgPtr);
 
     /**
      * @brief                               回调函数: sip保活请求消息接收
      * @return                              处理结果，0-success，-1-failed
-     * @param regReqMsgPtr                  保活请求消息指针
+     * @param keepAliveReqMsgPtr            保活请求消息
      */
-    MY_COMMON::MyStatus_t                   onRecvSipKeepAliveMsg(MY_COMMON::MySipRxDataPtr keepAliveReqMsgPtr);
+    MY_COMMON::MyStatus_t                   onSipServRecvSipKeepAliveReqMsg(MY_COMMON::MySipRxDataPtr keepAliveReqMsgPtr);
 
     /**
-     * @brief                               回调函数: sip设备目录请求消息接收
+     * @brief                               回调函数: sip设备目录查询请求消息接收
      * @return                              处理结果，0-success，-1-failed
-     * @param regReqMsgPtr                  sip设备目录请求消息指针
+     * @param catalogQueryReqMsgPtr         sip设备目录查询请求消息
      */
-    MY_COMMON::MyStatus_t                   onRecvSipCatalogMsg(MY_COMMON::MySipRxDataPtr catalogReqMsgPtr);
+    MY_COMMON::MyStatus_t                   onSipServRecvSipCatalogQueryReqMsg(MY_COMMON::MySipRxDataPtr catalogQueryReqMsgPtr);
+
+    /**
+     * @brief                               回调函数: sip设备目录响应请求消息接收
+     * @return                              处理结果，0-success，-1-failed
+     * @param catalogResponseReqMsgPtr      sip设备目录响应请求消息
+     */
+    MY_COMMON::MyStatus_t                   onSipServRecvSipCatalogResponseReqMsg(MY_COMMON::MySipRxDataPtr catalogResponseReqMsgPtr);
+
+public:
+    /**
+     * @brief                               向下级sip注册服务请求设备目录
+     * @return                              处理结果，0-success，-1-failed
+     * @param lowSipRegServAddrCfg          sip注册服务地址配置
+     */
+    MY_COMMON::MyStatus_t                   onReqLowSipServCatalog(const MY_COMMON::MySipRegLowServCfg_dt& lowSipRegServAddrCfg);
 
 public:     
     /**     
-     * @brief                               sip服务是否启动
-     * @return                              启动结果，0-success，-1-failed
+     * @brief                               sip服务状态
+     * @return                              获取结果，0-success，-1-failed
+     * @param status                        sip服务状态
      */         
-    inline MY_COMMON::MyStatus_t            getState() { return m_status.load(); }
+    MY_COMMON::MyStatus_t                   getState(MY_COMMON::MyStatus_t& status) const;
 
     /**
-     * @brief                               获取sip服务实例
-     * @return                              sip服务实例
+     * @brief                               获取sip服务
+     * @return                              获取结果，0-success，-1-failed
+     * @param sipServer                     sip服务
      */
-    inline MySipServer::SmtWkPtr            getSipServer() { return this->shared_from_this(); }
+     MY_COMMON::MyStatus_t                  getSipServer(MySipServer::SmtWkPtr& sipServer);
 
     /**
      * @brief                               获取sip服务地址配置
-     * @return                              sip服务地址配置
+     * @return                              获取结果，0-success，-1-failed
+     * @param cfg                           sip服务地址配置
      */
-    inline MY_COMMON::MySipServAddrCfg_dt   getSipServAddrCfg() const { return m_servAddrCfg; }
-    
-    /**
-     * @brief                               获取pjsip服务端点
-     * @return                              pjsip服务端点
-     */
-    inline MY_COMMON::MySipEndptPtr         getSipEndptPtr() const { return m_servEndptPtr; }
-
-    /**
-     * @brief                               获取pjsip服务内存池
-     * @return                              pjsip服务内存池
-     */
-    inline MY_COMMON::MySipPoolPtr          getSipThdPoolPtr() const { return m_servThdPoolPtr; }
+    MY_COMMON::MyStatus_t                   getSipServAddrCfg(MY_COMMON::MySipServAddrCfg_dt& cfg) const;
 
 private:
     //                                      启动状态 

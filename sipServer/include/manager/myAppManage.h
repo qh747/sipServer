@@ -42,24 +42,27 @@ public:
 public:
     /**
      * @brief                                       获取sip注册应用
-     * @return                                      sip注册应用弱引用指针
+     * @return                                      获取结果，0-success，-1-failed
      * @param servId                                sip服务id
+     * @param appSmtWkPtr                           sip注册应用弱引用指针
      */
-    static MySipRegApp::SmtWkPtr                    GetSipRegApp(const std::string& servId);
+    static MY_COMMON::MyStatus_t                    GetSipRegApp(const std::string& servId, MySipRegApp::SmtWkPtr& appSmtWkPtr);
 
     /**
      * @brief                                       获取sip消息处理应用
-     * @return                                      sip消息处理应用弱引用指针
+     * @return                                      获取结果，0-success，-1-failed
      * @param servId                                sip服务id
+     * @param appSmtWkPtr                           sip消息处理应用弱引用指针
      */
-    static MySipMsgProcApp::SmtWkPtr                GetSipMsgProcApp(const std::string& servId);
+    static MY_COMMON::MyStatus_t                    GetSipMsgProcApp(const std::string& servId, MySipMsgProcApp::SmtWkPtr& appSmtWkPtr);
 
     /**
      * @brief                                       获取sip设备目录应用
-     * @return                                      sip设备目录应用弱引用指针
+     * @return                                      获取结果，0-success，-1-failed
      * @param servId                                sip服务id
+     * @param appSmtWkPtr                           sip设备目录应用弱引用指针
      */
-    static MySipCatalogApp::SmtWkPtr                GetSipCatalogApp(const std::string& servId);
+    static MY_COMMON::MyStatus_t                    GetSipCatalogApp(const std::string& servId, MySipCatalogApp::SmtWkPtr& appSmtWkPtr);
 };
 
 }; // namespace MY_MANAGER

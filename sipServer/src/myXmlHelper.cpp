@@ -6,43 +6,77 @@ using namespace MY_COMMON;
 
 namespace MY_UTILS {
 
-MySipMsgBody_t MyXmlHelper::GetSipMsgBodyType(const std::string& xmlStr)
+MyStatus_t MyXmlHelper::GetSipMsgBodyType(const std::string& xmlStr, MySipMsgBody_t& msgBodyType)
 {
     tinyxml2::XMLDocument doc;
 
     // 解析XML数据
     if (tinyxml2::XML_SUCCESS != doc.Parse(xmlStr.c_str())) {
-        return MySipMsgBody_t::SIP_MSG_UNKNOWN;
+        return MyStatus_t::FAILED;
     }
 
     // 获取根元素
     tinyxml2::XMLElement* root = doc.RootElement();
     if (nullptr == root) {
-        return MySipMsgBody_t::SIP_MSG_UNKNOWN;
+        return MyStatus_t::FAILED;
     }
 
     // 获取子元素
     tinyxml2::XMLElement* cmdTypeElement = root->FirstChildElement("CmdType");
     if (nullptr == cmdTypeElement) {
-        return MySipMsgBody_t::SIP_MSG_UNKNOWN;
+        return MyStatus_t::FAILED;
     }
 
-    std::string cmdType = cmdTypeElement->GetText();
-    cmdType = MyStrHelper::TrimEmptyStr(cmdType);
-    cmdType = MyStrHelper::ConvertToLowStr(cmdType);
+    std::string cmdType;
+    MyStrHelper::TrimEmptyStr(cmdTypeElement->GetText(), cmdType);
+    MyStrHelper::ConvertToLowStr(cmdType, cmdType);
     
     if ("keepalive" == cmdType) {
-        return MySipMsgBody_t::SIP_MSG_KEEPALIVE;
+        msgBodyType = MySipMsgBody_t::SIP_MSG_KEEPALIVE;
+        return MyStatus_t::SUCCESS;
     }
     else if ("catalog" == cmdType) {
-        return MySipMsgBody_t::SIP_MSG_CATALOG;
+        std::string rootName;
+        MyStrHelper::ConvertToLowStr(root->Name(), rootName);
+
+        if ("query" == rootName) {
+            msgBodyType = MySipMsgBody_t::SIP_MSG_CATALOG_QUERY;
+            return MyStatus_t::SUCCESS;
+        }
+        else if ("response" == rootName) {
+            msgBodyType = MySipMsgBody_t::SIP_MSG_CATALOG_RESPONSE;
+            return MyStatus_t::SUCCESS;
+        }
     }
-    else {
-        return MySipMsgBody_t::SIP_MSG_UNKNOWN;
-    }
+    return MyStatus_t::FAILED;
 }
 
-std::string MyXmlHelper::GenerateSipKeepAliveMsgBody(const std::string& idx, const std::string& localServId)
+MyStatus_t MyXmlHelper::GetSipCatalogRespMsgDeviceId(const std::string& xmlStr, std::string& deviceId)
+{
+    tinyxml2::XMLDocument doc;
+
+    // 解析XML数据
+    if (tinyxml2::XML_SUCCESS != doc.Parse(xmlStr.c_str())) {
+        return MyStatus_t::FAILED;
+    }
+
+    // 获取根元素
+    tinyxml2::XMLElement* root = doc.RootElement();
+    if (nullptr == root) {
+        return MyStatus_t::FAILED;
+    }
+
+    // 获取子元素
+    tinyxml2::XMLElement* deviceIdElement = root->FirstChildElement("DeviceID");
+    if (nullptr == deviceIdElement) {
+        return MyStatus_t::FAILED;
+    }
+
+    deviceId = deviceIdElement->GetText();
+    return MyStatus_t::SUCCESS;
+}
+
+MyStatus_t MyXmlHelper::GenerateSipKeepAliveMsgBody(const std::string& idx, const std::string& localServId, std::string& msgBody)
 {
     // 创建一个 XML 文档对象
     tinyxml2::XMLDocument doc;
@@ -77,8 +111,8 @@ std::string MyXmlHelper::GenerateSipKeepAliveMsgBody(const std::string& idx, con
     // 将 XML 文档转换为字符串
     tinyxml2::XMLPrinter printer;
     doc.Print(&printer);
-    std::string xmlString = printer.CStr();
-    return xmlString;
+    msgBody = printer.CStr();
+    return MyStatus_t::SUCCESS;
 }
 
 MyStatus_t MyXmlHelper::ParseSipKeepAliveMsgBody(const std::string& xmlStr, MySipKeepAliveMsgBody_dt& keepAliveMsgBody)
@@ -114,12 +148,15 @@ MyStatus_t MyXmlHelper::ParseSipKeepAliveMsgBody(const std::string& xmlStr, MySi
 
     tinyxml2::XMLElement* statusElement = root->FirstChildElement("Status");
     if (nullptr != statusElement) {
-        keepAliveMsgBody.status = ("OK" == MyStrHelper::ConvertToUpStr(statusElement->GetText()) ? true : false);
+        std::string statusStr;
+        MyStrHelper::ConvertToUpStr(statusElement->GetText(), statusStr);
+
+        keepAliveMsgBody.status = ("OK" == statusStr ? true : false);
     }
     return MyStatus_t::SUCCESS;
 }
 
-std::string MyXmlHelper::GenerateSipCatalogReqMsgBody(const std::string& id)
+MyStatus_t MyXmlHelper::GenerateSipCatalogQueryReqMsgBody(const std::string& id, std::string& msgBody)
 {
     // 创建一个 XML 文档对象
     tinyxml2::XMLDocument doc;
@@ -138,7 +175,10 @@ std::string MyXmlHelper::GenerateSipCatalogReqMsgBody(const std::string& id)
 
     // 创建子节点 <SN> 并设置内容
     tinyxml2::XMLElement* sn = doc.NewElement("SN");
-    sn->SetText(MyRandomHelper::Get4BytesLenRandomStr().c_str());
+
+    std::string snStr;
+    MyRandomHelper::Get4BytesLenRandomStr(snStr);
+    sn->SetText(snStr.c_str());
     root->InsertEndChild(sn);
 
     // 创建子节点 <DeviceID> 并设置内容
@@ -149,11 +189,11 @@ std::string MyXmlHelper::GenerateSipCatalogReqMsgBody(const std::string& id)
     // 将 XML 文档转换为字符串
     tinyxml2::XMLPrinter printer;
     doc.Print(&printer);
-    std::string xmlString = printer.CStr();
-    return xmlString;
+    msgBody = printer.CStr();
+    return MyStatus_t::SUCCESS;
 }
 
-MyStatus_t MyXmlHelper::ParseSipCatalogReqMsgBody(const std::string& xmlStr, MySipCatalogReqMsgBody_dt& catalogReqMsgBody)
+MyStatus_t MyXmlHelper::ParseSipCatalogQueryReqMsgBody(const std::string& xmlStr, MySipCatalogReqMsgBody_dt& catalogReqMsgBody)
 {
     tinyxml2::XMLDocument doc;
 
@@ -186,7 +226,8 @@ MyStatus_t MyXmlHelper::ParseSipCatalogReqMsgBody(const std::string& xmlStr, MyS
     return MyStatus_t::SUCCESS;
 }
 
-std::string MyXmlHelper::GenerateSipCatalogPlatCfgMsgBody(const MY_COMMON::MySipCatalogPlatCfg_dt& platCfg, const std::string& sn, std::size_t sumNum)
+MyStatus_t MyXmlHelper::GenerateSipCatalogPlatCfgMsgBody(const MY_COMMON::MySipCatalogPlatCfg_dt& platCfg, const std::string& sn, 
+                                                         std::size_t sumNum, std::string& msgBody)
 {
     // 创建一个 XML 文档对象
     tinyxml2::XMLDocument doc;
@@ -210,7 +251,7 @@ std::string MyXmlHelper::GenerateSipCatalogPlatCfgMsgBody(const MY_COMMON::MySip
 
     // 创建子节点DeviceID
     tinyxml2::XMLElement* deviceIdElem = doc.NewElement("DeviceID");
-    deviceIdElem->SetText(platCfg.deviceID.c_str());
+    deviceIdElem->SetText(platCfg.platformID.c_str());
     rootElem->InsertEndChild(deviceIdElem);
 
     // 创建子节点SumNum
@@ -229,7 +270,7 @@ std::string MyXmlHelper::GenerateSipCatalogPlatCfgMsgBody(const MY_COMMON::MySip
 
     // 创建子节点item的子节点DeviceID
     tinyxml2::XMLElement* itemDeviceIdElem = doc.NewElement("DeviceID");
-    itemDeviceIdElem->SetText(std::to_string(sumNum).c_str());
+    itemDeviceIdElem->SetText(platCfg.deviceID.c_str());
     itemElem->InsertEndChild(itemDeviceIdElem);
 
     // 创建子节点item的子节点Name
@@ -249,13 +290,18 @@ std::string MyXmlHelper::GenerateSipCatalogPlatCfgMsgBody(const MY_COMMON::MySip
 
     // 创建子节点item的子节点Owner
     tinyxml2::XMLElement* itemOwnerElem = doc.NewElement("Owner");
-    itemOwnerElem->SetText("unknown");
+    itemOwnerElem->SetText("Owner");
     itemElem->InsertEndChild(itemOwnerElem);
 
     // 创建子节点item的子节点CivilCode
     tinyxml2::XMLElement* itemCivilCodeElem = doc.NewElement("CivilCode");
     itemCivilCodeElem->SetText(platCfg.deviceID.substr(0, 6).c_str());
     itemElem->InsertEndChild(itemCivilCodeElem);
+
+    // 创建子节点item的子节点Address
+    tinyxml2::XMLElement* itemAddressElem = doc.NewElement("Address");
+    itemAddressElem->SetText(platCfg.deviceIp.c_str());
+    itemElem->InsertEndChild(itemAddressElem);
 
     // 创建子节点item的子节点Parental
     tinyxml2::XMLElement* itemParentalElem = doc.NewElement("Parental");
@@ -292,8 +338,8 @@ std::string MyXmlHelper::GenerateSipCatalogPlatCfgMsgBody(const MY_COMMON::MySip
     // 将 XML 文档转换为字符串
     tinyxml2::XMLPrinter printer;
     doc.Print(&printer);
-    std::string xmlString = printer.CStr();
-    return xmlString;
+    msgBody = printer.CStr();
+    return MyStatus_t::SUCCESS;
 }
 
 MyStatus_t MyXmlHelper::ParseSipCatalogPlatCfgMsgBody(const std::string& xmlStr, MySipCatalogPlatCfgMsgBody_dt& catalogPlatCfgMsgBody)
@@ -411,7 +457,8 @@ MyStatus_t MyXmlHelper::ParseSipCatalogPlatCfgMsgBody(const std::string& xmlStr,
     return MyStatus_t::SUCCESS;
 }
 
-std::string MyXmlHelper::GenerateSipCatalogSubPlatCfgMsgBody(const MySipCatalogSubPlatCfg_dt& subPlatCfg, const std::string& sn, std::size_t sumNum)
+MyStatus_t MyXmlHelper::GenerateSipCatalogSubPlatCfgMsgBody(const MySipCatalogSubPlatCfg_dt& subPlatCfg, const std::string& sn, 
+                                                            std::size_t sumNum, std::string& msgBody)
 {
     // 创建一个 XML 文档对象
     tinyxml2::XMLDocument doc;
@@ -435,7 +482,7 @@ std::string MyXmlHelper::GenerateSipCatalogSubPlatCfgMsgBody(const MySipCatalogS
 
     // 创建子节点DeviceID
     tinyxml2::XMLElement* deviceIdElem = doc.NewElement("DeviceID");
-    deviceIdElem->SetText(subPlatCfg.deviceID.c_str());
+    deviceIdElem->SetText(subPlatCfg.platformID.c_str());
     rootElem->InsertEndChild(deviceIdElem);
 
     // 创建子节点SumNum
@@ -454,7 +501,7 @@ std::string MyXmlHelper::GenerateSipCatalogSubPlatCfgMsgBody(const MySipCatalogS
 
     // 创建子节点item的子节点DeviceID
     tinyxml2::XMLElement* itemDeviceIdElem = doc.NewElement("DeviceID");
-    itemDeviceIdElem->SetText(std::to_string(sumNum).c_str());
+    itemDeviceIdElem->SetText(subPlatCfg.deviceID.c_str());
     itemElem->InsertEndChild(itemDeviceIdElem);
 
     // 创建子节点item的子节点Name
@@ -474,13 +521,18 @@ std::string MyXmlHelper::GenerateSipCatalogSubPlatCfgMsgBody(const MySipCatalogS
 
     // 创建子节点item的子节点Owner
     tinyxml2::XMLElement* itemOwnerElem = doc.NewElement("Owner");
-    itemOwnerElem->SetText("unknown");
+    itemOwnerElem->SetText("Owner");
     itemElem->InsertEndChild(itemOwnerElem);
 
     // 创建子节点item的子节点CivilCode
     tinyxml2::XMLElement* itemCivilCodeElem = doc.NewElement("CivilCode");
     itemCivilCodeElem->SetText(subPlatCfg.deviceID.substr(0, 6).c_str());
     itemElem->InsertEndChild(itemCivilCodeElem);
+
+    // 创建子节点item的子节点Address
+    tinyxml2::XMLElement* itemAddressElem = doc.NewElement("Address");
+    itemAddressElem->SetText(subPlatCfg.deviceIp.c_str());
+    itemElem->InsertEndChild(itemAddressElem);
 
     // 创建子节点item的子节点Parental
     tinyxml2::XMLElement* itemParentalElem = doc.NewElement("Parental");
@@ -517,8 +569,8 @@ std::string MyXmlHelper::GenerateSipCatalogSubPlatCfgMsgBody(const MySipCatalogS
     // 将 XML 文档转换为字符串
     tinyxml2::XMLPrinter printer;
     doc.Print(&printer);
-    std::string xmlString = printer.CStr();
-    return xmlString;
+    msgBody = printer.CStr();
+    return MyStatus_t::SUCCESS;
 }
 
 MyStatus_t MyXmlHelper::ParseSipCatalogSubPlatCfgMsgBody(const std::string& xmlStr, MySipCatalogSubPlatCfgMsgBody_dt& catalogSubPlatCfgMsgBody)
@@ -634,7 +686,8 @@ MyStatus_t MyXmlHelper::ParseSipCatalogSubPlatCfgMsgBody(const std::string& xmlS
     return MyStatus_t::SUCCESS;
 }
 
-std::string MyXmlHelper::GenerateSipCatalogSubVirtualPlatCfgMsgBody(const MySipCatalogVirtualSubPlatCfg_dt& subVirtualPlatCfg, const std::string& sn, std::size_t sumNum)
+MyStatus_t MyXmlHelper::GenerateSipCatalogSubVirtualPlatCfgMsgBody(const MySipCatalogVirtualSubPlatCfg_dt& subVirtualPlatCfg, const std::string& sn, 
+                                                                   std::size_t sumNum, std::string& msgBody)
 {
     // 创建一个 XML 文档对象
     tinyxml2::XMLDocument doc;
@@ -658,7 +711,7 @@ std::string MyXmlHelper::GenerateSipCatalogSubVirtualPlatCfgMsgBody(const MySipC
 
     // 创建子节点DeviceID
     tinyxml2::XMLElement* deviceIdElem = doc.NewElement("DeviceID");
-    deviceIdElem->SetText(subVirtualPlatCfg.deviceID.c_str());
+    deviceIdElem->SetText(subVirtualPlatCfg.platformID.c_str());
     rootElem->InsertEndChild(deviceIdElem);
 
     // 创建子节点SumNum
@@ -677,7 +730,7 @@ std::string MyXmlHelper::GenerateSipCatalogSubVirtualPlatCfgMsgBody(const MySipC
 
     // 创建子节点item的子节点DeviceID
     tinyxml2::XMLElement* itemDeviceIdElem = doc.NewElement("DeviceID");
-    itemDeviceIdElem->SetText(std::to_string(sumNum).c_str());
+    itemDeviceIdElem->SetText(subVirtualPlatCfg.deviceID.c_str());
     itemElem->InsertEndChild(itemDeviceIdElem);
 
     // 创建子节点item的子节点Name
@@ -697,13 +750,18 @@ std::string MyXmlHelper::GenerateSipCatalogSubVirtualPlatCfgMsgBody(const MySipC
 
     // 创建子节点item的子节点Owner
     tinyxml2::XMLElement* itemOwnerElem = doc.NewElement("Owner");
-    itemOwnerElem->SetText("unknown");
+    itemOwnerElem->SetText("Owner");
     itemElem->InsertEndChild(itemOwnerElem);
 
     // 创建子节点item的子节点CivilCode
     tinyxml2::XMLElement* itemCivilCodeElem = doc.NewElement("CivilCode");
     itemCivilCodeElem->SetText(subVirtualPlatCfg.deviceID.substr(0, 6).c_str());
     itemElem->InsertEndChild(itemCivilCodeElem);
+
+    // 创建子节点item的子节点Address
+    tinyxml2::XMLElement* itemAddressElem = doc.NewElement("Address");
+    itemAddressElem->SetText(subVirtualPlatCfg.deviceIp.c_str());
+    itemElem->InsertEndChild(itemAddressElem);
 
     // 创建子节点item的子节点Parental
     tinyxml2::XMLElement* itemParentalElem = doc.NewElement("Parental");
@@ -740,8 +798,8 @@ std::string MyXmlHelper::GenerateSipCatalogSubVirtualPlatCfgMsgBody(const MySipC
     // 将 XML 文档转换为字符串
     tinyxml2::XMLPrinter printer;
     doc.Print(&printer);
-    std::string xmlString = printer.CStr();
-    return xmlString;
+    msgBody = printer.CStr();
+    return MyStatus_t::SUCCESS;
 }
 
 MyStatus_t MyXmlHelper::ParseSipCatalogSubVirtualPlatCfgMsgBody(const std::string& xmlStr, MySipCatalogSubVirtualPlatCfgMsgBody_dt& catalogSubVirtualPlatCfgMsgBody)
@@ -857,7 +915,8 @@ MyStatus_t MyXmlHelper::ParseSipCatalogSubVirtualPlatCfgMsgBody(const std::strin
     return MyStatus_t::SUCCESS;
 }
 
-std::string MyXmlHelper::GenerateSipCatalogDeviceCfgMsgBody(const MySipCatalogDeviceCfg_dt& deviceCfg, const std::string& sn, std::size_t sumNum)
+MyStatus_t MyXmlHelper::GenerateSipCatalogDeviceCfgMsgBody(const MySipCatalogDeviceCfg_dt& deviceCfg, const std::string& sn, 
+                                                           std::size_t sumNum, std::string& msgBody)
 {
     // 创建一个 XML 文档对象
     tinyxml2::XMLDocument doc;
@@ -881,7 +940,7 @@ std::string MyXmlHelper::GenerateSipCatalogDeviceCfgMsgBody(const MySipCatalogDe
 
     // 创建子节点DeviceID
     tinyxml2::XMLElement* deviceIdElem = doc.NewElement("DeviceID");
-    deviceIdElem->SetText(deviceCfg.deviceID.c_str());
+    deviceIdElem->SetText(deviceCfg.platformID.c_str());
     rootElem->InsertEndChild(deviceIdElem);
 
     // 创建子节点SumNum
@@ -900,7 +959,7 @@ std::string MyXmlHelper::GenerateSipCatalogDeviceCfgMsgBody(const MySipCatalogDe
 
     // 创建子节点item的子节点DeviceID
     tinyxml2::XMLElement* itemDeviceIdElem = doc.NewElement("DeviceID");
-    itemDeviceIdElem->SetText(std::to_string(sumNum).c_str());
+    itemDeviceIdElem->SetText(deviceCfg.deviceID.c_str());
     itemElem->InsertEndChild(itemDeviceIdElem);
 
     // 创建子节点item的子节点Name
@@ -920,13 +979,18 @@ std::string MyXmlHelper::GenerateSipCatalogDeviceCfgMsgBody(const MySipCatalogDe
 
     // 创建子节点item的子节点Owner
     tinyxml2::XMLElement* itemOwnerElem = doc.NewElement("Owner");
-    itemOwnerElem->SetText("unknown");
+    itemOwnerElem->SetText("Owner");
     itemElem->InsertEndChild(itemOwnerElem);
 
     // 创建子节点item的子节点CivilCode
     tinyxml2::XMLElement* itemCivilCodeElem = doc.NewElement("CivilCode");
     itemCivilCodeElem->SetText(deviceCfg.deviceID.substr(0, 6).c_str());
     itemElem->InsertEndChild(itemCivilCodeElem);
+
+    // 创建子节点item的子节点Address
+    tinyxml2::XMLElement* itemAddressElem = doc.NewElement("Address");
+    itemAddressElem->SetText(deviceCfg.deviceIp.c_str());
+    itemElem->InsertEndChild(itemAddressElem);
 
     // 创建子节点item的子节点Parental
     tinyxml2::XMLElement* itemParentalElem = doc.NewElement("Parental");
@@ -963,8 +1027,8 @@ std::string MyXmlHelper::GenerateSipCatalogDeviceCfgMsgBody(const MySipCatalogDe
     // 将 XML 文档转换为字符串
     tinyxml2::XMLPrinter printer;
     doc.Print(&printer);
-    std::string xmlString = printer.CStr();
-    return xmlString;
+    msgBody = printer.CStr();
+    return MyStatus_t::SUCCESS;
 }
 
 MyStatus_t MyXmlHelper::ParseSipCatalogDeviceCfgMsgBody(const std::string& xmlStr, MySipCatalogDeviceCfgMsgBody_dt& catalogDeviceCfgMsgBody)

@@ -25,22 +25,25 @@ public:
 
 public: 
     /**         
-     * @brief                                   状态
-     * @return                                  0-success，-1-failed
+     * @brief                                   获取状态
+     * @return                                  获取结果，0-success，-1-failed
+     * @param status                            状态
      */             
-    inline static MY_COMMON::MyStatus_t         State() { return SysPjsipState.load(); }
+    static MY_COMMON::MyStatus_t                GetState(MY_COMMON::MyStatus_t& status);
 
     /** 
-     * @brief                                   获取pjsip endpoint指针
-     * @return                                  pjsip endpoint指针
+     * @brief                                   获取pjsip endpoint
+     * @return                                  获取结果
+     * @param endptPtrAddr                      pjsip endpoint地址
      */ 
-    inline static MY_COMMON::MySipEndptPtr      GetPjsipEndptPtr() { return SysPjsipEndptPtr; }
+    static MY_COMMON::MyStatus_t                GetPjsipEndptPtr(MY_COMMON::MySipEndptPtrAddr endptPtrAddr);
 
     /** 
-     * @brief                                   获取pjsip media endpoint指针
-     * @return                                  pjsip media endpoint指针
+     * @brief                                   获取pjsip media endpoint
+     * @return                                  获取结果，0-success，-1-failed
+     * @param mediaEndptPtrAddr                 pjsip media endpoint地址
      */ 
-    inline static MY_COMMON::MySipMediaEndptPtr GetPjsipMediaEndptPtr() { return SysPjsipMediaEndptPtr; }
+    static MY_COMMON::MyStatus_t                GetPjsipMediaEndptPtr(MY_COMMON::MySipMediaEndptPtrAddr mediaEndptPtrAddr);
 
 private:    
     /**         

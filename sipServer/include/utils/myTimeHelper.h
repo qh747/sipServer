@@ -14,15 +14,17 @@ class MyTimeHelper : public MyNonConstructableAndNonCopyable
 public:
     /** 
      * @brief                       获取格式化后的当前时间（格式：yyyy-mm-dd hh:mm:ss）
-     * @return                      格式化后的当前时间
+     * @return                      获取结果，0-success，-1-failed
+     * @param timeStr               格式化后的当前时间
      */         
-    static std::string              GetCurrentFormatTime();
+    static MY_COMMON::MyStatus_t    GetCurrentFormatTime(std::string& timeStr);
 
     /**             
      * @brief                       获取sip消息首部支持格式的当前时间（格式：yyyy-mm-ddhh:mm:ss）
-     * @return                      sip消息首部支持格式的当前时间
+     * @return                      获取结果，0-success，-1-failed
+     * @param timeStr               格式化后的当前时间
      */         
-    static std::string              GetCurrentSipHeaderTime();
+    static MY_COMMON::MyStatus_t    GetCurrentSipHeaderTime(std::string& timeStr);
 
     /**         
      * @brief                       比较时间字符串增加指定秒后与当前时间

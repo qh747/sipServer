@@ -2,10 +2,6 @@
 
 For SIP server code practice.
 
-# Todo
-
-1. sip authorized register message handle.
-
 # Directory
 
 ```
@@ -45,5 +41,5 @@ For SIP server code practice.
 # Usage
 
 ``` command
- ./bin/sipServer --servCfgPath ./bin/servCfg.ini
+ ./bin/sipServer --cfg ./bin/servCfg.ini
 ```

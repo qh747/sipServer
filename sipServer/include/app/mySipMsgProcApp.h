@@ -43,30 +43,54 @@ public:
 
 public:     
     /**     
-     * @brief                                   sip app是否启动
-     * @return                                  启动结果，0-success，-1-failed
+     * @brief                                   应用是否启动
+     * @return                                  获取结果，0-success，-1-failed
+     * @param status                            启动结果，0-success，-1-failed
      */             
-    inline MY_COMMON::MyStatus_t                getState() const { return m_status.load(); }
+    MY_COMMON::MyStatus_t                       getState(MY_COMMON::MyStatus_t& status) const;
 
     /** 
      * @brief                                   获取应用id
-     * @return                                  应用id
+     * @return                                  获取结果，0-success，-1-failed
+     * @param id                                应用id
      */ 
-    inline std::string                          getId() const { return m_appIdCfg.id; }
+    MY_COMMON::MyStatus_t                       getId(std::string& id) const;
 
     /** 
-     * @brief                                   获取sip服务实例
-     * @return                                  sip服务实例
-     */ 
-    inline SmtWkPtr                             getSipMsgProcApp() { return this->shared_from_this(); }
+     * @brief                                   获取应用
+     * @return                                  获取结果，0-success，-1-failed
+     * @param wkPtr                             应用实例
+     */
+     MY_COMMON::MyStatus_t                      getSipMsgProcApp(SmtWkPtr& wkPtr);
 
 public:
     /**
-     * @brief                                   回调函数：处理sip请求消息
+     * @brief                                   回调函数：处理sip注册请求消息
      * @return                                  处理结果，0-success，-1-failed
-     * @param rdata                             接收到的sip请求消息
+     * @param rdata                             接收到的sip注册请求消息
      */
-    MY_COMMON::MyStatus_t                       onProcSipReqMsg(MY_COMMON::MySipRxDataPtr rdataPtr);
+    MY_COMMON::MyStatus_t                       onProcSipRegisterReqMsg(MY_COMMON::MySipRxDataPtr rdataPtr);
+
+    /**
+     * @brief                                   回调函数：处理sip保活请求消息
+     * @return                                  处理结果，0-success，-1-failed
+     * @param rdata                             接收到的sip保活请求消息
+     */
+    MY_COMMON::MyStatus_t                       onProcSipKeepAliveReqMsg(MY_COMMON::MySipRxDataPtr rdataPtr);
+
+    /**
+     * @brief                                   回调函数：处理sip设备目录查询请求消息
+     * @return                                  处理结果，0-success，-1-failed
+     * @param rdata                             接收到的sip设备目录查询请求消息
+     */
+    MY_COMMON::MyStatus_t                       onProcSipCatalogQueryReqMsg(MY_COMMON::MySipRxDataPtr rdataPtr);
+
+    /**
+     * @brief                                   回调函数：处理sip设备目录响应请求消息
+     * @return                                  处理结果，0-success，-1-failed
+     * @param rdata                             接收到的sip设备目录响应请求消息
+     */
+    MY_COMMON::MyStatus_t                       onProcSipCatalogResponseReqMsg(MY_COMMON::MySipRxDataPtr rdataPtr);
 
 public: 
     /** 

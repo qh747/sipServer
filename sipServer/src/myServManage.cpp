@@ -37,14 +37,15 @@ public:
         LOG(ERROR) << "delSipServ failed, servId: " << servId << " not exist.";
     }
 
-    MySipServer::SmtWkPtr get(const std::string& servId) {
+    MyStatus_t get(const std::string& servId, MySipServer::SmtWkPtr& sipServWkPtr) {
         boost::shared_lock<boost::shared_mutex> lock(m_rwMutex);
 
         auto iter = m_sipServMap.find(servId);
-        if (iter != m_sipServMap.end()) {
-            return iter->second->getSipServer();
+        if (m_sipServMap.end() == iter) {
+            return MyStatus_t::FAILED;
         }
-        return MySipServer::SmtWkPtr();
+        sipServWkPtr = iter->second;
+        return MyStatus_t::SUCCESS;
     }
 
     MyStatus_t has(const std::string& servId) {
@@ -61,7 +62,11 @@ public:
         boost::shared_lock<boost::shared_mutex> lock(m_rwMutex);
 
         for (auto& iter : m_sipServMap) {
-            auto curServAddrCfg = iter.second->getSipServAddrCfg();
+            MySipServAddrCfg_dt curServAddrCfg;
+            if (MyStatus_t::SUCCESS != iter.second->getSipServAddrCfg(curServAddrCfg)) {
+                return MyStatus_t::FAILED;
+            }
+            
             if ((port == curServAddrCfg.port) || (regPort == curServAddrCfg.regPort) || 
                 (port == curServAddrCfg.regPort) || (regPort == curServAddrCfg.port)) {
                 return MyStatus_t::SUCCESS;
@@ -91,9 +96,9 @@ public:
     }
 
 private:
-    boost::shared_mutex                                 m_rwMutex;
-    // key = server id, value = sip server          
-    std::map<std::string, MySipServer::SmtPtr>          m_sipServMap;
+    boost::shared_mutex                         m_rwMutex;
+    // key = server id, value = sip server      
+    std::map<std::string, MySipServer::SmtPtr>  m_sipServMap;
 };
 
 static MyServManage::MyServManageObject ManageObject;
@@ -101,10 +106,16 @@ static MyServManage::MyServManageObject ManageObject;
 MyStatus_t MyServManage::Init()
 {
     // 获取所有sip服务
-    MySipServAddrMap sipServAddrCfgMap = MySystemConfig::GetSipServAddrCfgMap();
+    MySipServAddrMap sipServAddrCfgMap;
+    if (MyStatus_t::SUCCESS != MySystemConfig::GetSipServAddrCfgMap(sipServAddrCfgMap)) {
+        return MyStatus_t::FAILED;
+    }
 
     // 获取sip服务线程内存配置
-    MySipEvThdMemCfg_dt sipEvThdMemCfg = MySystemConfig::GetSipEvThdMemCfg();
+    MySipEvThdMemCfg_dt sipEvThdMemCfg;
+    if (MyStatus_t::SUCCESS != MySystemConfig::GetSipEvThdMemCfg(sipEvThdMemCfg)) {
+        return MyStatus_t::FAILED;
+    }
 
     // 创建sip服务对象
     for (const auto& pair : sipServAddrCfgMap) {
@@ -140,27 +151,22 @@ MyStatus_t MyServManage::Shutdown()
     return MyStatus_t::SUCCESS;
 }
 
-MySipServer::SmtWkPtr MyServManage::GetSipServer(const std::string& servId)
+MyStatus_t MyServManage::GetSipServer(const std::string& servId, MySipServer::SmtWkPtr& sipServWkPtr)
 {
-    return ManageObject.get(servId);
+    return ManageObject.get(servId, sipServWkPtr);
 }
 
-MySipServAddrCfg_dt MyServManage::GetSipServAddrCfg(const std::string& servId)
+MyStatus_t MyServManage::GetSipServAddrCfg(const std::string& servId, MySipServAddrCfg_dt& sipServAddrCfg)
 {
-    auto sipServWkPtr = ManageObject.get(servId);
-    if (sipServWkPtr.expired()) {
-        return MySipServAddrCfg_dt();
+    MySipServer::SmtWkPtr sipServWkPtr;
+    if (MyStatus_t::SUCCESS != ManageObject.get(servId, sipServWkPtr)) {
+        return MyStatus_t::FAILED;
     }
-    return sipServWkPtr.lock()->getSipServAddrCfg();
-}
-
-MySipPoolPtr MyServManage::GetSipServThdPoolPtr(const std::string& servId)
-{
-    auto sipServWkPtr = ManageObject.get(servId);
-    if (sipServWkPtr.expired()) {
-        return nullptr;
+    
+    if (MyStatus_t::SUCCESS != sipServWkPtr.lock()->getSipServAddrCfg(sipServAddrCfg)) {
+        return MyStatus_t::FAILED;
     }
-    return sipServWkPtr.lock()->getSipThdPoolPtr();
+    return MyStatus_t::SUCCESS;
 }
 
 MyStatus_t MyServManage::HasSipServer(const std::string& servId)

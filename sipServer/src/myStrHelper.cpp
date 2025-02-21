@@ -2,31 +2,34 @@
 #include <algorithm>
 #include <Util/util.h>
 #include "utils/myStrHelper.h"
+using namespace MY_COMMON;
 
 namespace MY_UTILS {
 
-std::string MyStrHelper::ConvertToLowStr(const std::string& strToLow)
+MyStatus_t MyStrHelper::ConvertToLowStr(const std::string& strToLow, std::string& lowStr)
 {
-    std::string result = strToLow;
-    std::transform(result.begin(), result.end(), result.begin(), [](unsigned char c) {
+    lowStr = strToLow;
+    std::transform(lowStr.begin(), lowStr.end(), lowStr.begin(), [](unsigned char c) {
         return std::tolower(c);
     });
-    return result;
+
+    return MyStatus_t::SUCCESS;
 }
     
-std::string MyStrHelper::ConvertToUpStr(const std::string& strToUp)
+MyStatus_t MyStrHelper::ConvertToUpStr(const std::string& strToUp, std::string& upStr)
 {
-    std::string result = strToUp;
-    std::transform(result.begin(), result.end(), result.begin(), [](unsigned char c) {
+    upStr = strToUp;
+    std::transform(upStr.begin(), upStr.end(), upStr.begin(), [](unsigned char c) {
         return std::toupper(c);
     });
-    return result;
+    return MyStatus_t::SUCCESS;
 }
     
-std::string MyStrHelper::TrimEmptyStr(const std::string& str, const std::string& trimStr)
+MyStatus_t MyStrHelper::TrimEmptyStr(const std::string& str, std::string& resStr, const std::string& trimStr)
 {
     std::string result = str;
-    return toolkit::trim(result, trimStr);
+    resStr = toolkit::trim(result, trimStr);
+    return MyStatus_t::SUCCESS;
 }
     
 }; // namespace MY_UTILS

@@ -1,44 +1,45 @@
 #include <sstream>
 #include "utils/mySipServerHelper.h"
-using MY_COMMON::MySipServAddrCfg_dt;
-using MY_COMMON::MySipRegUpServCfg_dt;
-using MY_COMMON::MySipRegLowServCfg_dt;
+using namespace MY_COMMON;
 
 namespace MY_UTILS {
 
-std::string MySipServerHelper::GetSipServInfo(const MySipServAddrCfg_dt& sipServAddrCfg)
+MyStatus_t MySipServerHelper::GetSipServInfo(const MySipServAddrCfg_dt& sipServAddrCfg, std::string& info)
 {
     std::stringstream ss;
     ss << "name: " << sipServAddrCfg.name   << " domain: " << sipServAddrCfg.domain << " id: " << sipServAddrCfg.id
        << " ip: "  << sipServAddrCfg.ipAddr << " port: "   << sipServAddrCfg.port   << " protocol: udp/tcp";
 
-    return ss.str();
+    info = ss.str();
+    return MyStatus_t::SUCCESS;
 }
 
-std::string MySipServerHelper::GetSipUpRegServInfo(const MySipRegUpServCfg_dt& sipUpRegServCfg)
+MyStatus_t MySipServerHelper::GetSipUpRegServInfo(const MySipRegUpServCfg_dt& sipUpRegServCfg, std::string& info)
 {
-    return MySipServerHelper::GetSipServInfo(sipUpRegServCfg.upSipServAddrCfg);
+    return MySipServerHelper::GetSipServInfo(sipUpRegServCfg.upSipServAddrCfg, info);
 }
 
-std::string MySipServerHelper::GetSipLowRegServInfo(const MySipRegLowServCfg_dt& sipLowRegServCfg)
+MyStatus_t MySipServerHelper::GetSipLowRegServInfo(const MySipRegLowServCfg_dt& sipLowRegServCfg, std::string& info)
 {
-    return MySipServerHelper::GetSipServInfo(sipLowRegServCfg.lowSipServAddrCfg);
+    return MySipServerHelper::GetSipServInfo(sipLowRegServCfg.lowSipServAddrCfg, info);
 }
 
-std::string MySipServerHelper::GetSipServThdPoolName(const MySipServAddrCfg_dt& sipServAddrCfg)
+MyStatus_t MySipServerHelper::GetSipServThdPoolName(const MySipServAddrCfg_dt& sipServAddrCfg, std::string& name)
 {
     std::stringstream ss;
     ss << "sipServThdPool_" << sipServAddrCfg.id << "_" << sipServAddrCfg.ipAddr << "_" << sipServAddrCfg.port;
 
-    return ss.str();
+    name = ss.str();
+    return MyStatus_t::SUCCESS;
 }
 
-std::string MySipServerHelper::GetSipServEvThdName(const MySipServAddrCfg_dt& sipServAddrCfg)
+MyStatus_t MySipServerHelper::GetSipServEvThdName(const MySipServAddrCfg_dt& sipServAddrCfg, std::string& name)
 {
     std::stringstream ss;
     ss << "sipServEvThd_" << sipServAddrCfg.id << "_" << sipServAddrCfg.ipAddr << "_" << sipServAddrCfg.port;
 
-    return ss.str();
+    name = ss.str();
+    return MyStatus_t::SUCCESS;
 }
 
 }; // namespace MY_VIEW

@@ -76,7 +76,11 @@ private:
 public:
     void addSipMsgProcApp(const std::string& servId, MySipMsgProcApp::SmtPtr sipMsgProcAppSmtPtr) {
         if (MyStatus_t::SUCCESS != this->add(servId, sipMsgProcAppSmtPtr, m_sipMsgProcAppSmtPtrMap)) {
-            LOG(ERROR) << "addSipMsgProcApp failed, servId: " << servId << "appId: " << sipMsgProcAppSmtPtr->getId() << " already exist.";
+            std::string appId;
+            if (MyStatus_t::SUCCESS != sipMsgProcAppSmtPtr->getId(appId)) {
+                LOG(ERROR) << "addSipMsgProcApp failed, servId: " << servId << "appId: " << appId << " get app id failed.";
+            }
+            LOG(ERROR) << "addSipMsgProcApp failed, servId: " << servId << "appId: " << appId << " already exist.";
         }
     }
 
@@ -86,14 +90,15 @@ public:
         }
     }
 
-    MySipMsgProcApp::SmtWkPtr getSipMsgProcApp(const std::string& servId) {
+    MyStatus_t getSipMsgProcApp(const std::string& servId, MySipMsgProcApp::SmtWkPtr& appSmtWkPtr) {
         boost::shared_lock<boost::shared_mutex> lock(m_rwMutex);
 
         auto iter = m_sipMsgProcAppSmtPtrMap.find(servId);
-        if (m_sipMsgProcAppSmtPtrMap.end() != iter) {
-            return iter->second->getSipMsgProcApp();
+        if (m_sipMsgProcAppSmtPtrMap.end() == iter) {
+            return MyStatus_t::FAILED;
         }
-        return MySipMsgProcApp::SmtWkPtr();
+        appSmtWkPtr = iter->second;
+        return MyStatus_t::SUCCESS;
     }
 
     MyStatus_t hasSipMsgProcApp(const std::string& servId) {
@@ -110,7 +115,12 @@ public:
 
     void addSipRegApp(const std::string& servId, MySipRegApp::SmtPtr sipRegAppSmtPtr) {
         if (MyStatus_t::SUCCESS != this->add(servId, sipRegAppSmtPtr, m_sipRegAppSmtPtrMap)) {
-            LOG(ERROR) << "addSipRegApp failed, servId: " << servId << "appId: " << sipRegAppSmtPtr->getId() << " already exist.";
+            std::string appId;
+            if (MyStatus_t::SUCCESS != sipRegAppSmtPtr->getId(appId)) {
+                LOG(ERROR) << "addSipRegApp failed, servId: " << servId << "appId: " << appId << " get app id failed.";
+            }
+
+            LOG(ERROR) << "addSipRegApp failed, servId: " << servId << "appId: " << appId << " already exist.";
         }
     }
 
@@ -120,14 +130,15 @@ public:
         }
     }
 
-    MySipRegApp::SmtWkPtr getSipRegApp(const std::string& servId) {
+    MyStatus_t getSipRegApp(const std::string& servId, MySipRegApp::SmtWkPtr& appSmtWkPtr) {
         boost::shared_lock<boost::shared_mutex> lock(m_rwMutex);
 
         auto iter = m_sipRegAppSmtPtrMap.find(servId);
-        if (m_sipRegAppSmtPtrMap.end() != iter) {
-            return iter->second->getSipRegApp();
+        if (m_sipRegAppSmtPtrMap.end() == iter) {
+            return MyStatus_t::FAILED;
         }
-        return MySipRegApp::SmtWkPtr();
+        appSmtWkPtr = iter->second;
+        return MyStatus_t::SUCCESS;
     }
 
     MyStatus_t hasSipRegApp(const std::string& servId) {
@@ -144,7 +155,12 @@ public:
 
     void addSipCatalogApp(const std::string& servId, MySipCatalogApp::SmtPtr sipCatalogAppSmtPtr) {
         if (MyStatus_t::SUCCESS != this->add(servId, sipCatalogAppSmtPtr, m_sipCatalogAppSmtPtrMap)) {
-            LOG(ERROR) << "addSipCatalogApp failed, servId: " << servId << "appId: " << sipCatalogAppSmtPtr->getId() << " already exist.";
+            std::string appId;
+            if (MyStatus_t::SUCCESS != sipCatalogAppSmtPtr->getId(appId)) {
+                LOG(ERROR) << "addSipCatalogApp failed, servId: " << servId << "appId: " << appId << " get app id failed.";
+            }
+
+            LOG(ERROR) << "addSipCatalogApp failed, servId: " << servId << "appId: " << appId << " already exist.";
         }
     }
 
@@ -154,14 +170,15 @@ public:
         }
     }
 
-    MySipCatalogApp::SmtWkPtr getSipCatalogApp(const std::string& servId) {
+    MyStatus_t getSipCatalogApp(const std::string& servId, MySipCatalogApp::SmtWkPtr& appSmtWkPtr) {
         boost::shared_lock<boost::shared_mutex> lock(m_rwMutex);
 
         auto iter = m_sipCatalogAppSmtPtrMap.find(servId);
-        if (m_sipCatalogAppSmtPtrMap.end() != iter) {
-            return iter->second->getSipCatalogApp();
+        if (m_sipCatalogAppSmtPtrMap.end() == iter) {
+            return MyStatus_t::FAILED;
         }
-        return MySipCatalogApp::SmtWkPtr();
+        appSmtWkPtr = iter->second;
+        return MyStatus_t::SUCCESS;
     }
 
     MyStatus_t hasSipCatalogApp(const std::string& servId) {
@@ -191,7 +208,12 @@ static MyAppManage::MyAppManageObject ManageObject;
 MyStatus_t MyAppManage::Init()
 {
     // 获取sip服务配置
-    MySipServAddrMap serAddrMap = MySystemConfig::GetSipServAddrCfgMap();
+    MySipServAddrMap serAddrMap;
+    if (MyStatus_t::SUCCESS != MySystemConfig::GetSipServAddrCfgMap(serAddrMap)) {
+        LOG(ERROR) << "Init sip app manager failed. get sip serv addr cfg map failed.";
+        return MyStatus_t::FAILED;
+    }
+
     for (const auto& pair : serAddrMap) {
         if (MyStatus_t::SUCCESS != MyServManage::HasSipServer(pair.second.id)) {
             LOG(WARNING) << "Init sip app failed. sip server not exist. servId: " << pair.second.id;
@@ -256,19 +278,19 @@ MyStatus_t MyAppManage::Shutdown()
     return MyStatus_t::SUCCESS;
 }
 
-MySipRegApp::SmtWkPtr MyAppManage::GetSipRegApp(const std::string& servId)
+MyStatus_t MyAppManage::GetSipRegApp(const std::string& servId, MySipRegApp::SmtWkPtr& appSmtWkPtr)
 {
-    return ManageObject.getSipRegApp(servId);
+    return ManageObject.getSipRegApp(servId, appSmtWkPtr);
 }
 
-MySipMsgProcApp::SmtWkPtr MyAppManage::GetSipMsgProcApp(const std::string& servId)
+MyStatus_t MyAppManage::GetSipMsgProcApp(const std::string& servId, MySipMsgProcApp::SmtWkPtr& appSmtWkPtr)
 {
-    return ManageObject.getSipMsgProcApp(servId);
+    return ManageObject.getSipMsgProcApp(servId, appSmtWkPtr);
 }
 
-MySipCatalogApp::SmtWkPtr MyAppManage::GetSipCatalogApp(const std::string& servId)
+MyStatus_t MyAppManage::GetSipCatalogApp(const std::string& servId, MySipCatalogApp::SmtWkPtr& appSmtWkPtr)
 {
-    return ManageObject.getSipCatalogApp(servId);
+    return ManageObject.getSipCatalogApp(servId, appSmtWkPtr);
 }
 
 }; // namespace MY_MANAGER

@@ -2,11 +2,11 @@
 #include <chrono>
 #include <ctime>
 #include "utils/myTimeHelper.h"
-using MY_COMMON::MyStatus_t;
+using namespace MY_COMMON;
 
 namespace MY_UTILS {
 
-std::string MyTimeHelper::GetCurrentFormatTime()
+MyStatus_t MyTimeHelper::GetCurrentFormatTime(std::string& timeStr)
 {
     // 获取当前时间点
     auto now = std::chrono::system_clock::now();
@@ -24,10 +24,11 @@ std::string MyTimeHelper::GetCurrentFormatTime()
     oss << std::put_time(now_tm, "%Y-%m-%d %H:%M:%S");
 
     // 返回格式化后的字符串
-    return oss.str();
+    timeStr = oss.str();
+    return MyStatus_t::SUCCESS;
 }
 
-std::string MyTimeHelper::GetCurrentSipHeaderTime()
+MyStatus_t MyTimeHelper::GetCurrentSipHeaderTime(std::string& timeStr)
 {
     // 获取当前时间点
     auto now = std::chrono::system_clock::now();
@@ -45,7 +46,8 @@ std::string MyTimeHelper::GetCurrentSipHeaderTime()
     oss << std::put_time(now_tm, "%Y-%m-%dT%H:%M:%S.") << std::setw(3) << std::setfill('0') << now_ms.count();
 
     // 返回格式化后的字符串
-    return oss.str();
+    timeStr = oss.str();
+    return MyStatus_t::SUCCESS;
 }
 
 MyStatus_t MyTimeHelper::CompareWithCurrentTime(const std::string& timeStr, unsigned int secToAdd, int& timeDiff)

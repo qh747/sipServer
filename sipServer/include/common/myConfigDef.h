@@ -7,9 +7,6 @@
 
 namespace MY_COMMON {
 
-// sip服务注册有效时间（秒） 
-const unsigned int MAX_SIP_SERVER_REG_EXPIRED           = 3600;
-
 /**
  * @brief 传输层协议枚举类型
  */
@@ -25,7 +22,7 @@ typedef enum class MyTransportLayerProtocolType : int
 /** 
  * @brief 服务端日志配置    
  */ 
-typedef struct MySipServerLogConfigDataType     
+typedef struct MyServerLogConfigDataType     
 {   
     //                                                  日志级别
     std::string                                         logLevel;   
@@ -39,6 +36,22 @@ typedef struct MySipServerLogConfigDataType
 } MyServLogCfg_dt;  
 
 /** 
+ * @brief 服务端线程池配置    
+ */ 
+typedef struct MyServerThreadPoolConfigDataType     
+{   
+    //                                                  线程数量
+    unsigned int                                        threadNum;   
+    //                                                  线程优先级, 0 - 4              
+    unsigned int                                        threadPriority;   
+    //                                                  是否自动运行
+    bool                                                enableAutoRun;   
+    //                                                  是否使用不同颜色显示 
+    bool                                                enableAffinity; 
+
+} MyServThdPoolCfg_dt;  
+
+/** 
  * @brief SIP协议栈配置 
  */ 
 typedef struct MySipStackConfigDataType     
@@ -48,7 +61,19 @@ typedef struct MySipStackConfigDataType
     //                                                  sip协议栈名称        
     std::string                                         sipStackName;   
 
-} MySipStackCfg_dt;     
+} MySipStackCfg_dt;  
+
+/** 
+ * @brief SIP定时器配置 
+ */ 
+ typedef struct MySipTimerConfigDataType     
+ {   
+    //                                                  sip服务注册有效时间（秒） 
+    unsigned int                                        sipServRegExpiredTimeInterval;  
+    //                                                  sip本级服务判断上下级服务超时时间间隔（秒）   
+    float                                               sipServRegistJugdeTimeInterval;   
+ 
+ } MySipTimerCfg_dt;
 
 /** 
  * @brief SIP事件线程内存配置   

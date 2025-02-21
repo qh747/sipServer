@@ -7,6 +7,9 @@ project(DEMO_ZLTOOLKIT_TEST)
 # 设置为debug可调试
 set(CMAKE_BUILD_TYPE Debug)
 
+# 设置编译器
+set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # 设置C++标准
 set(CMAKE_CXX_STANDARD 14)
 

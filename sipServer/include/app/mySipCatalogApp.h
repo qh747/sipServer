@@ -3,8 +3,6 @@
 #include <string>
 #include <atomic>
 #include <cstdbool>
-#include <Poller/Timer.h>
-#include <Poller/EventPoller.h>
 #include "common/myTypeDef.h"
 
 namespace MY_APP {
@@ -58,37 +56,40 @@ public:
 
 public:
     /**             
-     * @brief                               处理下级sip服务的sip设备目录请求消息
+     * @brief                               处理下级sip服务的sip设备目录查询请求消息
      * @return                              处理结果，0-success，-1-failed
-     * @param rxDataPtr                     sip设备目录请求消息
+     * @param rxDataPtr                     sip设备目录查询请求消息
      */
-    MY_COMMON::MyStatus_t                   onRecvSipCatalogReqMsg(MY_COMMON::MySipRxDataPtr rxDataPtr);  
+    MY_COMMON::MyStatus_t                   onSipCatalogAppRecvSipCatalogQueryReqMsg(MY_COMMON::MySipRxDataPtr rxDataPtr);  
+
+    /**             
+     * @brief                               处理下级sip服务的sip设备目录响应请求消息
+     * @return                              处理结果，0-success，-1-failed
+     * @param rxDataPtr                     sip设备目录响应请求消息
+     */
+    MY_COMMON::MyStatus_t                   onSipCatalogAppRecvSipCatalogResponseReqMsg(MY_COMMON::MySipRxDataPtr rxDataPtr);  
 
 public:             
     /**                     
-     * @brief                               sip app是否启动
-     * @return                              启动结果，0-success，-1-failed
+     * @brief                               应用是否启动
+     * @return                              获取结果，0-success，-1-failed
+     * @param status                        启动结果，0-success，-1-failed
      */                             
-    inline MY_COMMON::MyStatus_t            getState() const { return m_status.load(); }
+    MY_COMMON::MyStatus_t                   getState(MY_COMMON::MyStatus_t& status) const;
 
     /**             
      * @brief                               获取应用id
-     * @return                              应用id
+     * @return                              获取结果，0-success，-1-failed
+     * @param id                            应用id
      */                 
-    inline std::string                      getId() const { return m_appIdCfg.id; }
+    MY_COMMON::MyStatus_t                   getId(std::string& id) const;
 
     /**             
-     * @brief                               获取sip服务实例
-     * @return                              sip服务实例
+     * @brief                               获取应用
+     * @return                              获取结果，0-success，-1-failed
+     * @param wkPtr                         应用实例
      */             
-    inline SmtWkPtr                         getSipCatalogApp() { return this->shared_from_this(); }
-
-private:
-    /**             
-     * @brief                               定时器回调
-     * @return                              是否继续触发定时器，true-继续，false-停止
-     */             
-    bool                                    onTimer();
+     MY_COMMON::MyStatus_t                  getSipCatalogApp(SmtWkPtr& wkPtr);
 
     /**
      * @brief                               向下级sip服务请求设备目录
@@ -96,8 +97,8 @@ private:
      * @param regLowServCfg                 下级sip注册服务配置
      * @param localServCfg                  本地sip服务地址配置
      */             
-    MY_COMMON::MyStatus_t                   reqLowServCatalog(const MY_COMMON::MySipRegLowServCfg_dt& regLowServCfg, 
-                                                              const MY_COMMON::MySipServAddrCfg_dt&   localServCfg);
+    MY_COMMON::MyStatus_t                   onSipCatalogAppReqLowServCatalog(const MY_COMMON::MySipRegLowServCfg_dt& regLowServCfg, 
+                                                                             const MY_COMMON::MySipServAddrCfg_dt&   localServCfg);
 
     /**
      * @brief                               发送本级sip服务设备目录
@@ -119,12 +120,6 @@ private:
 
     //                                      启动状态 
     std::atomic<MY_COMMON::MyStatus_t>      m_status; 
-
-    //                                      sip设备目录信息
-    MY_COMMON::MySipCatalogInfo_dt          m_catalogInfo;
-
-    //                                      定时器
-    toolkit::Timer::Ptr                     m_timePtr;
 };
 
 }; // namespace MY_APP

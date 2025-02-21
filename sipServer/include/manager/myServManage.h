@@ -41,24 +41,19 @@ public:
 public:
     /**
      * @brief                                       获取SipServer对象
-     * @return                                      std::weak_ptr<MY_SERVER::MySipServer>
+     * @return                                      获取结果，0-success，-1-failed
      * @param servId                                sip服务ID
+     * @param sipServWkPtr                          sip服务弱引用指针
      */
-    static MySipServer::SmtWkPtr                    GetSipServer(const std::string& servId);
+    static MY_COMMON::MyStatus_t                    GetSipServer(const std::string& servId, MySipServer::SmtWkPtr& sipServWkPtr);
 
     /**
      * @brief                                       获取SipServer地址配置
-     * @return                                      MY_COMMON::MySipServAddrCfg_dt
+     * @return                                      获取结果，0-success，-1-failed
      * @param servId                                sip服务ID
+     * @param sipServAddrCfg                        sip服务地址配置
      */
-    static MY_COMMON::MySipServAddrCfg_dt           GetSipServAddrCfg(const std::string& servId);
-
-    /**
-     * @brief                                       获取SipServer内存池
-     * @return                                      MY_COMMON::MySipPoolPtr
-     * @param servId                                sip服务ID
-     */
-    static MY_COMMON::MySipPoolPtr                  GetSipServThdPoolPtr(const std::string& servId);
+    static MY_COMMON::MyStatus_t                    GetSipServAddrCfg(const std::string& servId, MY_COMMON::MySipServAddrCfg_dt& sipServAddrCfg);
 
     /**
      * @brief                                       SipServer对象是否存在

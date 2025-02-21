@@ -4,6 +4,7 @@
 #include "envir/mySystemConfg.h"
 #include "envir/mySystemPjsip.h"
 #include "envir/mySystemSigCatch.h"
+#include "envir/mySystemThreadPool.h"
 #include "manager/myServManage.h"
 #include "manager/myAppManage.h"
 #include "envir/mySystemEnvir.h"
@@ -14,27 +15,29 @@ using MY_MANAGER::MyServManage;
 
 namespace MY_ENVIR {
 
-DEFINE_string(servCfgPath, "", "servCfgPath");
+DEFINE_string(cfg, "", "cfg");
 
 MyStatus_t MySystemEnvir::Init(int argc, char** argv)
 {
     // --------------------------------------------------- 命令行参数解析 -------------------------------------------------------
     gflags::ParseCommandLineFlags(&argc, &argv, true);
-    if (FLAGS_servCfgPath.empty()) {
+    if (FLAGS_cfg.empty()) {
         LOG(ERROR) << "Server envirment init failed. servCfgPath is empty";
         return MyStatus_t::FAILED;
     }
 
     // --------------------------------------------------- 加载配置 ------------------------------------------------------------
-    MyStatus_t status = MySystemConfig::Init(FLAGS_servCfgPath);
+    MyStatus_t status = MySystemConfig::Init(FLAGS_cfg);
     if (MyStatus_t::SUCCESS != status) {
-        LOG(ERROR) << "Server envirment init failed. load config file failed. config path: " << FLAGS_servCfgPath;
+        LOG(ERROR) << "Server envirment init failed. load config file failed. config path: " << FLAGS_cfg;
         return MyStatus_t::FAILED;
     }
  
     // --------------------------------------------------- 日志初始化 -----------------------------------------------------------
     google::InitGoogleLogging("sipServer");
-    const MyServLogCfg_dt& logConfig = MySystemConfig::GetServerLogCfg();
+    MyServLogCfg_dt logConfig;
+    MySystemConfig::GetServerLogCfg(logConfig);
+    
     // 是否将日志输出到文件和stderr
     FLAGS_alsologtostderr  = logConfig.enableOutputToConsole;
     // 是否启用不同颜色显示
@@ -51,6 +54,12 @@ MyStatus_t MySystemEnvir::Init(int argc, char** argv)
     // --------------------------------------------------- 信号处理 ------------------------------------------------------------
     if (MyStatus_t::SUCCESS != MySystemSigCatch::Init()) {
         LOG(ERROR) << "Server envirment init failed. signal catcher init failed";
+        return MyStatus_t::FAILED;
+    }
+
+    // --------------------------------------------------- 线程池初始化 ------------------------------------------------------
+    if (MyStatus_t::SUCCESS != MySystemThdPool::Init()) {
+        LOG(ERROR) << "Server envirment init failed. thread pool system environment init failed";
         return MyStatus_t::FAILED;
     }
 
@@ -106,6 +115,9 @@ MyStatus_t MySystemEnvir::Shutdown()
 
     // pjsip环境关闭
     MySystemPjsip::Shutdown();
+
+    // 线程池关闭
+    MySystemThdPool::Shutdown();
 
     // glog环境关闭
     google::ShutdownGoogleLogging();
