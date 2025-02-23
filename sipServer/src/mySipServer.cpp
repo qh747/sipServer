@@ -16,7 +16,7 @@ using MY_UTILS::MySipServerHelper;
 
 namespace MY_SERVER {
 
-int MySipServer::SipServerThdFunc(MySipEvThdCbParamPtr arg)
+int MySipServer::SipServerThdFunc(MySipCbParamPtr arg)
 {
     if (nullptr == arg) {
         LOG(ERROR) << "SipServerThdFunc() error. arg is invalid.";

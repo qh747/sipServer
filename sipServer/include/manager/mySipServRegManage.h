@@ -89,6 +89,15 @@ public:
      */ 
     static MY_COMMON::MyStatus_t            GetSipRegUpServCfg(const std::string& servId, const std::string& upRegServId, MY_COMMON::MySipRegUpServCfg_dt& upRegServCfg);
 
+    /**     
+     * @brief                               获取上级服务注册配置
+     * @return                              获取结果，success-0, failed-非0
+     * @param servId                        本地服务id
+     * @param upRegServId                   上级服务注册id
+     * @param proto                         上级服务协议类型
+     */ 
+    static MY_COMMON::MyStatus_t            GetSipRegUpServProto(const std::string& servId, const std::string& upRegServId, MY_COMMON::MyTpProto_t& proto);
+
     /**
      * @brief                               获取上级服务注册最后注册时间
      * @return                              获取结果，success-0, failed-非0
@@ -179,7 +188,7 @@ public:
      * @param lowRegServId                  下级服务注册id
      * @param time                          下级服务注册最后注册时间
      */ 
-    static MY_COMMON::MyStatus_t             GetSipRegLowServLastRegTime(const std::string& servId, const std::string& lowRegServId, std::string& time);
+    static MY_COMMON::MyStatus_t            GetSipRegLowServLastRegTime(const std::string& servId, const std::string& lowRegServId, std::string& time);
 
     /** 
      * @brief                               获取下级服务注册时长

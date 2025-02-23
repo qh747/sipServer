@@ -192,7 +192,9 @@ typedef struct MySipDeviceConfigDataType
     //                                                  父设备ID
     std::string                                         parentID;     
     //                                                  平台ID
-    std::string                                         platformID;    
+    std::string                                         platformID;
+    //                                                  所属者
+    std::string                                         owner;   
     //                                                  设备IP地址
     std::string                                         deviceIp;  
     //                                                  设备端口号
@@ -205,6 +207,33 @@ typedef struct MySipDeviceConfigDataType
     std::string                                         longitude;  
     //                                                  设备纬度
     std::string                                         latitude; 
+
+    bool operator==(const MySipDeviceConfigDataType& other) const {
+        if      (status         != other.status)         return false;
+        else if (name           != other.name)           return false;
+        else if (deviceID       != other.deviceID)       return false;
+        else if (parental       != other.parental)       return false;
+        else if (manufacturer   != other.manufacturer)   return false;
+        else if (model          != other.model)          return false;
+        else if (block          != other.block)          return false;
+        else if (safetyWay      != other.safetyWay)      return false;
+        else if (registerWay    != other.registerWay)    return false;
+        else if (secrecy        != other.secrecy)        return false;
+        else if (parentID       != other.parentID)       return false;
+        else if (platformID     != other.platformID)     return false;
+        else if (owner          != other.owner)          return false;
+        else if (deviceIp       != other.deviceIp)       return false;
+        else if (devicePort     != other.devicePort)     return false;
+        else if (deviceChannel  != other.deviceChannel)  return false;
+        else if (deviceStream   != other.deviceStream)   return false;
+        else if (longitude      != other.longitude)      return false; 
+        else if (latitude       != other.latitude)       return false;     
+        else                                             return true;    
+    }
+
+    bool operator!=(const MySipDeviceConfigDataType& other) const {
+        return !(*this == other);
+    }
 
 } MySipCatalogDeviceCfg_dt;     
 
@@ -251,6 +280,8 @@ typedef struct MySipVirtualSubPlatformConfigDataType
     std::string                                         platformIp;    
     //                                                  平台端口号
     int                                                 platformPort;
+    //                                                  所属者
+    std::string                                         owner;
     //                                                  设备IP地址
     std::string                                         deviceIp;  
     //                                                  设备端口号
@@ -265,6 +296,35 @@ typedef struct MySipVirtualSubPlatformConfigDataType
     std::string                                         longitude;  
     //                                                  设备纬度
     std::string                                         latitude;
+
+    bool operator==(const MySipVirtualSubPlatformConfigDataType& other) const {
+        if      (status         != other.status)         return false;
+        else if (name           != other.name)           return false;
+        else if (deviceID       != other.deviceID)       return false;
+        else if (parental       != other.parental)       return false;
+        else if (manufacturer   != other.manufacturer)   return false;
+        else if (model          != other.model)          return false;
+        else if (block          != other.block)          return false;
+        else if (safetyWay      != other.safetyWay)      return false;
+        else if (registerWay    != other.registerWay)    return false;
+        else if (secrecy        != other.secrecy)        return false;
+        else if (parentID       != other.parentID)       return false;
+        else if (platformID     != other.platformID)     return false;
+        else if (platformIp     != other.platformIp)     return false;
+        else if (platformPort   != other.platformPort)   return false;
+        else if (owner          != other.owner)          return false;
+        else if (deviceIp       != other.deviceIp)       return false;
+        else if (devicePort     != other.devicePort)     return false;
+        else if (deviceChannel  != other.deviceChannel)  return false;
+        else if (deviceStream   != other.deviceStream)   return false;
+        else if (longitude      != other.longitude)      return false; 
+        else if (latitude       != other.latitude)       return false;     
+        else                                             return true;    
+    }
+
+    bool operator!=(const MySipVirtualSubPlatformConfigDataType& other) const {
+        return !(*this == other);
+    }
 
 } MySipCatalogVirtualSubPlatCfg_dt; 
 
@@ -301,6 +361,8 @@ typedef struct MySipSubPlatformConfigDataType
     std::string                                         platformIp;  
     //                                                  平台端口号
     int                                                 platformPort;
+    //                                                  所属者
+    std::string                                         owner;
     //                                                  设备IP地址
     std::string                                         deviceIp;  
     //                                                  设备端口号
@@ -313,6 +375,35 @@ typedef struct MySipSubPlatformConfigDataType
     std::string                                         longitude;  
     //                                                  设备纬度
     std::string                                         latitude;
+
+    bool operator==(const MySipSubPlatformConfigDataType& other) const {
+        if      (status         != other.status)         return false;
+        else if (name           != other.name)           return false;
+        else if (deviceID       != other.deviceID)       return false;
+        else if (parental       != other.parental)       return false;
+        else if (manufacturer   != other.manufacturer)   return false;
+        else if (model          != other.model)          return false;
+        else if (block          != other.block)          return false;
+        else if (safetyWay      != other.safetyWay)      return false;
+        else if (registerWay    != other.registerWay)    return false;
+        else if (secrecy        != other.secrecy)        return false;
+        else if (parentID       != other.parentID)       return false;
+        else if (platformID     != other.platformID)     return false;
+        else if (platformIp     != other.platformIp)     return false;
+        else if (platformPort   != other.platformPort)   return false;
+        else if (owner          != other.owner)          return false;
+        else if (deviceIp       != other.deviceIp)       return false;
+        else if (devicePort     != other.devicePort)     return false;
+        else if (deviceChannel  != other.deviceChannel)  return false;
+        else if (deviceStream   != other.deviceStream)   return false;
+        else if (longitude      != other.longitude)      return false; 
+        else if (latitude       != other.latitude)       return false;     
+        else                                             return true;    
+    }
+
+    bool operator!=(const MySipSubPlatformConfigDataType& other) const {
+        return !(*this == other);
+    }
 
 } MySipCatalogSubPlatCfg_dt;    
 
@@ -349,6 +440,8 @@ typedef struct MySipPlatformConfigDataType
     std::string                                         platformIp;  
     //                                                  平台端口号
     int                                                 platformPort;
+    //                                                  所属者
+    std::string                                         owner;
     //                                                  设备IP地址
     std::string                                         deviceIp;  
     //                                                  设备端口号
@@ -361,6 +454,35 @@ typedef struct MySipPlatformConfigDataType
     std::string                                         longitude;  
     //                                                  设备纬度
     std::string                                         latitude;
+
+    bool operator==(const MySipPlatformConfigDataType& other) const {
+        if      (status         != other.status)         return false;
+        else if (name           != other.name)           return false;
+        else if (deviceID       != other.deviceID)       return false;
+        else if (parental       != other.parental)       return false;
+        else if (manufacturer   != other.manufacturer)   return false;
+        else if (model          != other.model)          return false;
+        else if (block          != other.block)          return false;
+        else if (safetyWay      != other.safetyWay)      return false;
+        else if (registerWay    != other.registerWay)    return false;
+        else if (secrecy        != other.secrecy)        return false;
+        else if (parentID       != other.parentID)       return false;
+        else if (platformID     != other.platformID)     return false;
+        else if (platformIp     != other.platformIp)     return false;
+        else if (platformPort   != other.platformPort)   return false;
+        else if (owner          != other.owner)          return false;
+        else if (deviceIp       != other.deviceIp)       return false;
+        else if (devicePort     != other.devicePort)     return false;
+        else if (deviceChannel  != other.deviceChannel)  return false;
+        else if (deviceStream   != other.deviceStream)   return false;
+        else if (longitude      != other.longitude)      return false; 
+        else if (latitude       != other.latitude)       return false;     
+        else                                             return true;    
+    }
+
+    bool operator!=(const MySipPlatformConfigDataType& other) const {
+        return !(*this == other);
+    }
 
 } MySipCatalogPlatCfg_dt;
 

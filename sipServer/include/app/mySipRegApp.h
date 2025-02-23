@@ -41,8 +41,8 @@ public:
      * @param evParamPtr                    回调参数
      * @param evPtr                         回调事件
      */ 
-    static void                             OnKeepAliveRespCb(MY_COMMON::MySipEvThdCbParamPtr evParamPtr, 
-                                                              MY_COMMON::MySipEvPtr           evPtr);
+    static void                             OnKeepAliveRespCb(MY_COMMON::MySipCbParamPtr evParamPtr, 
+                                                              MY_COMMON::MySipEvPtr      evPtr);
 
 public:
     MySipRegApp();

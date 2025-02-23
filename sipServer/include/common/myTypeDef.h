@@ -1,5 +1,6 @@
 #pragma once
 #include <map>
+#include <atomic>
 #include <string>
 #include <memory>
 #include <pjsip.h>
@@ -32,10 +33,11 @@ typedef         pjsip_www_authenticate_hdr*                                 MySi
 typedef         pjsip_regc_cbparam*                                         MySipRegCbParamPtr;
 typedef         pjsip_transaction*                                          MySipTsxPtr;
 typedef         pj_thread_t*                                                MySipThdPtr; 
-typedef         void*                                                       MySipEvThdCbParamPtr;
+typedef         void*                                                       MySipCbParamPtr;
 
 typedef         MySipServAddrCfg_dt*                                        MySipServAddrCfgPtr;
 typedef         MySipRegUpServCfg_dt*                                       MySipRegUpServCfgPtr;
+typedef         std::atomic<MyStatus_t>*                                    MySipStatusPtr;
 typedef         std::shared_ptr<pjsip_module>                               MySipModSmtPtr;
 typedef         std::shared_ptr<MySipUpRegServInfo_dt>                      MySipUpRegServInfoSmtPtr;
 typedef         std::shared_ptr<MySipLowRegServInfo_dt>                     MySipLowRegServInfoSmtPtr;

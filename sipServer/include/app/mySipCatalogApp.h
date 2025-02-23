@@ -18,11 +18,32 @@ public:
 
 public:
     /**
-     * @brief                               sip catalog应用线程回调函数
+     * @brief                               sip catalog应用推送设备目录线程回调函数
      * @return                              回调结果，0-success，-1-failed
      * @param arg                           回调参数
      */
-    static int                              SipCatalogAppThdFunc(MY_COMMON::MySipEvThdCbParamPtr arg);
+    static int                              SipCatalogAppPushCatalogThdFunc(MY_COMMON::MySipCbParamPtr arg);
+
+    /**
+     * @brief                               sip catalog应用推送设备目录回调函数
+     * @param arg                           回调参数
+     * @param ev                            回调事件
+     */
+    static void                             OnSipCatalogAppPushCatalogCb(MY_COMMON::MySipCbParamPtr arg, MY_COMMON::MySipEvPtr ev);
+
+    /**
+     * @brief                               sip catalog应用更新设备目录线程回调函数
+     * @return                              回调结果，0-success，-1-failed
+     * @param arg                           回调参数
+     */
+    static int                              SipCatalogAppUpdateCatalogThdFunc(MY_COMMON::MySipCbParamPtr arg);
+
+    /**
+     * @brief                               sip catalog应用更新设备目录回调函数
+     * @param arg                           回调参数
+     * @param ev                            回调事件
+     */
+    static void                             OnSipCatalogAppUpdateCatalogCb(MY_COMMON::MySipCbParamPtr arg, MY_COMMON::MySipEvPtr ev);
 
 public:
     MySipCatalogApp();

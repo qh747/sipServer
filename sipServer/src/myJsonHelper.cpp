@@ -245,6 +245,7 @@ MyStatus_t MyJsonHelper::ParseSipServCatalogJsonFile(const std::string&         
             cfg.platformID    = curPlatNode["platformID"].asString();
             cfg.platformIp    = curPlatNode["platformIp"].asString();
             cfg.platformPort  = curPlatNode["platformPort"].asInt();
+            cfg.owner         = curPlatNode["owner"].asString();
             cfg.deviceIp      = curPlatNode["deviceIp"].asString();
             cfg.devicePort    = curPlatNode["devicePort"].asInt();
             cfg.deviceChannel = curPlatNode["deviceChannel"].asInt();
@@ -290,6 +291,7 @@ MyStatus_t MyJsonHelper::ParseSipServCatalogJsonFile(const std::string&         
             cfg.platformID    = curSubPlatNode["platformID"].asString();
             cfg.platformIp    = curSubPlatNode["platformIp"].asString();
             cfg.platformPort  = curSubPlatNode["platformPort"].asInt();
+            cfg.owner         = curSubPlatNode["owner"].asString();
             cfg.deviceIp      = curSubPlatNode["deviceIp"].asString();
             cfg.devicePort    = curSubPlatNode["devicePort"].asInt();
             cfg.deviceChannel = curSubPlatNode["deviceChannel"].asInt();
@@ -335,6 +337,7 @@ MyStatus_t MyJsonHelper::ParseSipServCatalogJsonFile(const std::string&         
             cfg.platformID    = curSubVirtualPlatNode["platformID"].asString();
             cfg.platformIp    = curSubVirtualPlatNode["platformIp"].asString();
             cfg.platformPort  = curSubVirtualPlatNode["platformPort"].asInt();
+            cfg.owner         = curSubVirtualPlatNode["owner"].asString();
             cfg.deviceIp      = curSubVirtualPlatNode["deviceIp"].asString();
             cfg.devicePort    = curSubVirtualPlatNode["devicePort"].asInt();
             cfg.deviceChannel = curSubVirtualPlatNode["deviceChannel"].asInt();
@@ -392,6 +395,7 @@ MyStatus_t MyJsonHelper::ParseSipServCatalogJsonFile(const std::string&         
             cfg.deviceID      = curDeviceNode["deviceID"].asString();
             cfg.parentID      = curDeviceNode["parentID"].asString();
             cfg.platformID    = curDeviceNode["platformID"].asString();
+            cfg.owner         = curDeviceNode["owner"].asString();
             cfg.deviceIp      = curDeviceNode["deviceIp"].asString();
             cfg.devicePort    = curDeviceNode["devicePort"].asInt();
             cfg.deviceChannel = curDeviceNode["deviceChannel"].asInt();

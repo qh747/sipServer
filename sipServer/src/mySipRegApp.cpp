@@ -7,6 +7,7 @@
 #include "envir/mySystemPjsip.h"
 #include "manager/myServManage.h"
 #include "manager/mySipServRegManage.h"
+#include "manager/mySipServCatalogManager.h"
 #include "utils/myXmlHelper.h"
 #include "utils/myTimeHelper.h"
 #include "utils/mySipAppHelper.h"
@@ -23,6 +24,7 @@ using MY_ENVIR::MySystemPjsip;
 using MY_ENVIR::MySystemConfig;
 using MY_MANAGER::MyServManage;
 using MY_MANAGER::MySipServRegManage;
+using MY_MANAGER::MySipServCatalogManage;
 
 namespace MY_APP {
 
@@ -63,7 +65,7 @@ pj_status_t MySipRegApp::OnRegFillAuthInfoCb(MySipPoolPtr poolPtr, MySipStrCstPt
     return PJ_SUCCESS;
 }
 
-void MySipRegApp::OnKeepAliveRespCb(MySipEvThdCbParamPtr evParamPtr, MySipEvPtr evPtr)
+void MySipRegApp::OnKeepAliveRespCb(MySipCbParamPtr evParamPtr, MySipEvPtr evPtr)
 {
     MySipRegUpServCfgPtr sipRegUpServCfgPtr = static_cast<MySipRegUpServCfgPtr>(evParamPtr); 
 
@@ -210,6 +212,10 @@ MyStatus_t MySipRegApp::shutdown()
     if (nullptr != m_timePtr) {
         m_timePtr.reset();
     }
+
+    std::string appInfo;
+    MySipAppHelper::GetSipAppInfo(m_appIdCfg, appInfo);
+    LOG(INFO) << "Sip app module shutdown success. " << appInfo << ".";
 
     return MyStatus_t::SUCCESS;
 }
@@ -393,8 +399,7 @@ bool MySipRegApp::onTimer()
     
     MySipRegUpServCfgMap regUpServMap;
     if (MyStatus_t::SUCCESS != MySipServRegManage::GetSipRegUpServCfgMap(m_servId, regUpServMap)) {
-        LOG(ERROR) << "Sip reg app module keepAlive up server failed. get sip reg up serv cfg map failed. " << m_servId << ".";
-        return false;
+        return true;
     }
     
     for (const auto& pair : regUpServMap) {
@@ -439,8 +444,7 @@ bool MySipRegApp::onTimer()
     // 获取下级sip服务配置
     MySipRegLowServCfgMap regLowServMap;
     if (MyStatus_t::SUCCESS != MySipServRegManage::GetSipRegLowServCfgMap(m_servId, regLowServMap)) {
-        LOG(ERROR) << "Sip reg app module keepAlive up server failed. get sip reg low serv cfg map failed. " << m_servId << ".";
-        return false;
+        return true;
     }
     
     for (const auto& pair : regLowServMap) {
@@ -473,13 +477,14 @@ bool MySipRegApp::onTimer()
             LOG(ERROR) << "Sip reg app module erase invalid sip low server. sip low server timeout."<< lowRegServInfoStr << ".";
 
             MySipServRegManage::DelSipRegLowServInfo(m_servId, pair.first);
+            MySipServCatalogManage::DelSipServCatalogInfo(pair.first);
             continue;
         }
     }
     return true;
 }
 
-MyStatus_t MySipRegApp::onLowSipServRegSuccess(const MY_COMMON::MySipRegLowServCfg_dt& sipRegLowServCfg)
+MyStatus_t MySipRegApp::onLowSipServRegSuccess(const MySipRegLowServCfg_dt& sipRegLowServCfg)
 {
     std::string lowRegServInfoStr;
     MySipServerHelper::GetSipLowRegServInfo(sipRegLowServCfg, lowRegServInfoStr);
@@ -696,7 +701,7 @@ MyStatus_t MySipRegApp::onRecvSipRegReqMsg(MySipRxDataPtr rxDataPtr)
     return MyStatus_t::SUCCESS;
 }
 
-MyStatus_t MySipRegApp::onSipRegAppRecvSipKeepAliveReqMsg(MY_COMMON::MySipRxDataPtr rxDataPtr)
+MyStatus_t MySipRegApp::onSipRegAppRecvSipKeepAliveReqMsg(MySipRxDataPtr rxDataPtr)
 {
     MySipKeepAliveMsgBody_dt keepAliveMsgBody;
     if (MyStatus_t::SUCCESS != MyXmlHelper::ParseSipKeepAliveMsgBody(static_cast<char*>(rxDataPtr->msg_info.msg->body->data), keepAliveMsgBody)) {

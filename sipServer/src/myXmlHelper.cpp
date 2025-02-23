@@ -290,7 +290,7 @@ MyStatus_t MyXmlHelper::GenerateSipCatalogPlatCfgMsgBody(const MY_COMMON::MySipC
 
     // 创建子节点item的子节点Owner
     tinyxml2::XMLElement* itemOwnerElem = doc.NewElement("Owner");
-    itemOwnerElem->SetText("Owner");
+    itemOwnerElem->SetText(platCfg.owner.c_str());
     itemElem->InsertEndChild(itemOwnerElem);
 
     // 创建子节点item的子节点CivilCode
@@ -314,6 +314,11 @@ MyStatus_t MyXmlHelper::GenerateSipCatalogPlatCfgMsgBody(const MY_COMMON::MySipC
         itemParentIdElem->SetText(platCfg.parentID.c_str());
         itemElem->InsertEndChild(itemParentIdElem);
     }
+
+    // 创建子节点item的子节点PlatformID
+    tinyxml2::XMLElement* itemPlatformIdElem = doc.NewElement("PlatformID");
+    itemPlatformIdElem->SetText(platCfg.platformID.c_str());
+    itemElem->InsertEndChild(itemPlatformIdElem);
 
     // 创建子节点item的子节点SafetyWay
     tinyxml2::XMLElement* itemSafetyWayElem = doc.NewElement("SafetyWay");
@@ -339,121 +344,6 @@ MyStatus_t MyXmlHelper::GenerateSipCatalogPlatCfgMsgBody(const MY_COMMON::MySipC
     tinyxml2::XMLPrinter printer;
     doc.Print(&printer);
     msgBody = printer.CStr();
-    return MyStatus_t::SUCCESS;
-}
-
-MyStatus_t MyXmlHelper::ParseSipCatalogPlatCfgMsgBody(const std::string& xmlStr, MySipCatalogPlatCfgMsgBody_dt& catalogPlatCfgMsgBody)
-{
-    tinyxml2::XMLDocument doc;
-
-    // 解析XML数据
-    if (tinyxml2::XML_SUCCESS != doc.Parse(xmlStr.c_str())) {
-        return MyStatus_t::FAILED;
-    }
-
-    // 获取根元素
-    tinyxml2::XMLElement* root = doc.RootElement();
-    if (nullptr == root) {
-        return MyStatus_t::FAILED;
-    }
-
-    // 获取子元素
-    tinyxml2::XMLElement* cmdTypeElement = root->FirstChildElement("CmdType");
-    if (nullptr != cmdTypeElement) {
-        catalogPlatCfgMsgBody.cmdType = cmdTypeElement->GetText();
-    }
-
-    tinyxml2::XMLElement* deviceIDElement = root->FirstChildElement("DeviceID");
-    if (nullptr != deviceIDElement) {
-        catalogPlatCfgMsgBody.deviceId = deviceIDElement->GetText();
-    }
-
-    tinyxml2::XMLElement* snElement = root->FirstChildElement("SN");
-    if (nullptr != snElement) {
-        catalogPlatCfgMsgBody.sn = snElement->GetText();
-    }
-
-    tinyxml2::XMLElement* sumNumElement = root->FirstChildElement("SumNum");
-    if (nullptr != sumNumElement) {
-        catalogPlatCfgMsgBody.sumNum = std::stoul(sumNumElement->GetText());
-    }
-
-    tinyxml2::XMLElement* deviceListElement = root->FirstChildElement("DeviceList");
-    if (nullptr != deviceListElement) {
-        catalogPlatCfgMsgBody.deviceList = std::stoul(deviceListElement->GetText());
-    }
-
-    std::size_t deviceCount = std::stoul(deviceListElement->Attribute("Num"));
-    if (0 == deviceCount) {
-        return MyStatus_t::FAILED;
-    }
-
-    // 获取子元素item
-    tinyxml2::XMLElement* itemElement = root->FirstChildElement("Item");
-    while (nullptr != itemElement) {
-        // 配置解析
-        MySipCatalogPlatCfg_dt platCfg;
-
-        tinyxml2::XMLElement* itemDeviceIdElement = itemElement->FirstChildElement("DeviceID");
-        if (nullptr != itemDeviceIdElement) {
-            platCfg.deviceID = itemDeviceIdElement->GetText();
-        }
-
-        tinyxml2::XMLElement* itemNameElement = itemElement->FirstChildElement("Name");
-        if (nullptr != itemNameElement) {
-            platCfg.name = itemNameElement->GetText();
-        }
-
-        tinyxml2::XMLElement* itemManufacturerElement = itemElement->FirstChildElement("Manufacturer");
-        if (nullptr != itemManufacturerElement) {
-            platCfg.manufacturer = itemManufacturerElement->GetText();
-        }
-
-        tinyxml2::XMLElement* itemModelElement = itemElement->FirstChildElement("Model");
-        if (nullptr != itemModelElement) {
-            platCfg.model = itemModelElement->GetText();
-        }
-
-        tinyxml2::XMLElement* itemParentalElement = itemElement->FirstChildElement("Parental");
-        if (nullptr != itemParentalElement) {
-            platCfg.parental = std::stoi(itemParentalElement->GetText());
-        }
-
-        if (0 != platCfg.parental) {
-            tinyxml2::XMLElement* itemParentIdElement = itemElement->FirstChildElement("ParentID");
-            if (nullptr != itemParentIdElement) {
-                platCfg.parentID = itemParentIdElement->GetText();
-            }
-        }
-
-        tinyxml2::XMLElement* itemSafetyWayElement = itemElement->FirstChildElement("SafetyWay");
-        if (nullptr != itemSafetyWayElement) {
-            platCfg.safetyWay = std::stoi(itemSafetyWayElement->GetText());
-        }
-
-        tinyxml2::XMLElement* itemRegisterWayElement = itemElement->FirstChildElement("RegisterWay");
-        if (nullptr != itemRegisterWayElement) {
-            platCfg.registerWay = std::stoi(itemRegisterWayElement->GetText());
-        }
-
-        tinyxml2::XMLElement* itemSecrecyElement = itemElement->FirstChildElement("Secrecy");
-        if (nullptr != itemSecrecyElement) {
-            platCfg.secrecy = std::stoi(itemSecrecyElement->GetText());
-        }
-
-        tinyxml2::XMLElement* itemStatusElement = itemElement->FirstChildElement("Status");
-        if (nullptr != itemStatusElement) {
-            platCfg.status = itemStatusElement->GetText();
-        }
-
-        // 添加配置
-        if (catalogPlatCfgMsgBody.platCfgMap.end() == catalogPlatCfgMsgBody.platCfgMap.find(platCfg.deviceID)) {
-            catalogPlatCfgMsgBody.platCfgMap.insert(std::make_pair(platCfg.deviceID, platCfg));
-        }
-
-        // 移动到下一个 <Item>
-        itemElement = itemElement->NextSiblingElement("Item");
-    }
     return MyStatus_t::SUCCESS;
 }
 
@@ -521,7 +411,7 @@ MyStatus_t MyXmlHelper::GenerateSipCatalogSubPlatCfgMsgBody(const MySipCatalogSu
 
     // 创建子节点item的子节点Owner
     tinyxml2::XMLElement* itemOwnerElem = doc.NewElement("Owner");
-    itemOwnerElem->SetText("Owner");
+    itemOwnerElem->SetText(subPlatCfg.owner.c_str());
     itemElem->InsertEndChild(itemOwnerElem);
 
     // 创建子节点item的子节点CivilCode
@@ -545,6 +435,11 @@ MyStatus_t MyXmlHelper::GenerateSipCatalogSubPlatCfgMsgBody(const MySipCatalogSu
         itemParentIdElem->SetText(subPlatCfg.parentID.c_str());
         itemElem->InsertEndChild(itemParentIdElem);
     }
+
+    // 创建子节点item的子节点PlatformID
+    tinyxml2::XMLElement* itemPlatformIdElem = doc.NewElement("PlatformID");
+    itemPlatformIdElem->SetText(subPlatCfg.platformID.c_str());
+    itemElem->InsertEndChild(itemPlatformIdElem);
 
     // 创建子节点item的子节点SafetyWay
     tinyxml2::XMLElement* itemSafetyWayElem = doc.NewElement("SafetyWay");
@@ -570,119 +465,6 @@ MyStatus_t MyXmlHelper::GenerateSipCatalogSubPlatCfgMsgBody(const MySipCatalogSu
     tinyxml2::XMLPrinter printer;
     doc.Print(&printer);
     msgBody = printer.CStr();
-    return MyStatus_t::SUCCESS;
-}
-
-MyStatus_t MyXmlHelper::ParseSipCatalogSubPlatCfgMsgBody(const std::string& xmlStr, MySipCatalogSubPlatCfgMsgBody_dt& catalogSubPlatCfgMsgBody)
-{
-    tinyxml2::XMLDocument doc;
-
-    // 解析XML数据
-    if (tinyxml2::XML_SUCCESS != doc.Parse(xmlStr.c_str())) {
-        return MyStatus_t::FAILED;
-    }
-
-    // 获取根元素
-    tinyxml2::XMLElement* root = doc.RootElement();
-    if (nullptr == root) {
-        return MyStatus_t::FAILED;
-    }
-
-    // 获取子元素
-    tinyxml2::XMLElement* cmdTypeElement = root->FirstChildElement("CmdType");
-    if (nullptr != cmdTypeElement) {
-        catalogSubPlatCfgMsgBody.cmdType = cmdTypeElement->GetText();
-    }
-
-    tinyxml2::XMLElement* deviceIDElement = root->FirstChildElement("DeviceID");
-    if (nullptr != deviceIDElement) {
-        catalogSubPlatCfgMsgBody.deviceId = deviceIDElement->GetText();
-    }
-
-    tinyxml2::XMLElement* snElement = root->FirstChildElement("SN");
-    if (nullptr != snElement) {
-        catalogSubPlatCfgMsgBody.sn = snElement->GetText();
-    }
-
-    tinyxml2::XMLElement* sumNumElement = root->FirstChildElement("SumNum");
-    if (nullptr != sumNumElement) {
-        catalogSubPlatCfgMsgBody.sumNum = std::stoul(sumNumElement->GetText());
-    }
-
-    tinyxml2::XMLElement* deviceListElement = root->FirstChildElement("DeviceList");
-    if (nullptr != deviceListElement) {
-        catalogSubPlatCfgMsgBody.deviceList = std::stoul(deviceListElement->GetText());
-    }
-
-    std::size_t deviceCount = std::stoul(deviceListElement->Attribute("Num"));
-    if (0 == deviceCount) {
-        return MyStatus_t::FAILED;
-    }
-
-    // 获取子元素item
-    tinyxml2::XMLElement* itemElement = root->FirstChildElement("Item");
-    while (nullptr != itemElement) {
-        // 配置解析
-        MySipCatalogSubPlatCfg_dt subPlatCfg;
-
-        tinyxml2::XMLElement* itemDeviceIdElement = itemElement->FirstChildElement("DeviceID");
-        if (nullptr != itemDeviceIdElement) {
-            subPlatCfg.deviceID = itemDeviceIdElement->GetText();
-        }
-
-        tinyxml2::XMLElement* itemNameElement = itemElement->FirstChildElement("Name");
-        if (nullptr != itemNameElement) {
-            subPlatCfg.name = itemNameElement->GetText();
-        }
-
-        tinyxml2::XMLElement* itemManufacturerElement = itemElement->FirstChildElement("Manufacturer");
-        if (nullptr != itemManufacturerElement) {
-            subPlatCfg.manufacturer = itemManufacturerElement->GetText();
-        }
-
-        tinyxml2::XMLElement* itemModelElement = itemElement->FirstChildElement("Model");
-        if (nullptr != itemModelElement) {
-            subPlatCfg.model = itemModelElement->GetText();
-        }
-
-        tinyxml2::XMLElement* itemParentalElement = itemElement->FirstChildElement("Parental");
-        if (nullptr != itemParentalElement) {
-            subPlatCfg.parental = std::stoi(itemParentalElement->GetText());
-        }
-
-        tinyxml2::XMLElement* itemParentIdElement = itemElement->FirstChildElement("ParentID");
-        if (nullptr != itemParentIdElement) {
-            subPlatCfg.parentID = itemParentIdElement->GetText();
-        }
-
-        tinyxml2::XMLElement* itemSafetyWayElement = itemElement->FirstChildElement("SafetyWay");
-        if (nullptr != itemSafetyWayElement) {
-            subPlatCfg.safetyWay = std::stoi(itemSafetyWayElement->GetText());
-        }
-
-        tinyxml2::XMLElement* itemRegisterWayElement = itemElement->FirstChildElement("RegisterWay");
-        if (nullptr != itemRegisterWayElement) {
-            subPlatCfg.registerWay = std::stoi(itemRegisterWayElement->GetText());
-        }
-
-        tinyxml2::XMLElement* itemSecrecyElement = itemElement->FirstChildElement("Secrecy");
-        if (nullptr != itemSecrecyElement) {
-            subPlatCfg.secrecy = std::stoi(itemSecrecyElement->GetText());
-        }
-
-        tinyxml2::XMLElement* itemStatusElement = itemElement->FirstChildElement("Status");
-        if (nullptr != itemStatusElement) {
-            subPlatCfg.status = itemStatusElement->GetText();
-        }
-
-        // 添加配置
-        if (catalogSubPlatCfgMsgBody.subPlatCfgMap.end() == catalogSubPlatCfgMsgBody.subPlatCfgMap.find(subPlatCfg.deviceID)) {
-            catalogSubPlatCfgMsgBody.subPlatCfgMap.insert(std::make_pair(subPlatCfg.deviceID, subPlatCfg));
-        }
-
-        // 移动到下一个 <Item>
-        itemElement = itemElement->NextSiblingElement("Item");
-    }
     return MyStatus_t::SUCCESS;
 }
 
@@ -750,7 +532,7 @@ MyStatus_t MyXmlHelper::GenerateSipCatalogSubVirtualPlatCfgMsgBody(const MySipCa
 
     // 创建子节点item的子节点Owner
     tinyxml2::XMLElement* itemOwnerElem = doc.NewElement("Owner");
-    itemOwnerElem->SetText("Owner");
+    itemOwnerElem->SetText(subVirtualPlatCfg.owner.c_str());
     itemElem->InsertEndChild(itemOwnerElem);
 
     // 创建子节点item的子节点CivilCode
@@ -774,6 +556,11 @@ MyStatus_t MyXmlHelper::GenerateSipCatalogSubVirtualPlatCfgMsgBody(const MySipCa
         itemParentIdElem->SetText(subVirtualPlatCfg.parentID.c_str());
         itemElem->InsertEndChild(itemParentIdElem);
     }
+
+    // 创建子节点item的子节点PlatformID
+    tinyxml2::XMLElement* itemPlatformIdElem = doc.NewElement("PlatformID");
+    itemPlatformIdElem->SetText(subVirtualPlatCfg.platformID.c_str());
+    itemElem->InsertEndChild(itemPlatformIdElem);
 
     // 创建子节点item的子节点SafetyWay
     tinyxml2::XMLElement* itemSafetyWayElem = doc.NewElement("SafetyWay");
@@ -799,119 +586,6 @@ MyStatus_t MyXmlHelper::GenerateSipCatalogSubVirtualPlatCfgMsgBody(const MySipCa
     tinyxml2::XMLPrinter printer;
     doc.Print(&printer);
     msgBody = printer.CStr();
-    return MyStatus_t::SUCCESS;
-}
-
-MyStatus_t MyXmlHelper::ParseSipCatalogSubVirtualPlatCfgMsgBody(const std::string& xmlStr, MySipCatalogSubVirtualPlatCfgMsgBody_dt& catalogSubVirtualPlatCfgMsgBody)
-{
-    tinyxml2::XMLDocument doc;
-
-    // 解析XML数据
-    if (tinyxml2::XML_SUCCESS != doc.Parse(xmlStr.c_str())) {
-        return MyStatus_t::FAILED;
-    }
-
-    // 获取根元素
-    tinyxml2::XMLElement* root = doc.RootElement();
-    if (nullptr == root) {
-        return MyStatus_t::FAILED;
-    }
-
-    // 获取子元素
-    tinyxml2::XMLElement* cmdTypeElement = root->FirstChildElement("CmdType");
-    if (nullptr != cmdTypeElement) {
-        catalogSubVirtualPlatCfgMsgBody.cmdType = cmdTypeElement->GetText();
-    }
-
-    tinyxml2::XMLElement* deviceIDElement = root->FirstChildElement("DeviceID");
-    if (nullptr != deviceIDElement) {
-        catalogSubVirtualPlatCfgMsgBody.deviceId = deviceIDElement->GetText();
-    }
-
-    tinyxml2::XMLElement* snElement = root->FirstChildElement("SN");
-    if (nullptr != snElement) {
-        catalogSubVirtualPlatCfgMsgBody.sn = snElement->GetText();
-    }
-
-    tinyxml2::XMLElement* sumNumElement = root->FirstChildElement("SumNum");
-    if (nullptr != sumNumElement) {
-        catalogSubVirtualPlatCfgMsgBody.sumNum = std::stoul(sumNumElement->GetText());
-    }
-
-    tinyxml2::XMLElement* deviceListElement = root->FirstChildElement("DeviceList");
-    if (nullptr != deviceListElement) {
-        catalogSubVirtualPlatCfgMsgBody.deviceList = std::stoul(deviceListElement->GetText());
-    }
-
-    std::size_t deviceCount = std::stoul(deviceListElement->Attribute("Num"));
-    if (0 == deviceCount) {
-        return MyStatus_t::FAILED;
-    }
-
-    // 获取子元素item
-    tinyxml2::XMLElement* itemElement = root->FirstChildElement("Item");
-    while (nullptr != itemElement) {
-        // 配置解析
-        MySipCatalogVirtualSubPlatCfg_dt subVirtualPlatCfg;
-
-        tinyxml2::XMLElement* itemDeviceIdElement = itemElement->FirstChildElement("DeviceID");
-        if (nullptr != itemDeviceIdElement) {
-            subVirtualPlatCfg.deviceID = itemDeviceIdElement->GetText();
-        }
-
-        tinyxml2::XMLElement* itemNameElement = itemElement->FirstChildElement("Name");
-        if (nullptr != itemNameElement) {
-            subVirtualPlatCfg.name = itemNameElement->GetText();
-        }
-
-        tinyxml2::XMLElement* itemManufacturerElement = itemElement->FirstChildElement("Manufacturer");
-        if (nullptr != itemManufacturerElement) {
-            subVirtualPlatCfg.manufacturer = itemManufacturerElement->GetText();
-        }
-
-        tinyxml2::XMLElement* itemModelElement = itemElement->FirstChildElement("Model");
-        if (nullptr != itemModelElement) {
-            subVirtualPlatCfg.model = itemModelElement->GetText();
-        }
-
-        tinyxml2::XMLElement* itemParentalElement = itemElement->FirstChildElement("Parental");
-        if (nullptr != itemParentalElement) {
-            subVirtualPlatCfg.parental = std::stoi(itemParentalElement->GetText());
-        }
-
-        tinyxml2::XMLElement* itemParentIdElement = itemElement->FirstChildElement("ParentID");
-        if (nullptr != itemParentIdElement) {
-            subVirtualPlatCfg.parentID = itemParentIdElement->GetText();
-        }
-
-        tinyxml2::XMLElement* itemSafetyWayElement = itemElement->FirstChildElement("SafetyWay");
-        if (nullptr != itemSafetyWayElement) {
-            subVirtualPlatCfg.safetyWay = std::stoi(itemSafetyWayElement->GetText());
-        }
-
-        tinyxml2::XMLElement* itemRegisterWayElement = itemElement->FirstChildElement("RegisterWay");
-        if (nullptr != itemRegisterWayElement) {
-            subVirtualPlatCfg.registerWay = std::stoi(itemRegisterWayElement->GetText());
-        }
-
-        tinyxml2::XMLElement* itemSecrecyElement = itemElement->FirstChildElement("Secrecy");
-        if (nullptr != itemSecrecyElement) {
-            subVirtualPlatCfg.secrecy = std::stoi(itemSecrecyElement->GetText());
-        }
-
-        tinyxml2::XMLElement* itemStatusElement = itemElement->FirstChildElement("Status");
-        if (nullptr != itemStatusElement) {
-            subVirtualPlatCfg.status = itemStatusElement->GetText();
-        }
-
-        // 添加配置
-        if (catalogSubVirtualPlatCfgMsgBody.subVirtualPlatCfgMap.end() == catalogSubVirtualPlatCfgMsgBody.subVirtualPlatCfgMap.find(subVirtualPlatCfg.deviceID)) {
-            catalogSubVirtualPlatCfgMsgBody.subVirtualPlatCfgMap.insert(std::make_pair(subVirtualPlatCfg.deviceID, subVirtualPlatCfg));
-        }
-
-        // 移动到下一个 <Item>
-        itemElement = itemElement->NextSiblingElement("Item");
-    }
     return MyStatus_t::SUCCESS;
 }
 
@@ -979,7 +653,7 @@ MyStatus_t MyXmlHelper::GenerateSipCatalogDeviceCfgMsgBody(const MySipCatalogDev
 
     // 创建子节点item的子节点Owner
     tinyxml2::XMLElement* itemOwnerElem = doc.NewElement("Owner");
-    itemOwnerElem->SetText("Owner");
+    itemOwnerElem->SetText(deviceCfg.owner.c_str());
     itemElem->InsertEndChild(itemOwnerElem);
 
     // 创建子节点item的子节点CivilCode
@@ -1003,6 +677,11 @@ MyStatus_t MyXmlHelper::GenerateSipCatalogDeviceCfgMsgBody(const MySipCatalogDev
         itemParentIdElem->SetText(deviceCfg.parentID.c_str());
         itemElem->InsertEndChild(itemParentIdElem);
     }
+
+    // 创建子节点item的子节点PlatformID
+    tinyxml2::XMLElement* itemPlatformIdElem = doc.NewElement("PlatformID");
+    itemPlatformIdElem->SetText(deviceCfg.platformID.c_str());
+    itemElem->InsertEndChild(itemPlatformIdElem);
 
     // 创建子节点item的子节点SafetyWay
     tinyxml2::XMLElement* itemSafetyWayElem = doc.NewElement("SafetyWay");
@@ -1031,7 +710,7 @@ MyStatus_t MyXmlHelper::GenerateSipCatalogDeviceCfgMsgBody(const MySipCatalogDev
     return MyStatus_t::SUCCESS;
 }
 
-MyStatus_t MyXmlHelper::ParseSipCatalogDeviceCfgMsgBody(const std::string& xmlStr, MySipCatalogDeviceCfgMsgBody_dt& catalogDeviceCfgMsgBody)
+MyStatus_t MyXmlHelper::ParseSipCatalogRespMsgBody(const std::string& xmlStr, MySipCatalogRespMsgBody_dt& catalogRespMsgBody)
 {
     tinyxml2::XMLDocument doc;
 
@@ -1049,95 +728,192 @@ MyStatus_t MyXmlHelper::ParseSipCatalogDeviceCfgMsgBody(const std::string& xmlSt
     // 获取子元素
     tinyxml2::XMLElement* cmdTypeElement = root->FirstChildElement("CmdType");
     if (nullptr != cmdTypeElement) {
-        catalogDeviceCfgMsgBody.cmdType = cmdTypeElement->GetText();
+        catalogRespMsgBody.cmdType = cmdTypeElement->GetText();
     }
 
     tinyxml2::XMLElement* deviceIDElement = root->FirstChildElement("DeviceID");
     if (nullptr != deviceIDElement) {
-        catalogDeviceCfgMsgBody.deviceId = deviceIDElement->GetText();
+        catalogRespMsgBody.deviceId = deviceIDElement->GetText();
     }
 
     tinyxml2::XMLElement* snElement = root->FirstChildElement("SN");
     if (nullptr != snElement) {
-        catalogDeviceCfgMsgBody.sn = snElement->GetText();
+        catalogRespMsgBody.sn = snElement->GetText();
     }
 
     tinyxml2::XMLElement* sumNumElement = root->FirstChildElement("SumNum");
     if (nullptr != sumNumElement) {
-        catalogDeviceCfgMsgBody.sumNum = std::stoul(sumNumElement->GetText());
+        catalogRespMsgBody.sumNum = std::stoul(sumNumElement->GetText());
     }
 
     tinyxml2::XMLElement* deviceListElement = root->FirstChildElement("DeviceList");
     if (nullptr != deviceListElement) {
-        catalogDeviceCfgMsgBody.deviceList = std::stoul(deviceListElement->GetText());
-    }
-
-    std::size_t deviceCount = std::stoul(deviceListElement->Attribute("Num"));
-    if (0 == deviceCount) {
-        return MyStatus_t::FAILED;
+        catalogRespMsgBody.deviceList = std::stoul(deviceListElement->Attribute("Num"));
     }
 
     // 获取子元素item
     tinyxml2::XMLElement* itemElement = root->FirstChildElement("Item");
     while (nullptr != itemElement) {
-        // 配置解析
-        MySipCatalogDeviceCfg_dt deviceCfg;
-
+        std::string deviceID;
         tinyxml2::XMLElement* itemDeviceIdElement = itemElement->FirstChildElement("DeviceID");
         if (nullptr != itemDeviceIdElement) {
-            deviceCfg.deviceID = itemDeviceIdElement->GetText();
+            deviceID = itemDeviceIdElement->GetText();
         }
 
+        std::string name;
         tinyxml2::XMLElement* itemNameElement = itemElement->FirstChildElement("Name");
         if (nullptr != itemNameElement) {
-            deviceCfg.name = itemNameElement->GetText();
+            name = itemNameElement->GetText();
         }
 
+        std::string manufacturer;
         tinyxml2::XMLElement* itemManufacturerElement = itemElement->FirstChildElement("Manufacturer");
         if (nullptr != itemManufacturerElement) {
-            deviceCfg.manufacturer = itemManufacturerElement->GetText();
+            manufacturer = itemManufacturerElement->GetText();
         }
 
+        std::string model;
         tinyxml2::XMLElement* itemModelElement = itemElement->FirstChildElement("Model");
         if (nullptr != itemModelElement) {
-            deviceCfg.model = itemModelElement->GetText();
+            model = itemModelElement->GetText();
         }
 
+        std::string owner;
+        tinyxml2::XMLElement* itemOwnerElement = itemElement->FirstChildElement("Owner");
+        if (nullptr != itemOwnerElement) {
+            owner = itemOwnerElement->GetText();
+        }
+
+        std::string address;
+        tinyxml2::XMLElement* itemAddressElement = itemElement->FirstChildElement("Address");
+        if (nullptr != itemAddressElement) {
+            address = itemAddressElement->GetText();
+        }
+
+        unsigned int parental = 0;
         tinyxml2::XMLElement* itemParentalElement = itemElement->FirstChildElement("Parental");
         if (nullptr != itemParentalElement) {
-            deviceCfg.parental = std::stoi(itemParentalElement->GetText());
+            parental = std::stoi(itemParentalElement->GetText());
         }
 
+        std::string parentID;
         tinyxml2::XMLElement* itemParentIdElement = itemElement->FirstChildElement("ParentID");
         if (nullptr != itemParentIdElement) {
-            deviceCfg.parentID = itemParentIdElement->GetText();
+            parentID = itemParentIdElement->GetText();
         }
 
+        std::string platformID;
+        tinyxml2::XMLElement* itemPlatformIDElement = itemElement->FirstChildElement("PlatformID");
+        if (nullptr != itemPlatformIDElement) {
+            platformID = itemPlatformIDElement->GetText();
+        }
+
+        unsigned int safetyWay = 0;
         tinyxml2::XMLElement* itemSafetyWayElement = itemElement->FirstChildElement("SafetyWay");
         if (nullptr != itemSafetyWayElement) {
-            deviceCfg.safetyWay = std::stoi(itemSafetyWayElement->GetText());
+            safetyWay = std::stoi(itemSafetyWayElement->GetText());
         }
 
+        unsigned int registerWay = 0;
         tinyxml2::XMLElement* itemRegisterWayElement = itemElement->FirstChildElement("RegisterWay");
         if (nullptr != itemRegisterWayElement) {
-            deviceCfg.registerWay = std::stoi(itemRegisterWayElement->GetText());
+            registerWay = std::stoi(itemRegisterWayElement->GetText());
         }
 
+        unsigned int secrecy = 0;
         tinyxml2::XMLElement* itemSecrecyElement = itemElement->FirstChildElement("Secrecy");
         if (nullptr != itemSecrecyElement) {
-            deviceCfg.secrecy = std::stoi(itemSecrecyElement->GetText());
+            secrecy = std::stoi(itemSecrecyElement->GetText());
         }
 
+        std::string status;
         tinyxml2::XMLElement* itemStatusElement = itemElement->FirstChildElement("Status");
         if (nullptr != itemStatusElement) {
-            deviceCfg.status = itemStatusElement->GetText();
+            status = itemStatusElement->GetText();
         }
 
-        // 添加配置
-        if (catalogDeviceCfgMsgBody.deviceCfgMap.end() == catalogDeviceCfgMsgBody.deviceCfgMap.find(deviceCfg.deviceID)) {
-            catalogDeviceCfgMsgBody.deviceCfgMap.insert(std::make_pair(deviceCfg.deviceID, deviceCfg));
-        }
+        std::string deviceType = deviceID.substr(10, 3);
+        if ("200" == deviceType) {
+            MySipCatalogPlatCfg_dt platCfg;
+            platCfg.deviceID     = deviceID;
+            platCfg.manufacturer = manufacturer;
+            platCfg.model        = model;
+            platCfg.owner        = owner;
+            platCfg.name         = name;
+            platCfg.deviceIp     = address;
+            platCfg.parental     = parental;
+            platCfg.parentID     = parentID;
+            platCfg.platformID   = platformID;
+            platCfg.safetyWay    = safetyWay;
+            platCfg.registerWay  = registerWay;
+            platCfg.secrecy      = secrecy;
+            platCfg.status       = status;
 
+            if (catalogRespMsgBody.platCfgMap.end() == catalogRespMsgBody.platCfgMap.find(deviceID)) {
+                catalogRespMsgBody.platCfgMap.insert(std::make_pair(deviceID, platCfg));
+            }
+        }
+        else if ("215" == deviceType) {
+            MySipCatalogSubPlatCfg_dt subPlatCfg;
+            subPlatCfg.deviceID     = deviceID;
+            subPlatCfg.manufacturer = manufacturer;
+            subPlatCfg.model        = model;
+            subPlatCfg.owner        = owner;
+            subPlatCfg.name         = name;
+            subPlatCfg.deviceIp     = address;
+            subPlatCfg.parental     = parental;
+            subPlatCfg.parentID     = parentID;
+            subPlatCfg.platformID   = platformID;
+            subPlatCfg.safetyWay    = safetyWay;
+            subPlatCfg.registerWay  = registerWay;
+            subPlatCfg.secrecy      = secrecy;
+            subPlatCfg.status       = status;
+
+            if (catalogRespMsgBody.subPlatCfgMap.end() == catalogRespMsgBody.subPlatCfgMap.find(deviceID)) {
+                catalogRespMsgBody.subPlatCfgMap.insert(std::make_pair(deviceID, subPlatCfg));
+            }
+        }
+        else if ("216" == deviceType) {
+            MySipCatalogVirtualSubPlatCfg_dt virtualSubPlatCfg;
+            virtualSubPlatCfg.deviceID     = deviceID;
+            virtualSubPlatCfg.manufacturer = manufacturer;
+            virtualSubPlatCfg.model        = model;
+            virtualSubPlatCfg.owner        = owner;
+            virtualSubPlatCfg.name         = name;
+            virtualSubPlatCfg.deviceIp     = address;
+            virtualSubPlatCfg.parental     = parental;
+            virtualSubPlatCfg.parentID     = parentID;
+            virtualSubPlatCfg.platformID   = platformID;
+            virtualSubPlatCfg.safetyWay    = safetyWay;
+            virtualSubPlatCfg.registerWay  = registerWay;
+            virtualSubPlatCfg.secrecy      = secrecy;
+            virtualSubPlatCfg.status       = status;
+
+            if (catalogRespMsgBody.subVirtualPlatCfgMap.end() == catalogRespMsgBody.subVirtualPlatCfgMap.find(deviceID)) {
+                catalogRespMsgBody.subVirtualPlatCfgMap.insert(std::make_pair(deviceID, virtualSubPlatCfg));
+            }
+        }
+        else if ("131" == deviceType || "132" == deviceType) {
+            MySipCatalogDeviceCfg_dt deviceCfg;
+            deviceCfg.deviceID     = deviceID;
+            deviceCfg.manufacturer = manufacturer;
+            deviceCfg.model        = model;
+            deviceCfg.owner        = owner;
+            deviceCfg.name         = name;
+            deviceCfg.deviceIp     = address;
+            deviceCfg.parental     = parental;
+            deviceCfg.parentID     = parentID;
+            deviceCfg.platformID   = platformID;
+            deviceCfg.safetyWay    = safetyWay;
+            deviceCfg.registerWay  = registerWay;
+            deviceCfg.secrecy      = secrecy;
+            deviceCfg.status       = status;
+
+            if (catalogRespMsgBody.deviceCfgMap.end() == catalogRespMsgBody.deviceCfgMap.find(deviceID)) {
+                catalogRespMsgBody.deviceCfgMap.insert(std::make_pair(deviceID, deviceCfg));
+            }
+        }
+        
         // 移动到下一个 <Item>
         itemElement = itemElement->NextSiblingElement("Item");
     }

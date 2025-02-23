@@ -99,6 +99,23 @@ public:
         return MyStatus_t::SUCCESS;
     }
 
+    MyStatus_t getUpRegProto(const std::string& servId, const std::string& upRegServId, MyTpProto_t& proto) {
+        boost::shared_lock<boost::shared_mutex> lock(m_rwMutex);
+
+        auto iter = m_sipUpRegServInfoMap.find(servId);
+        if (m_sipUpRegServInfoMap.end() == iter) {
+            return MyStatus_t::FAILED;
+        }
+        
+        auto subIter = iter->second.find(upRegServId);
+        if (iter->second.end() == subIter) {
+            return MyStatus_t::FAILED;
+        }
+
+        proto = subIter->second->sipRegUpServCfg.proto;
+        return MyStatus_t::SUCCESS;
+    }
+
     MyStatus_t getUpRegLastRegTime(const std::string& servId, const std::string& upRegServId, std::string& time) {
         boost::shared_lock<boost::shared_mutex> lock(m_rwMutex);
 
@@ -464,6 +481,11 @@ MyStatus_t MySipServRegManage::GetSipRegUpServCfg(const std::string& servId, con
 
     upRegCfg = iter->second;
     return MyStatus_t::SUCCESS;
+}
+
+MyStatus_t MySipServRegManage::GetSipRegUpServProto(const std::string& servId, const std::string& upRegServId, MY_COMMON::MyTpProto_t& proto)
+{
+    return ManageObject.getUpRegProto(servId, upRegServId, proto);
 }
 
 MyStatus_t MySipServRegManage::GetSipRegUpServLastRegTime(const std::string& servId, const std::string& upRegServId, std::string& time)

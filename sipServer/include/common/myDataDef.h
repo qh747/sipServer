@@ -14,10 +14,10 @@ namespace MY_COMMON {
  */
 typedef enum class MyStatusType : int
 {
-    //                                                      成功
-    SUCCESS                                                 = 0,            
     //                                                      失败
-    FAILED                                                  = -1,           
+    FAILED                                                  = -1,
+    //                                                      成功
+    SUCCESS                                                 = 0,
 
 } MyStatus_t;
 

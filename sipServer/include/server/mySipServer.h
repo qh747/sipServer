@@ -22,7 +22,7 @@ public:
      * @return                              回调结果，0-success，-1-failed
      * @param arg                           回调参数
      */
-    static int                              SipServerThdFunc(MY_COMMON::MySipEvThdCbParamPtr arg);
+    static int                              SipServerThdFunc(MY_COMMON::MySipCbParamPtr arg);
 
 public:         
     MySipServer();          

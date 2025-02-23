@@ -29,7 +29,7 @@ public:
      * @param deviceId                  设备id
      */  
     static MY_COMMON::MyStatus_t        GetSipCatalogRespMsgDeviceId(const std::string& xmlStr, std::string& deviceId);
-
+    
 public:             
     /**             
      * @note                            消息格式：
@@ -122,17 +122,7 @@ public:
                                                                          const std::string&                       sn,
                                                                          std::size_t                              sumNum, 
                                                                          std::string&                             msgBody);
-
-    /**             
-     * @brief                           sip catalog平台配置消息解析
-     * @return                          解析结果
-     * @param xmlStr                    字符串格式消息内容
-     * @param catalogPlatCfgMsgBody     sip catalog平台配置消息内容
-     */                 
-    static MY_COMMON::MyStatus_t        ParseSipCatalogPlatCfgMsgBody(const std::string&                        xmlStr, 
-                                                                      MY_COMMON::MySipCatalogPlatCfgMsgBody_dt& catalogPlatCfgMsgBody);
-
-public:                 
+    
     /**                 
      * @note                            消息格式：
      *                                  <?xml version="1.0" encoding="gb2312"?>
@@ -171,16 +161,6 @@ public:
                                                                             std::size_t                                 sumNum,
                                                                             std::string&                                msgBody);
 
-    /**             
-     * @brief                           sip catalog子平台配置消息解析
-     * @return                          解析结果
-     * @param xmlStr                    字符串格式消息内容
-     * @param catalogSubPlatCfgMsgBody  sip catalog子平台配置消息内容
-     */                 
-    static MY_COMMON::MyStatus_t        ParseSipCatalogSubPlatCfgMsgBody(const std::string&                           xmlStr, 
-                                                                         MY_COMMON::MySipCatalogSubPlatCfgMsgBody_dt& catalogSubPlatCfgMsgBody);
-
-public:                 
     /**                 
      * @note                            消息格式：
      *                                  <?xml version="1.0" encoding="gb2312"?>
@@ -218,17 +198,6 @@ public:
                                                                                    const std::string&                                 sn,
                                                                                    std::size_t                                        sumNum,
                                                                                    std::string&                                       msgBody);
-
-    /**             
-     * @brief                                  sip catalog虚拟子平台配置消息解析
-     * @return                                 解析结果
-     * @param xmlStr                           字符串格式消息内容
-     * @param catalogSubVirtualPlatCfgMsgBody  sip catalog虚拟子平台配置消息内容
-     */                 
-    static MY_COMMON::MyStatus_t        ParseSipCatalogSubVirtualPlatCfgMsgBody(const std::string&                                  xmlStr, 
-                                                                                MY_COMMON::MySipCatalogSubVirtualPlatCfgMsgBody_dt& catalogSubVirtualPlatCfgMsgBody);
-
-public:                 
     /**                 
      * @note                            消息格式：
      *                                  <?xml version="1.0" encoding="gb2312"?>
@@ -268,13 +237,13 @@ public:
                                                                            std::string&                               msgBody);
 
     /**             
-     * @brief                           sip catalog设备配置消息解析
+     * @brief                           sip catalog响应消息解析
      * @return                          解析结果
      * @param xmlStr                    字符串格式消息内容
-     * @param catalogDeviceCfgMsgBody   sip catalog设备配置消息内容
+     * @param catalogRespMsgBody        sip catalog响应消息内容
      */                 
-    static MY_COMMON::MyStatus_t        ParseSipCatalogDeviceCfgMsgBody(const std::string&                          xmlStr, 
-                                                                        MY_COMMON::MySipCatalogDeviceCfgMsgBody_dt& catalogDeviceCfgMsgBody);
+    static MY_COMMON::MyStatus_t        ParseSipCatalogRespMsgBody(const std::string&                     xmlStr, 
+                                                                   MY_COMMON::MySipCatalogRespMsgBody_dt& catalogRespMsgBody);
 };
 
 }; // namespace MY_UTILS
