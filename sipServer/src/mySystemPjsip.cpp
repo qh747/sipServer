@@ -88,6 +88,9 @@ MyStatus_t MySystemPjsip::GetPjsipMediaEndptPtr(MY_COMMON::MySipMediaEndptPtrAdd
 
 MyStatus_t MySystemPjsip::InitPjsipLib()
 {
+    // pjsip配置初始化
+    pjsip_cfg()->endpt.disable_tcp_switch = PJ_TRUE;
+
     // pjlib 初始化
     if (PJ_SUCCESS != pj_init()) {
         LOG(ERROR) << "System pjsip environment init pjsip lib failed. pj_init() error.";
