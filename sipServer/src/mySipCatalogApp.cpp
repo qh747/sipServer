@@ -82,7 +82,7 @@ int MySipCatalogApp::SipCatalogAppPushCatalogThdFunc(MySipCbParamPtr arg)
     const MySipServAddrCfg_dt&  localServAddrCfg  = thdParamPtr->m_servAddrCfg;
 
     std::string upRegServInfo;
-    MySipServerHelper::GetSipUpRegServInfo(regUpServCfg, upRegServInfo);
+    MySipServerHelper::PrintSipUpRegServInfo(regUpServCfg, upRegServInfo);
 
     // 获取endpoint
     MySipEndptPtr endptPtr = nullptr;
@@ -159,14 +159,14 @@ int MySipCatalogApp::SipCatalogAppPushCatalogThdFunc(MySipCbParamPtr arg)
 
         // sip catalog消息首部生成
         std::string sURL;
-        MySipMsgHelper::GenerateSipMsgURL(regUpServCfg.upSipServAddrCfg.id, regUpServCfg.upSipServAddrCfg.ipAddr, 
-                                          regUpServCfg.upSipServAddrCfg.port, regUpServCfg.proto, sURL);
+        MySipMsgHelper::GenerateSipMsgURL(regUpServCfg.upSipServRegAddrCfg.id, regUpServCfg.upSipServRegAddrCfg.ipAddr, 
+                                          regUpServCfg.upSipServRegAddrCfg.port, regUpServCfg.proto, sURL);
 
         std::string sFromHdr;
         MySipMsgHelper::GenerateSipMsgFromHeader(servAddrCfg.id, servAddrCfg.ipAddr, sFromHdr);
 
         std::string sToHdr;
-        MySipMsgHelper::GenerateSipMsgToHeader(regUpServCfg.upSipServAddrCfg.id, regUpServCfg.upSipServAddrCfg.ipAddr, sToHdr);
+        MySipMsgHelper::GenerateSipMsgToHeader(regUpServCfg.upSipServRegAddrCfg.id, regUpServCfg.upSipServRegAddrCfg.ipAddr, sToHdr);
 
         pj_str_t sipMsgURL     = pj_str(const_cast<char*>(sURL.c_str()));
         pj_str_t sipMsgFromHdr = pj_str(const_cast<char*>(sFromHdr.c_str()));
@@ -187,6 +187,31 @@ int MySipCatalogApp::SipCatalogAppPushCatalogThdFunc(MySipCbParamPtr arg)
                 LOG(ERROR) << "Sip catalog app push local server catalog failed. create pjsip request failed. " << upRegServInfo << ".";
                 return;
             }
+
+            // 指定传输端口为注册端口
+            pjsip_tpselector tpSeclector;
+            tpSeclector.type = PJSIP_TPSELECTOR_TRANSPORT;
+            tpSeclector.disable_connection_reuse = false;
+
+            MySipTransportPtr transportPtr = nullptr;
+            if (MyTpProto_t::UDP == regUpServCfg.proto) {
+                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegUdpTp(servAddrCfg.id, &transportPtr)) {
+                    LOG(ERROR) << "Sip catalog app push local server catalog failed. get sip serv reg udp tp failed. " << upRegServInfo << ".";
+                    return;
+                }
+            }
+            else {
+                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegTcpTp(servAddrCfg.id, 
+                                                                      &transportPtr, 
+                                                                      regUpServCfg.upSipServRegAddrCfg.ipAddr, 
+                                                                        regUpServCfg.upSipServRegAddrCfg.port)) {
+                    LOG(ERROR) << "Sip reg app register up server failed. get sip serv reg tcp tp failed. " << upRegServInfo << ".";
+                    return;
+                }
+            }
+        
+            tpSeclector.u.transport = transportPtr;
+            pjsip_tx_data_set_transport(txDataPtr, &tpSeclector);
 
             // sip catalog消息内容填充
             std::string msgBody;
@@ -232,6 +257,31 @@ int MySipCatalogApp::SipCatalogAppPushCatalogThdFunc(MySipCbParamPtr arg)
                 return;
             }
 
+            // 指定传输端口为注册端口
+            pjsip_tpselector tpSeclector;
+            tpSeclector.type = PJSIP_TPSELECTOR_TRANSPORT;
+            tpSeclector.disable_connection_reuse = false;
+
+            MySipTransportPtr transportPtr = nullptr;
+            if (MyTpProto_t::UDP == regUpServCfg.proto) {
+                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegUdpTp(servAddrCfg.id, &transportPtr)) {
+                    LOG(ERROR) << "Sip catalog app push local server catalog failed. get sip serv reg udp tp failed. " << upRegServInfo << ".";
+                    return;
+                }
+            }
+            else {
+                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegTcpTp(servAddrCfg.id, 
+                                                                      &transportPtr, 
+                                                                      regUpServCfg.upSipServRegAddrCfg.ipAddr, 
+                                                                        regUpServCfg.upSipServRegAddrCfg.port)) {
+                    LOG(ERROR) << "Sip reg app register up server failed. get sip serv reg tcp tp failed. " << upRegServInfo << ".";
+                    return;
+                }
+            }
+        
+            tpSeclector.u.transport = transportPtr;
+            pjsip_tx_data_set_transport(txDataPtr, &tpSeclector);
+
             // sip catalog消息内容填充
             std::string msgBody;
             MyXmlHelper::GenerateSipCatalogSubPlatCfgMsgBody(subPlatCfgPair.second, sn, sumNum, msgBody);
@@ -276,6 +326,31 @@ int MySipCatalogApp::SipCatalogAppPushCatalogThdFunc(MySipCbParamPtr arg)
                 return;
             }
 
+            // 指定传输端口为注册端口
+            pjsip_tpselector tpSeclector;
+            tpSeclector.type = PJSIP_TPSELECTOR_TRANSPORT;
+            tpSeclector.disable_connection_reuse = false;
+
+            MySipTransportPtr transportPtr = nullptr;
+            if (MyTpProto_t::UDP == regUpServCfg.proto) {
+                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegUdpTp(servAddrCfg.id, &transportPtr)) {
+                    LOG(ERROR) << "Sip catalog app push local server catalog failed. get sip serv reg udp tp failed. " << upRegServInfo << ".";
+                    return;
+                }
+            }
+            else {
+                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegTcpTp(servAddrCfg.id, 
+                                                                      &transportPtr, 
+                                                                      regUpServCfg.upSipServRegAddrCfg.ipAddr, 
+                                                                        regUpServCfg.upSipServRegAddrCfg.port)) {
+                    LOG(ERROR) << "Sip reg app register up server failed. get sip serv reg tcp tp failed. " << upRegServInfo << ".";
+                    return;
+                }
+            }
+        
+            tpSeclector.u.transport = transportPtr;
+            pjsip_tx_data_set_transport(txDataPtr, &tpSeclector);
+
             // sip catalog消息内容填充
             std::string msgBody;
             MyXmlHelper::GenerateSipCatalogSubVirtualPlatCfgMsgBody(subVirtualPlatCfgPair.second, sn, sumNum, msgBody);
@@ -319,6 +394,31 @@ int MySipCatalogApp::SipCatalogAppPushCatalogThdFunc(MySipCbParamPtr arg)
                 LOG(ERROR) << "Sip catalog app push local server catalog failed. create pjsip request failed. " << upRegServInfo << ".";
                 return;
             }
+
+            // 指定传输端口为注册端口
+            pjsip_tpselector tpSeclector;
+            tpSeclector.type = PJSIP_TPSELECTOR_TRANSPORT;
+            tpSeclector.disable_connection_reuse = false;
+
+            MySipTransportPtr transportPtr = nullptr;
+            if (MyTpProto_t::UDP == regUpServCfg.proto) {
+                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegUdpTp(servAddrCfg.id, &transportPtr)) {
+                    LOG(ERROR) << "Sip catalog app push local server catalog failed. get sip serv reg udp tp failed. " << upRegServInfo << ".";
+                    return;
+                }
+            }
+            else {
+                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegTcpTp(servAddrCfg.id, 
+                                                                      &transportPtr, 
+                                                                      regUpServCfg.upSipServRegAddrCfg.ipAddr, 
+                                                                        regUpServCfg.upSipServRegAddrCfg.port)) {
+                    LOG(ERROR) << "Sip reg app register up server failed. get sip serv reg tcp tp failed. " << upRegServInfo << ".";
+                    return;
+                }
+            }
+        
+            tpSeclector.u.transport = transportPtr;
+            pjsip_tx_data_set_transport(txDataPtr, &tpSeclector);
 
             // sip catalog消息内容填充
             std::string msgBody;
@@ -366,7 +466,14 @@ int MySipCatalogApp::SipCatalogAppPushCatalogThdFunc(MySipCbParamPtr arg)
 
     // 推送下级设备目录
     for (const auto& lowRegCfgPair : lowRegCfgMap) {
-        pushCatalogFunc(lowRegCfgPair.second.lowSipServAddrCfg);
+        MySipServAddrCfg_dt lowRegServAddr;
+        lowRegServAddr.id     = lowRegCfgPair.first;
+        lowRegServAddr.ipAddr = lowRegCfgPair.second.lowSipServRegAddrCfg.ipAddr;
+        lowRegServAddr.port   = lowRegCfgPair.second.lowSipServRegAddrCfg.port;
+        lowRegServAddr.name   = lowRegCfgPair.second.lowSipServRegAddrCfg.name;
+        lowRegServAddr.domain = lowRegCfgPair.second.lowSipServRegAddrCfg.domain;
+
+        pushCatalogFunc(lowRegServAddr);
     }
     return 0;
 }
@@ -507,7 +614,7 @@ int MySipCatalogApp::SipCatalogAppUpdateCatalogThdFunc(MySipCbParamPtr arg)
     }
 
     // 查询请求过本级设备目录信息的上级服务(用于向上级服务发送更新)
-    MySipServAddrMap upServAddrMap;
+    MySipRegServAddrMap upServAddrMap;
     MySipServCatalogManage::GetSipUpQueryServInfo(servId, upServAddrMap);
 
     // 记录上级服务响应消息状态
@@ -522,7 +629,7 @@ int MySipCatalogApp::SipCatalogAppUpdateCatalogThdFunc(MySipCbParamPtr arg)
         }
 
         std::string upRegServInfo;
-        MySipServerHelper::GetSipServInfo(upServAddrCfgPair.second, upRegServInfo);
+        MySipServerHelper::PrintSipRegServInfo(upServAddrCfgPair.second, upRegServInfo);
 
         MyTpProto_t proto = MyTpProto_t::UDP;
         MySipServRegManage::GetSipRegUpServProto(servId, upServAddrCfgPair.second.id, proto);
@@ -555,6 +662,31 @@ int MySipCatalogApp::SipCatalogAppUpdateCatalogThdFunc(MySipCbParamPtr arg)
                 LOG(ERROR) << "Sip catalog app update catalog to up server failed. create pjsip request failed. " << upRegServInfo << ".";
                 return -1;
             }
+
+            // 指定传输端口为注册端口
+            pjsip_tpselector tpSeclector;
+            tpSeclector.type = PJSIP_TPSELECTOR_TRANSPORT;
+            tpSeclector.disable_connection_reuse = false;
+
+            MySipTransportPtr transportPtr = nullptr;
+            if (MyTpProto_t::UDP == proto) {
+                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegUdpTp(servAddrCfg.id, &transportPtr)) {
+                    LOG(ERROR) << "Sip catalog app update catalog to up server failed. get sip serv reg udp tp failed. " << upRegServInfo << ".";
+                    return -1;
+                }
+            }
+            else {
+                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegTcpTp(servAddrCfg.id, 
+                                                                      &transportPtr, 
+                                                                      upServAddrCfgPair.second.ipAddr, 
+                                                                        upServAddrCfgPair.second.port)) {
+                    LOG(ERROR) << "Sip reg app register up server failed. get sip serv reg tcp tp failed. " << upRegServInfo << ".";
+                    return -1;
+                }
+            }
+        
+            tpSeclector.u.transport = transportPtr;
+            pjsip_tx_data_set_transport(txDataPtr, &tpSeclector);
 
             // sip catalog消息内容填充
             std::string msgBody;
@@ -599,6 +731,31 @@ int MySipCatalogApp::SipCatalogAppUpdateCatalogThdFunc(MySipCbParamPtr arg)
                 return -1;
             }
 
+            // 指定传输端口为注册端口
+            pjsip_tpselector tpSeclector;
+            tpSeclector.type = PJSIP_TPSELECTOR_TRANSPORT;
+            tpSeclector.disable_connection_reuse = false;
+
+            MySipTransportPtr transportPtr = nullptr;
+            if (MyTpProto_t::UDP == proto) {
+                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegUdpTp(servAddrCfg.id, &transportPtr)) {
+                    LOG(ERROR) << "Sip catalog app update catalog to up server failed. get sip serv reg udp tp failed. " << upRegServInfo << ".";
+                    return -1;
+                }
+            }
+            else {
+                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegTcpTp(servAddrCfg.id, 
+                                                                      &transportPtr, 
+                                                                      upServAddrCfgPair.second.ipAddr, 
+                                                                        upServAddrCfgPair.second.port)) {
+                    LOG(ERROR) << "Sip reg app register up server failed. get sip serv reg tcp tp failed. " << upRegServInfo << ".";
+                    return -1;
+                }
+            }
+        
+            tpSeclector.u.transport = transportPtr;
+            pjsip_tx_data_set_transport(txDataPtr, &tpSeclector);
+
             // sip catalog消息内容填充
             std::string msgBody;
             MyXmlHelper::GenerateSipCatalogSubPlatCfgMsgBody(subPlatCfgPair.second, sn, sumNum, msgBody);
@@ -642,6 +799,31 @@ int MySipCatalogApp::SipCatalogAppUpdateCatalogThdFunc(MySipCbParamPtr arg)
                 return -1;
             }
 
+            // 指定传输端口为注册端口
+            pjsip_tpselector tpSeclector;
+            tpSeclector.type = PJSIP_TPSELECTOR_TRANSPORT;
+            tpSeclector.disable_connection_reuse = false;
+
+            MySipTransportPtr transportPtr = nullptr;
+            if (MyTpProto_t::UDP == proto) {
+                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegUdpTp(servAddrCfg.id, &transportPtr)) {
+                    LOG(ERROR) << "Sip catalog app update catalog to up server failed. get sip serv reg udp tp failed. " << upRegServInfo << ".";
+                    return -1;
+                }
+            }
+            else {
+                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegTcpTp(servAddrCfg.id, 
+                                                                      &transportPtr, 
+                                                                      upServAddrCfgPair.second.ipAddr, 
+                                                                        upServAddrCfgPair.second.port)) {
+                    LOG(ERROR) << "Sip reg app register up server failed. get sip serv reg tcp tp failed. " << upRegServInfo << ".";
+                    return -1;
+                }
+            }
+        
+            tpSeclector.u.transport = transportPtr;
+            pjsip_tx_data_set_transport(txDataPtr, &tpSeclector);
+
             // sip catalog消息内容填充
             std::string msgBody;
             MyXmlHelper::GenerateSipCatalogSubVirtualPlatCfgMsgBody(subVirtualPlatCfgPair.second, sn, sumNum, msgBody);
@@ -684,6 +866,31 @@ int MySipCatalogApp::SipCatalogAppUpdateCatalogThdFunc(MySipCbParamPtr arg)
                 LOG(ERROR) << "Sip catalog app update catalog to up server failed. create pjsip request failed. " << upRegServInfo << ".";
                 return -1;
             }
+
+            // 指定传输端口为注册端口
+            pjsip_tpselector tpSeclector;
+            tpSeclector.type = PJSIP_TPSELECTOR_TRANSPORT;
+            tpSeclector.disable_connection_reuse = false;
+
+            MySipTransportPtr transportPtr = nullptr;
+            if (MyTpProto_t::UDP == proto) {
+                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegUdpTp(servAddrCfg.id, &transportPtr)) {
+                    LOG(ERROR) << "Sip catalog app update catalog to up server failed. get sip serv reg udp tp failed. " << upRegServInfo << ".";
+                    return -1;
+                }
+            }
+            else {
+                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegTcpTp(servAddrCfg.id, 
+                                                                      &transportPtr, 
+                                                                      upServAddrCfgPair.second.ipAddr, 
+                                                                        upServAddrCfgPair.second.port)) {
+                    LOG(ERROR) << "Sip reg app register up server failed. get sip serv reg tcp tp failed. " << upRegServInfo << ".";
+                    return -1;
+                }
+            }
+        
+            tpSeclector.u.transport = transportPtr;
+            pjsip_tx_data_set_transport(txDataPtr, &tpSeclector);
 
             // sip catalog消息内容填充
             std::string msgBody;
@@ -918,7 +1125,7 @@ MyStatus_t MySipCatalogApp::onSipCatalogAppRecvSipCatalogQueryReqMsg(MySipRxData
         return MyStatus_t::FAILED;
     }
 
-    if (upServRegCfg.upSipServAddrCfg.id.empty()) {
+    if (upServRegCfg.upSipServRegAddrCfg.id.empty()) {
         LOG(ERROR) << "Sip catalog app module recv catalog message. invalid up reg serv id. " << upRegServId << ".";
         return MyStatus_t::FAILED;
     }
@@ -958,7 +1165,7 @@ MyStatus_t MySipCatalogApp::onSipCatalogAppRecvSipCatalogQueryReqMsg(MySipRxData
     MySipServCatalogManage::UpdateSipServCatalogSN(m_servId, catalogMsgBody.sn);
 
     // 添加上级服务信息
-    MySipServCatalogManage::AddSipUpQueryServInfo(m_servId, upServRegCfg.upSipServAddrCfg);
+    MySipServCatalogManage::AddSipUpQueryServInfo(m_servId, upServRegCfg.upSipServRegAddrCfg);
 
     // 创建发送sip设备目录消息线程参数，delete in function: MySipCatalogApp::SipCatalogAppPushCatalogThdFunc()
     MySipCatalogAppPushCatalogThdParamPtr thdParamPtr = new MySipCatalogAppPushCatalogThdParam_dt();
@@ -1052,7 +1259,7 @@ MyStatus_t MySipCatalogApp::getSipCatalogApp(MySipCatalogApp::SmtWkPtr& wkPtr)
 MyStatus_t MySipCatalogApp::onSipCatalogAppReqLowServCatalog(const MySipRegLowServCfg_dt& regLowServCfg, const MySipServAddrCfg_dt& localServCfg)
 {
     std::string lowRegServInfo;
-    MySipServerHelper::GetSipLowRegServInfo(regLowServCfg, lowRegServInfo);
+    MySipServerHelper::PrintSipLowRegServInfo(regLowServCfg, lowRegServInfo);
 
     // 获取endpoint
     MySipEndptPtr endptPtr = nullptr;
@@ -1063,8 +1270,8 @@ MyStatus_t MySipCatalogApp::onSipCatalogAppReqLowServCatalog(const MySipRegLowSe
 
     // sip catalog消息首部生成
     std::string sURL;
-    MySipMsgHelper::GenerateSipMsgURL(regLowServCfg.lowSipServAddrCfg.id, regLowServCfg.lowSipServAddrCfg.ipAddr, 
-                                      regLowServCfg.lowSipServAddrCfg.port, regLowServCfg.proto, sURL);
+    MySipMsgHelper::GenerateSipMsgURL(regLowServCfg.lowSipServRegAddrCfg.id, regLowServCfg.lowSipServRegAddrCfg.ipAddr, 
+                                      regLowServCfg.lowSipServRegAddrCfg.port, regLowServCfg.proto, sURL);
 
     std::string sFromHdr;
     MySipMsgHelper::GenerateSipMsgFromHeader(localServCfg.id, localServCfg.ipAddr, sFromHdr);
@@ -1085,9 +1292,34 @@ MyStatus_t MySipCatalogApp::onSipCatalogAppReqLowServCatalog(const MySipRegLowSe
         return MyStatus_t::FAILED;
     }
 
+    // 指定传输端口为注册端口
+    pjsip_tpselector tpSeclector;
+    tpSeclector.type = PJSIP_TPSELECTOR_TRANSPORT;
+    tpSeclector.disable_connection_reuse = false;
+
+    MySipTransportPtr transportPtr = nullptr;
+    if (MyTpProto_t::UDP == regLowServCfg.proto) {
+        if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegUdpTp(localServCfg.id, &transportPtr)) {
+            LOG(ERROR) << "Sip catalog app request low server catalog failed. get sip serv reg udp tp failed. " << lowRegServInfo << ".";
+            return MyStatus_t::FAILED;
+        }
+    }
+    else {
+        if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegTcpTp(localServCfg.id, 
+                                                              &transportPtr, 
+                                                              regLowServCfg.lowSipServRegAddrCfg.ipAddr, 
+                                                                regLowServCfg.lowSipServRegAddrCfg.port)) {
+            LOG(ERROR) << "Sip catalog app request low server catalog failed. get sip serv reg tcp tp failed. " << lowRegServInfo << ".";
+            return MyStatus_t::FAILED;
+        }
+    }
+
+    tpSeclector.u.transport = transportPtr;
+    pjsip_tx_data_set_transport(txDataPtr, &tpSeclector);
+
     // sip catalog消息内容填充
     std::string msgBody;
-    MyXmlHelper::GenerateSipCatalogQueryReqMsgBody(regLowServCfg.lowSipServAddrCfg.id, msgBody);
+    MyXmlHelper::GenerateSipCatalogQueryReqMsgBody(regLowServCfg.lowSipServRegAddrCfg.id, msgBody);
 
     pj_str_t type    = pj_str(const_cast<char*>("Application"));
     pj_str_t subtype = pj_str(const_cast<char*>("MANSCDP+xml"));

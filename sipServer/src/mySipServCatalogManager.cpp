@@ -195,7 +195,7 @@ private:
 class MySipServCatalogManage::MySipServCatalogInfoManageObject
 {
 public:
-    MyStatus_t add(const std::string& servId, const MySipServAddrCfg_dt& servAddrCfg, bool isUpServ) {
+    MyStatus_t add(const std::string& servId, const MySipServRegAddrCfg_dt& servAddrCfg, bool isUpServ) {
         boost::unique_lock<boost::shared_mutex> lock(m_rwMutex);
 
         auto mapPtr = &m_sipUpServInfoMap;
@@ -205,7 +205,7 @@ public:
 
         auto iter = mapPtr->find(servId);
         if (mapPtr->end() == iter) {
-            MySipServAddrMap subMap;
+            MySipRegServAddrMap subMap;
             subMap.insert(std::make_pair(servAddrCfg.id, servAddrCfg));
 
             mapPtr->insert(std::make_pair(servId, subMap));
@@ -280,7 +280,7 @@ public:
         return MyStatus_t::SUCCESS;
     }
 
-    MyStatus_t get(const std::string& servId, MySipServAddrMap& servAddrCfgMap, bool isUpServ) {
+    MyStatus_t get(const std::string& servId, MySipRegServAddrMap& servAddrCfgMap, bool isUpServ) {
         boost::shared_lock<boost::shared_mutex> lock(m_rwMutex);
 
         auto mapPtr = &m_sipUpServInfoMap;
@@ -360,7 +360,7 @@ MyStatus_t MySipServCatalogManage::UpdateSipServCatalogSN(const std::string& ser
     return CatalogManageObject.uptServSN(servId, sn);
 }
 
-MyStatus_t MySipServCatalogManage::AddSipUpQueryServInfo(const std::string& servId, const MY_COMMON::MySipServAddrCfg_dt& servAddr)
+MyStatus_t MySipServCatalogManage::AddSipUpQueryServInfo(const std::string& servId, const MY_COMMON::MySipServRegAddrCfg_dt& servAddr)
 {
     return CatalogSipServgManageObject.add(servId, servAddr, true);
 }
@@ -375,12 +375,12 @@ MyStatus_t MySipServCatalogManage::HasSipUpQueryServInfo(const std::string& serv
     return CatalogSipServgManageObject.has(servId, upServId, true);
 }
           
-MyStatus_t MySipServCatalogManage::GetSipUpQueryServInfo(const std::string& servId, MySipServAddrMap& servAddrMap)
+MyStatus_t MySipServCatalogManage::GetSipUpQueryServInfo(const std::string& servId, MySipRegServAddrMap& servAddrMap)
 {
     return CatalogSipServgManageObject.get(servId, servAddrMap, true);
 }
 
-MyStatus_t MySipServCatalogManage::AddSipLowRespServInfo(const std::string& servId, const MY_COMMON::MySipServAddrCfg_dt& servAddr)
+MyStatus_t MySipServCatalogManage::AddSipLowRespServInfo(const std::string& servId, const MY_COMMON::MySipServRegAddrCfg_dt& servAddr)
 {
     return CatalogSipServgManageObject.add(servId, servAddr, false);
 }
@@ -395,7 +395,7 @@ MyStatus_t MySipServCatalogManage::HasSipLowRespServInfo(const std::string& serv
     return CatalogSipServgManageObject.has(servId, lowServId, false);
 }
           
-MyStatus_t MySipServCatalogManage::GetSipLowRespServInfoMap(const std::string& servId, MySipServAddrMap& servAddrMap)
+MyStatus_t MySipServCatalogManage::GetSipLowRespServInfoMap(const std::string& servId, MySipRegServAddrMap& servAddrMap)
 {
     return CatalogSipServgManageObject.get(servId, servAddrMap, false);
 }

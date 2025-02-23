@@ -2,6 +2,7 @@
 #include <atomic>
 #include <memory>
 #include <cstdbool>
+#include <boost/thread/shared_mutex.hpp>
 #include "common/myTypeDef.h"
 
 namespace MY_SERVER {
@@ -96,22 +97,61 @@ public:
     MY_COMMON::MyStatus_t                   getState(MY_COMMON::MyStatus_t& status) const;
 
     /**
-     * @brief                               获取sip服务
-     * @return                              获取结果，0-success，-1-failed
-     * @param sipServer                     sip服务
-     */
-     MY_COMMON::MyStatus_t                  getSipServer(MySipServer::SmtWkPtr& sipServer);
-
-    /**
      * @brief                               获取sip服务地址配置
      * @return                              获取结果，0-success，-1-failed
      * @param cfg                           sip服务地址配置
      */
-    MY_COMMON::MyStatus_t                   getSipServAddrCfg(MY_COMMON::MySipServAddrCfg_dt& cfg) const;
+    MY_COMMON::MyStatus_t                   getSipServAddrCfg(MY_COMMON::MySipServAddrCfg_dt& cfg);
+
+    /**
+     * @brief                               获取sip服务
+     * @return                              获取结果，0-success，-1-failed
+     * @param sipServer                     sip服务
+     */
+    MY_COMMON::MyStatus_t                   getSipServer(MySipServer::SmtWkPtr& sipServer);
+
+    /**
+     * @brief                               获取sip服务udp transport
+     * @return                              获取结果，0-success，-1-failed
+     * @param udpTpPtrAddr                  sip服务udp transport
+     */
+    MY_COMMON::MyStatus_t                  getSipServUdpTp(MY_COMMON::MySipTransportPtrAddr udpTpPtrAddr);
+
+    /**
+     * @brief                               获取sip服务注册使用的udp transport
+     * @return                              获取结果，0-success，-1-failed
+     * @param udpTpPtrAddr                  sip服务udp transport
+     */
+    MY_COMMON::MyStatus_t                  getSipServRegUdpTp(MY_COMMON::MySipTransportPtrAddr udpTpPtrAddr);
+
+    /**
+     * @brief                               获取sip服务tcp transport
+     * @return                              获取结果，0-success，-1-failed
+     * @param tcpTpPtrAddr                  sip服务tcp transport
+     * @param remoteIpAddr                  远端ip地址
+     * @param remotePort                    远端端口
+     */
+    MY_COMMON::MyStatus_t                  getSipServTcpTp(MY_COMMON::MySipTransportPtrAddr tcpTpPtrAddr, 
+                                                           const std::string&               remoteIpAddr, 
+                                                           uint16_t                         remotePort);
+
+    /**
+     * @brief                               获取sip服务注册使用的tcp transport工厂
+     * @return                              获取结果，0-success，-1-failed
+     * @param tcpTpPtrAddr                  sip服务tcp transport
+     * @param remoteIpAddr                  远端ip地址
+     * @param remotePort                    远端端口
+     */
+    MY_COMMON::MyStatus_t                  getSipServRegTcpTpFactory(MY_COMMON::MySipTransportPtrAddr tcpTpPtrAddr, 
+                                                                     const std::string&               remoteIpAddr, 
+                                                                     uint16_t                         remotePort);
 
 private:
     //                                      启动状态 
-    std::atomic<MY_COMMON::MyStatus_t>      m_status;  
+    std::atomic<MY_COMMON::MyStatus_t>      m_status; 
+    
+    //                                      sip服务多线程互斥量
+    boost::shared_mutex                     m_rwMutex;
 
     //                                      sip服务地址配置
     MY_COMMON::MySipServAddrCfg_dt          m_servAddrCfg;
@@ -124,6 +164,24 @@ private:
 
     //                                      pjsip事件回调函数所在线程使用的内存地址
     MY_COMMON::MySipPoolPtr                 m_servThdPoolPtr;
+
+    //                                      pjsip local udp transport 
+    MY_COMMON::MySipTransportPtr            m_servUdpTpPtr;
+
+    //                                      pjsip local tcp transport factory
+    MY_COMMON::MySipTransportFactoryPtr     m_servTcpTpFactoryPtr;
+
+    //                                      pjsip local tcp transport map
+    MY_COMMON::MySipServTpMap               m_servTcpTpMap;
+    
+    //                                      pjsip regist udp transport 
+    MY_COMMON::MySipTransportPtr            m_servUdpRegTpPtr;
+    
+    //                                      pjsip regist tcp transport 
+    MY_COMMON::MySipTransportFactoryPtr     m_servTcpRegTpFactoryPtr;
+
+    //                                      pjsip regist tcp transport map
+    MY_COMMON::MySipServTpMap               m_servTcpRegTpMap;
 };
 
 }; //namespace MY_SERVER

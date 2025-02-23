@@ -108,6 +108,24 @@ typedef struct MySipServerAddressConfigDataType
 } MySipServAddrCfg_dt;  
 
 /** 
+ * @brief sip服务端注册地址配置 
+ */ 
+ typedef struct MySipServerRegisterAddressConfigDataType     
+ {   
+     //                                                  注册服务端ID
+     std::string                                         id;
+     //                                                  注册服务端IP地址
+     std::string                                         ipAddr;    
+     //                                                  注册服务端端口号
+     uint16_t                                            port; 
+     //                                                  注册服务端名称
+     std::string                                         name;  
+     //                                                  注册服务端域名
+     std::string                                         domain;      
+ 
+ } MySipServRegAddrCfg_dt;  
+
+/** 
  * @brief SIP服务鉴权配置   
  */ 
 typedef struct {    
@@ -125,12 +143,12 @@ typedef struct {
 /** 
  * @brief SIP上级注册服务配置   
  */ 
-typedef struct MySipRegistUpperServerConfigDataType     
+typedef struct MySipRegisterUpperServerConfigDataType     
 {   
     //                                                  SIP上级注册服务地址配置
-    MySipServAddrCfg_dt                                 upSipServAddrCfg;  
+    MySipServRegAddrCfg_dt                              upSipServRegAddrCfg;  
     //                                                  SIP上级注册服务鉴权配置
-    MySipServAuthCfg_dt                                 upSipServAuthCfg;
+    MySipServAuthCfg_dt                                 upSipServRegAuthCfg;
     //                                                  传输层协议类型
     MyTpProto_t                                         proto;
 
@@ -139,12 +157,12 @@ typedef struct MySipRegistUpperServerConfigDataType
 /** 
  * @brief SIP下级注册服务配置   
  */ 
-typedef struct MySipRegistLowerServerConfigDataType     
+typedef struct MySipRegisterLowerServerConfigDataType     
 {   
     //                                                  SIP下级注册服务地址配置
-    MySipServAddrCfg_dt                                 lowSipServAddrCfg;  
+    MySipServRegAddrCfg_dt                              lowSipServRegAddrCfg;  
     //                                                  SIP下级注册服务鉴权配置
-    MySipServAuthCfg_dt                                 lowSipServAuthCfg;
+    MySipServAuthCfg_dt                                 lowSipServRegAuthCfg;
     //                                                  传输层协议类型
     MyTpProto_t                                         proto;
 
@@ -153,7 +171,7 @@ typedef struct MySipRegistLowerServerConfigDataType
 /** 
  * @brief SIP注册服务配置   
  */ 
-typedef struct MySipRegistServerConfigDataType  
+typedef struct MySipRegisterServerConfigDataType  
 {   
     //                                                  本机SIP服务ID
     std::string                                         localServId;  

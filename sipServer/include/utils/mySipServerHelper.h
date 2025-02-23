@@ -18,7 +18,15 @@ public:
      * @param sipServAddrCfg        sip服务配置
      * @param info                  sip服务信息
      */                     
-    static MY_COMMON::MyStatus_t    GetSipServInfo(const MY_COMMON::MySipServAddrCfg_dt& sipServAddrCfg, std::string& info);
+    static MY_COMMON::MyStatus_t    PrintSipServInfo(const MY_COMMON::MySipServAddrCfg_dt& sipServAddrCfg, std::string& info);
+
+    /**                         
+     * @brief                       获取sip注册服务信息
+     * @return                      获取结果, success-0, fail-非0
+     * @param sipServAddrCfg        sip注册服务配置
+     * @param info                  sip注册服务信息
+     */                     
+    static MY_COMMON::MyStatus_t    PrintSipRegServInfo(const MY_COMMON::MySipServRegAddrCfg_dt& sipRegServAddrCfg, std::string& info);
 
     /**
      * @brief                       获取sip上级注册服务信息
@@ -26,7 +34,7 @@ public:
      * @param sipUpRegServCfg       sip上级注册服务配置
      * @param info                  sip上级注册服务信息
      */
-    static MY_COMMON::MyStatus_t    GetSipUpRegServInfo(const MY_COMMON::MySipRegUpServCfg_dt& sipUpRegServCfg, std::string& info);
+    static MY_COMMON::MyStatus_t    PrintSipUpRegServInfo(const MY_COMMON::MySipRegUpServCfg_dt& sipUpRegServCfg, std::string& info);
 
     /**
      * @brief                       获取sip下级注册服务信息
@@ -34,7 +42,7 @@ public:
      * @param sipLowRegServCfg      sip下级注册服务配置
      * @param info                  sip下级注册服务信息
      */
-    static MY_COMMON::MyStatus_t    GetSipLowRegServInfo(const MY_COMMON::MySipRegLowServCfg_dt& sipLowRegServCfg, std::string& info);
+    static MY_COMMON::MyStatus_t    PrintSipLowRegServInfo(const MY_COMMON::MySipRegLowServCfg_dt& sipLowRegServCfg, std::string& info);
 
     /**                         
      * @brief                       获取sip服务线程池名称
@@ -42,15 +50,7 @@ public:
      * @param sipServAddrCfg        sip服务配置
      * @param name                  sip服务线程池名称
      */                     
-    static MY_COMMON::MyStatus_t    GetSipServThdPoolName(const MY_COMMON::MySipServAddrCfg_dt& sipServAddrCfg, std::string& name);
-
-    /**                         
-     * @brief                       获取sip服务事件线程名称
-     * @return                      获取结果, success-0, fail-非0
-     * @param sipServAddrCfg        sip服务配置
-     * @param name                  sip服务事件线程名称
-     */                     
-    static MY_COMMON::MyStatus_t    GetSipServEvThdName(const MY_COMMON::MySipServAddrCfg_dt& sipServAddrCfg, std::string& info);
+    static MY_COMMON::MyStatus_t    PrintSipServThdPoolName(const MY_COMMON::MySipServAddrCfg_dt& sipServAddrCfg, std::string& name);
 };
 
 }; // namespace MY_VIEW

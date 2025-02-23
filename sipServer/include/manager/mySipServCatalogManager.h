@@ -28,7 +28,7 @@ public:
     typedef std::map<std::string, MY_COMMON::MySipCatalogInfo_dt> MySipServCatalogInfoMap;
 
     // key = local server id, value = sip up/low serv addr map
-    typedef std::map<std::string, MY_COMMON::MySipServAddrMap>    MySipServCatalogInfoAddrMap;
+    typedef std::map<std::string, MY_COMMON::MySipRegServAddrMap> MySipServCatalogInfoAddrMap;
 
 public:
     /** 
@@ -117,7 +117,7 @@ public:
      * @param servId                                    本级服务id
      * @param servAddr                                  上级服务地址
      */                         
-    static MY_COMMON::MyStatus_t                        AddSipUpQueryServInfo(const std::string& servId, const MY_COMMON::MySipServAddrCfg_dt& servAddr);
+    static MY_COMMON::MyStatus_t                        AddSipUpQueryServInfo(const std::string& servId, const MY_COMMON::MySipServRegAddrCfg_dt& servAddr);
 
     /**             
      * @brief                                           删除查询本级服务设备目录的上级服务信息
@@ -141,7 +141,7 @@ public:
      * @param servId                                    本级服务id
      * @param servAddrMap                               上级服务地址
      */                         
-    static MY_COMMON::MyStatus_t                        GetSipUpQueryServInfo(const std::string& servId, MY_COMMON::MySipServAddrMap& servAddrMap);
+    static MY_COMMON::MyStatus_t                        GetSipUpQueryServInfo(const std::string& servId, MY_COMMON::MySipRegServAddrMap& servAddrMap);
 
 public:
     /** 
@@ -150,7 +150,7 @@ public:
      * @param servId                                    本级服务id
      * @param servAddr                                  下级服务地址
      */                         
-    static MY_COMMON::MyStatus_t                        AddSipLowRespServInfo(const std::string& servId, const MY_COMMON::MySipServAddrCfg_dt& servAddr);
+    static MY_COMMON::MyStatus_t                        AddSipLowRespServInfo(const std::string& servId, const MY_COMMON::MySipServRegAddrCfg_dt& servAddr);
 
     /**             
      * @brief                                           删除向本级服务推送设备目录的下级服务信息
@@ -174,7 +174,7 @@ public:
      * @param servId                                    本级服务id
      * @param servAddrMap                               下级服务地址
      */                         
-    static MY_COMMON::MyStatus_t                        GetSipLowRespServInfoMap(const std::string& servId, MY_COMMON::MySipServAddrMap& servAddrMap);
+    static MY_COMMON::MyStatus_t                        GetSipLowRespServInfoMap(const std::string& servId, MY_COMMON::MySipRegServAddrMap& servAddrMap);
 };
 
 }; // namespace MY_MANAGER

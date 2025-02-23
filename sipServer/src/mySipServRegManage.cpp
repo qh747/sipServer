@@ -19,16 +19,16 @@ public:
             MySipUpRegServInfoSmtPtr upRegServInfoPtr = std::make_shared<MySipUpRegServInfo_dt>(upRegServInfo);
 
             MySipServRegManage::MySipUpRegServInfoSubMap subMap;
-            subMap.insert(std::make_pair(upRegServInfoPtr->sipRegUpServCfg.upSipServAddrCfg.id, upRegServInfoPtr));
+            subMap.insert(std::make_pair(upRegServInfoPtr->sipRegUpServCfg.upSipServRegAddrCfg.id, upRegServInfoPtr));
 
             m_sipUpRegServInfoMap.insert(std::make_pair(servId, subMap));
         }
         else {
             auto& subMap = iter->second;
-            auto subIter = subMap.find(upRegServInfo.sipRegUpServCfg.upSipServAddrCfg.id);
+            auto subIter = subMap.find(upRegServInfo.sipRegUpServCfg.upSipServRegAddrCfg.id);
             if (subMap.end() == subIter) {
                 MySipUpRegServInfoSmtPtr upRegServInfoPtr = std::make_shared<MySipUpRegServInfo_dt>(upRegServInfo);
-                subMap.insert(std::make_pair(upRegServInfoPtr->sipRegUpServCfg.upSipServAddrCfg.id, upRegServInfoPtr));
+                subMap.insert(std::make_pair(upRegServInfoPtr->sipRegUpServCfg.upSipServRegAddrCfg.id, upRegServInfoPtr));
             }
             else {
                 return MyStatus_t::FAILED;
@@ -221,16 +221,16 @@ public:
             MySipLowRegServInfoSmtPtr lowRegServInfoPtr = std::make_shared<MySipLowRegServInfo_dt>(lowRegServInfo);
 
             MySipServRegManage::MySipLowRegServInfoSubMap subMap;
-            subMap.insert(std::make_pair(lowRegServInfo.sipRegLowServCfg.lowSipServAddrCfg.id, lowRegServInfoPtr));
+            subMap.insert(std::make_pair(lowRegServInfo.sipRegLowServCfg.lowSipServRegAddrCfg.id, lowRegServInfoPtr));
 
             m_sipLowRegServInfoMap.insert(std::make_pair(servId, subMap));
         }
         else {
             auto& subMap = iter->second;
-            auto subIter = subMap.find(lowRegServInfo.sipRegLowServCfg.lowSipServAddrCfg.id);
+            auto subIter = subMap.find(lowRegServInfo.sipRegLowServCfg.lowSipServRegAddrCfg.id);
             if (subMap.end() == subIter) {
                 MySipLowRegServInfoSmtPtr lowRegServInfoPtr = std::make_shared<MySipLowRegServInfo_dt>(lowRegServInfo);
-                subMap.insert(std::make_pair(lowRegServInfo.sipRegLowServCfg.lowSipServAddrCfg.id, lowRegServInfoPtr));
+                subMap.insert(std::make_pair(lowRegServInfo.sipRegLowServCfg.lowSipServRegAddrCfg.id, lowRegServInfoPtr));
             }
             else {
                 return MyStatus_t::FAILED;
@@ -366,7 +366,7 @@ public:
         subIter->second->sipRegLowServExpired = expired;
     }
 
-    void uptLowRegAddr(const std::string& servId, const std::string& lowRegServId, const MySipServAddrCfg_dt& lowRegServAddr) {
+    void uptLowRegAddr(const std::string& servId, const std::string& lowRegServId, const MySipServRegAddrCfg_dt& lowRegServAddr) {
         boost::shared_lock<boost::shared_mutex> lock(m_rwMutex);
 
         auto iter = m_sipLowRegServInfoMap.find(servId);
@@ -378,7 +378,7 @@ public:
         if (iter->second.end() == subIter) {
             return;
         }
-        subIter->second->sipRegLowServCfg.lowSipServAddrCfg = lowRegServAddr;
+        subIter->second->sipRegLowServCfg.lowSipServRegAddrCfg = lowRegServAddr;
     }
 
 private:
@@ -579,9 +579,9 @@ MyStatus_t MySipServRegManage::GetSipRegLowAuthCfg(const std::string& name, cons
 
     for (const auto& pair : lowRegServInfoMap) {
         for (const auto& subPair : pair.second) {
-            if (subPair.second->sipRegLowServCfg.lowSipServAuthCfg.authName  == name &&
-                subPair.second->sipRegLowServCfg.lowSipServAuthCfg.authRealm == realm) {
-                authCfg = subPair.second->sipRegLowServCfg.lowSipServAuthCfg;
+            if (subPair.second->sipRegLowServCfg.lowSipServRegAuthCfg.authName  == name &&
+                subPair.second->sipRegLowServCfg.lowSipServRegAuthCfg.authRealm == realm) {
+                authCfg = subPair.second->sipRegLowServCfg.lowSipServRegAuthCfg;
                 return MyStatus_t::SUCCESS;
             }
         }
@@ -599,7 +599,7 @@ void MySipServRegManage::UpdateSipRegLowServExpired(const std::string& servId, c
     return ManageObject.uptLowRegExpired(servId, lowRegServId, expired);
 }
 
-void MySipServRegManage::UpdateSipRegLowServIpAddr(const std::string& servId, const std::string& lowRegServId, const MySipServAddrCfg_dt& lowRegServAddr)
+void MySipServRegManage::UpdateSipRegLowServIpAddr(const std::string& servId, const std::string& lowRegServId, const MySipServRegAddrCfg_dt& lowRegServAddr)
 {
     return ManageObject.uptLowRegAddr(servId, lowRegServId, lowRegServAddr);
 }

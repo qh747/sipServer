@@ -20,10 +20,15 @@ typedef const   pj_str_t*                                                   MySi
 typedef         pj_pool_t*                                                  MySipPoolPtr;
 typedef         pjsip_event*                                                MySipEvPtr;
 typedef         pjsip_cred_info*                                            MySipCredInfoPtr;
+typedef         pjsip_tpmgr*                                                MySipTpmgrPtr;
 typedef         pjsip_endpoint*                                             MySipEndptPtr; 
 typedef         pjsip_endpoint**                                            MySipEndptPtrAddr; 
 typedef         pjmedia_endpt*                                              MySipMediaEndptPtr;
 typedef         pjmedia_endpt**                                             MySipMediaEndptPtrAddr;
+typedef         pjsip_transport*                                            MySipTransportPtr;
+typedef         pjsip_transport**                                           MySipTransportPtrAddr;
+typedef         pjsip_tpfactory*                                            MySipTransportFactoryPtr;
+typedef         pjsip_tpfactory**                                           MySipTransportFactoryPtrAddr;
 typedef         pjsip_regc*                                                 MySipRegcPtr;
 typedef         pjsip_hdr*                                                  MySipMsgHdrPtr;
 typedef         pjsip_rx_data*                                              MySipRxDataPtr;
@@ -44,6 +49,10 @@ typedef         std::shared_ptr<MySipLowRegServInfo_dt>                     MySi
 
 // key = local sip server id, value = sip server address config
 typedef         std::map<std::string, MySipServAddrCfg_dt>                  MySipServAddrMap;
+// key = reg sip server id, value = reg sip server address config
+typedef         std::map<std::string, MySipServRegAddrCfg_dt>               MySipRegServAddrMap;
+// key = remote server ip + remote port, value = sip server transport
+typedef         std::map<std::string, MySipTransportPtr>                    MySipServTpMap;
 // key = local sip server id, value = reg sip server config(inclue up reg sip server and low reg sip server)
 typedef         std::map<std::string, MySipRegServCfg_dt>                   MySipRegServCfgMap;
 // key = up reg sip server id, value = up reg sip server config     

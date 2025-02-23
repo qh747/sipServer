@@ -81,52 +81,42 @@ MyStatus_t MyJsonHelper::ParseSipServRegJsonFile(const std::string& filePath, My
         if ((regServNode.isMember("upperServer"))) {
             const Json::Value& upServNodes = regServNode["upperServer"];
             for (const auto& curServNode : upServNodes) {
-                MySipServAddrCfg_dt upServAddrCfg;
-                upServAddrCfg.id = curServNode["id"].asString();
+                MySipRegUpServCfg_dt upRegServCfg;
 
-                if (cfg.upRegSipServMap.end() != cfg.upRegSipServMap.find(upServAddrCfg.id)) {
+                upRegServCfg.upSipServRegAddrCfg.id = curServNode["id"].asString();
+                if (upRegServCfg.upSipServRegAddrCfg.id.empty() || (cfg.upRegSipServMap.end() != cfg.upRegSipServMap.find(upRegServCfg.upSipServRegAddrCfg.id))) {
                     continue;
                 }
 
-                upServAddrCfg.ipAddr = curServNode["ipAddr"].asString();
-                upServAddrCfg.port   = static_cast<uint16_t>(std::stoi(curServNode["port"].asString()));
-                upServAddrCfg.name   = curServNode["name"].asString();
-                upServAddrCfg.domain = curServNode["domain"].asString();
+                upRegServCfg.upSipServRegAddrCfg.ipAddr  = curServNode["ipAddr"].asString();
+                upRegServCfg.upSipServRegAddrCfg.port    = static_cast<uint16_t>(std::stoi(curServNode["port"].asString()));
+                upRegServCfg.upSipServRegAddrCfg.name    = curServNode["name"].asString();
+                upRegServCfg.upSipServRegAddrCfg.domain  = curServNode["domain"].asString();
 
-                if (upServAddrCfg.id.empty()   || upServAddrCfg.ipAddr.empty() || (0 == upServAddrCfg.port) || 
-                    upServAddrCfg.name.empty() || upServAddrCfg.domain.empty()) {
+                if (upRegServCfg.upSipServRegAddrCfg.id.empty()   || upRegServCfg.upSipServRegAddrCfg.ipAddr.empty() || (0 == upRegServCfg.upSipServRegAddrCfg.port) || 
+                    upRegServCfg.upSipServRegAddrCfg.name.empty() || upRegServCfg.upSipServRegAddrCfg.domain.empty()) {
                     continue;
+                }
+
+                if ("true" == curServNode["auth"].asString()) {
+                    upRegServCfg.upSipServRegAuthCfg.enableAuth  = true;
+                    upRegServCfg.upSipServRegAuthCfg.authName    = curServNode["authName"].asString();
+                    upRegServCfg.upSipServRegAuthCfg.authPwd     = curServNode["authPwd"].asString();
+                    upRegServCfg.upSipServRegAuthCfg.authRealm   = curServNode["authRealm"].asString();
+                }
+                else {
+                    upRegServCfg.upSipServRegAuthCfg.enableAuth  = false;
+                    upRegServCfg.upSipServRegAuthCfg.authName    = "";
+                    upRegServCfg.upSipServRegAuthCfg.authPwd     = "";
+                    upRegServCfg.upSipServRegAuthCfg.authRealm   = "";
                 }
 
                 std::string sProto = curServNode["proto"].asString();
-                MyTpProto_t proto;
-                if      ("udp" == sProto)   { proto = MyTpProto_t::UDP; }
-                else if ("tcp" == sProto)   { proto = MyTpProto_t::TCP; }
-                else                        { proto = MyTpProto_t::UDP; }
+                if      ("udp" == sProto) { upRegServCfg.proto = MyTpProto_t::UDP; }
+                else if ("tcp" == sProto) { upRegServCfg.proto = MyTpProto_t::TCP; }
+                else                      { upRegServCfg.proto = MyTpProto_t::UDP; }
 
-                MySipServAuthCfg_dt upServAuthCfg;
-                if ("true" == curServNode["auth"].asString()) {
-                    upServAuthCfg.enableAuth  = true;
-                    upServAuthCfg.authName    = curServNode["authName"].asString();
-                    upServAuthCfg.authPwd     = curServNode["authPwd"].asString();
-                    upServAuthCfg.authRealm   = curServNode["authRealm"].asString();
-                }
-                else {
-                    upServAuthCfg.enableAuth  = false;
-                    upServAuthCfg.authName    = "";
-                    upServAuthCfg.authPwd     = "";
-                    upServAuthCfg.authRealm   = "";
-                }
-
-                MySipRegUpServCfg_dt upRegServCfg;
-                upRegServCfg.upSipServAddrCfg   = std::move(upServAddrCfg);
-                upRegServCfg.upSipServAuthCfg   = std::move(upServAuthCfg);
-                upRegServCfg.proto              = proto;
-
-                if (!upRegServCfg.upSipServAddrCfg.id.empty() && 
-                    (cfg.upRegSipServMap.end() == cfg.upRegSipServMap.find(upRegServCfg.upSipServAddrCfg.id))) {
-                    cfg.upRegSipServMap.insert(std::make_pair(upRegServCfg.upSipServAddrCfg.id, std::move(upRegServCfg)));
-                }
+                cfg.upRegSipServMap.insert(std::make_pair(upRegServCfg.upSipServRegAddrCfg.id, std::move(upRegServCfg)));
             }
         }
 
@@ -134,52 +124,42 @@ MyStatus_t MyJsonHelper::ParseSipServRegJsonFile(const std::string& filePath, My
         if ((regServNode.isMember("lowerServer"))) {
             const Json::Value& lowServNodes = regServNode["lowerServer"];
             for (const auto& curServNode : lowServNodes) {
-                MySipServAddrCfg_dt lowServAddrCfg;
-                lowServAddrCfg.id = curServNode["id"].asString();
-            
-                if (cfg.lowRegSipServMap.end() != cfg.lowRegSipServMap.find(lowServAddrCfg.id)) {
+                MySipRegLowServCfg_dt regLowServCfg;
+
+                regLowServCfg.lowSipServRegAddrCfg.id = curServNode["id"].asString();
+                if (regLowServCfg.lowSipServRegAddrCfg.id.empty() || (cfg.lowRegSipServMap.end() != cfg.lowRegSipServMap.find(regLowServCfg.lowSipServRegAddrCfg.id))) {
                     continue;
                 }
             
-                lowServAddrCfg.ipAddr = curServNode["ipAddr"].asString();
-                lowServAddrCfg.port   = static_cast<uint16_t>(std::stoi(curServNode["port"].asString()));
-                lowServAddrCfg.name   = curServNode["name"].asString();
-                lowServAddrCfg.domain = curServNode["domain"].asString();
+                regLowServCfg.lowSipServRegAddrCfg.ipAddr  = curServNode["ipAddr"].asString();
+                regLowServCfg.lowSipServRegAddrCfg.port    = static_cast<uint16_t>(std::stoi(curServNode["port"].asString()));
+                regLowServCfg.lowSipServRegAddrCfg.name    = curServNode["name"].asString();
+                regLowServCfg.lowSipServRegAddrCfg.domain  = curServNode["domain"].asString();
             
-                if (lowServAddrCfg.id.empty()   || lowServAddrCfg.ipAddr.empty() || (0 == lowServAddrCfg.port) || 
-                    lowServAddrCfg.name.empty() || lowServAddrCfg.domain.empty()) {
+                if (regLowServCfg.lowSipServRegAddrCfg.id.empty()   || regLowServCfg.lowSipServRegAddrCfg.ipAddr.empty() || (0 == regLowServCfg.lowSipServRegAddrCfg.port) || 
+                    regLowServCfg.lowSipServRegAddrCfg.name.empty() || regLowServCfg.lowSipServRegAddrCfg.domain.empty()) {
                     continue;
+                }
+
+                if ("true" == curServNode["auth"].asString()) {
+                    regLowServCfg.lowSipServRegAuthCfg.enableAuth  = true;
+                    regLowServCfg.lowSipServRegAuthCfg.authName    = curServNode["authName"].asString();
+                    regLowServCfg.lowSipServRegAuthCfg.authPwd     = curServNode["authPwd"].asString();
+                    regLowServCfg.lowSipServRegAuthCfg.authRealm   = curServNode["authRealm"].asString();
+                }
+                else {
+                    regLowServCfg.lowSipServRegAuthCfg.enableAuth  = false;
+                    regLowServCfg.lowSipServRegAuthCfg.authName    = "";
+                    regLowServCfg.lowSipServRegAuthCfg.authPwd     = "";
+                    regLowServCfg.lowSipServRegAuthCfg.authRealm   = "";
                 }
             
                 std::string sProto = curServNode["proto"].asString();
-                MyTpProto_t proto;
-                if      ("udp" == sProto)   { proto = MyTpProto_t::UDP; }
-                else if ("tcp" == sProto)   { proto = MyTpProto_t::TCP; }
-                else                        { proto = MyTpProto_t::UDP; }
+                if      ("udp" == sProto)   { regLowServCfg.proto = MyTpProto_t::UDP; }
+                else if ("tcp" == sProto)   { regLowServCfg.proto = MyTpProto_t::TCP; }
+                else                        { regLowServCfg.proto = MyTpProto_t::UDP; }
 
-                MySipServAuthCfg_dt lowServAuthCfg;
-                if ("true" == curServNode["auth"].asString()) {
-                    lowServAuthCfg.enableAuth  = true;
-                    lowServAuthCfg.authName    = curServNode["authName"].asString();
-                    lowServAuthCfg.authPwd     = curServNode["authPwd"].asString();
-                    lowServAuthCfg.authRealm   = curServNode["authRealm"].asString();
-                }
-                else {
-                    lowServAuthCfg.enableAuth  = false;
-                    lowServAuthCfg.authName    = "";
-                    lowServAuthCfg.authPwd     = "";
-                    lowServAuthCfg.authRealm   = "";
-                }
-            
-                MySipRegLowServCfg_dt regLowServInfo;
-                regLowServInfo.lowSipServAddrCfg  = std::move(lowServAddrCfg);
-                regLowServInfo.lowSipServAuthCfg  = std::move(lowServAuthCfg);
-                regLowServInfo.proto              = proto;
-
-                if (!regLowServInfo.lowSipServAddrCfg.id.empty() && 
-                    (cfg.lowRegSipServMap.end() == cfg.lowRegSipServMap.find(regLowServInfo.lowSipServAddrCfg.id))) {
-                    cfg.lowRegSipServMap.insert(std::make_pair(regLowServInfo.lowSipServAddrCfg.id, std::move(regLowServInfo)));
-                }
+                cfg.lowRegSipServMap.insert(std::make_pair(regLowServCfg.lowSipServRegAddrCfg.id, std::move(regLowServCfg)));
             }
         }
         

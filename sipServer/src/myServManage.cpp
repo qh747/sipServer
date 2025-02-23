@@ -151,6 +151,11 @@ MyStatus_t MyServManage::Shutdown()
     return MyStatus_t::SUCCESS;
 }
 
+MyStatus_t MyServManage::HasSipServer(const std::string& servId)
+{   
+    return ManageObject.has(servId);
+}
+
 MyStatus_t MyServManage::GetSipServer(const std::string& servId, MySipServer::SmtWkPtr& sipServWkPtr)
 {
     return ManageObject.get(servId, sipServWkPtr);
@@ -169,9 +174,56 @@ MyStatus_t MyServManage::GetSipServAddrCfg(const std::string& servId, MySipServA
     return MyStatus_t::SUCCESS;
 }
 
-MyStatus_t MyServManage::HasSipServer(const std::string& servId)
+MyStatus_t MyServManage::GetSipServUdpTp(const std::string& servId, MySipTransportPtrAddr udpTpPtrAddr)
+{
+    MySipServer::SmtWkPtr sipServWkPtr;
+    if (MyStatus_t::SUCCESS != ManageObject.get(servId, sipServWkPtr)) {
+        return MyStatus_t::FAILED;
+    }
+    
+    if (MyStatus_t::SUCCESS != sipServWkPtr.lock()->getSipServUdpTp(udpTpPtrAddr)) {
+        return MyStatus_t::FAILED;
+    }
+    return MyStatus_t::SUCCESS;
+}
+
+MyStatus_t MyServManage::GetSipServRegUdpTp(const std::string& servId, MySipTransportPtrAddr udpTpPtrAddr)
+{
+    MySipServer::SmtWkPtr sipServWkPtr;
+    if (MyStatus_t::SUCCESS != ManageObject.get(servId, sipServWkPtr)) {
+        return MyStatus_t::FAILED;
+    }
+    
+    if (MyStatus_t::SUCCESS != sipServWkPtr.lock()->getSipServRegUdpTp(udpTpPtrAddr)) {
+        return MyStatus_t::FAILED;
+    }
+    return MyStatus_t::SUCCESS;
+}
+
+MyStatus_t MyServManage::GetSipServTcpTp(const std::string& servId, MySipTransportPtrAddr tcpTpPtrAddr, const std::string& remoteIpAddr, uint16_t remotePort)
 {   
-    return ManageObject.has(servId);
+    MySipServer::SmtWkPtr sipServWkPtr;
+    if (MyStatus_t::SUCCESS != ManageObject.get(servId, sipServWkPtr)) {
+        return MyStatus_t::FAILED;
+    }
+    
+    if (MyStatus_t::SUCCESS != sipServWkPtr.lock()->getSipServTcpTp(tcpTpPtrAddr, remoteIpAddr, remotePort)) {
+        return MyStatus_t::FAILED;
+    }
+    return MyStatus_t::SUCCESS;
+}
+
+MyStatus_t MyServManage::GetSipServRegTcpTp(const std::string& servId, MySipTransportPtrAddr tcpTpPtrAddr, const std::string& remoteIpAddr, uint16_t remotePort)
+{
+    MySipServer::SmtWkPtr sipServWkPtr;
+    if (MyStatus_t::SUCCESS != ManageObject.get(servId, sipServWkPtr)) {
+        return MyStatus_t::FAILED;
+    }
+    
+    if (MyStatus_t::SUCCESS != sipServWkPtr.lock()->getSipServTcpTp(tcpTpPtrAddr, remoteIpAddr, remotePort)) {
+        return MyStatus_t::FAILED;
+    }
+    return MyStatus_t::SUCCESS;
 }
 
 }; // namespace MY_MANAGER

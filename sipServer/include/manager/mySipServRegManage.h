@@ -238,9 +238,9 @@ public:
      * @param lowRegServId                  下级服务注册id
      * @param expired                       下级服务地址
      */ 
-    static void                             UpdateSipRegLowServIpAddr(const std::string&                    servId, 
-                                                                      const std::string&                    lowRegServId, 
-                                                                      const MY_COMMON::MySipServAddrCfg_dt& lowRegServAddr);
+    static void                             UpdateSipRegLowServIpAddr(const std::string&                       servId, 
+                                                                      const std::string&                       lowRegServId, 
+                                                                      const MY_COMMON::MySipServRegAddrCfg_dt& lowRegServAddr);
 };
 
 }; // namespace MY_MANAGER
