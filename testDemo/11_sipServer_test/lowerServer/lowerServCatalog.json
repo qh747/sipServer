@@ -1,0 +1,108 @@
+{
+    "catalog-1": {
+        "id": "11000000002000000001",
+        "platInfo": {
+            "plat-1": {
+                "name": "lowerSipServer",
+                "status": "ON",
+                "parental": 0,
+                "manufacturer": "MY_PLAT",
+                "model": "MY_PLAT_1",
+                "block": "block",
+                "safetyWay": 0,
+                "registerWay": 1,
+                "secrecy": 0,
+                "deviceID": "11000000002000000001",
+                "parentID": "11000000002000000001",
+                "platformID": "11000000002000000001",
+                "platformIp": "192.168.1.10",
+                "platformPort": 15060,
+                "owner": "lowerSipServer",
+                "deviceIp": "192.168.1.10",
+                "devicePort": 15060,
+                "deviceChannel": 0,
+                "deviceStream": "main",
+                "longitude": "117.96647071838379",
+                "latitude": "28.444311616185587"
+            }
+        },
+        "subPlatInfo": {
+            "subPlat-1": {
+                "name": "lowerSipSubServer-1",
+                "status": "ON",
+                "parental": 1,
+                "manufacturer": "MY_SUB_PLAT",
+                "model": "MY_SUB_PLAT_1",
+                "block": "block",
+                "safetyWay": 0,
+                "registerWay": 1,
+                "secrecy": 0,
+                "deviceID": "11000000002150000002",
+                "parentID": "11000000002000000001",
+                "platformID": "11000000002000000001",
+                "platformIp": "192.168.1.10",
+                "platformPort": 16060,
+                "owner": "lowerSipServer",
+                "deviceIp": "192.168.1.10",
+                "devicePort": 0,
+                "deviceChannel": 0,
+                "deviceStream": "main",
+                "longitude": "",
+                "latitude": ""
+            }
+        },
+        "subVirtualPlatInfo": {
+            "subVirtualPlat-1": {
+                "name": "lowerSipSubVirtualServer-1",
+                "status": "ON",
+                "parental": 1,
+                "manufacturer": "MY_SUB_VIRTUAL_PLAT",
+                "model": "MY_SUB_VIRTUAL_PLAT_1",
+                "block": "block",
+                "safetyWay": 0,
+                "registerWay": 1,
+                "secrecy": 0,
+                "deviceID": "11000000002160000029",
+                "parentID": "11000000002150000002",
+                "platformID": "11000000002000000001",
+                "platformIp": "192.168.1.10",
+                "platformPort": 17070,
+                "owner": "lowerSipServer",
+                "deviceIp": "192.168.1.10",
+                "devicePort": 0,
+                "deviceChannel": 0,
+                "deviceStream": "main",
+                "auth": [
+                    {
+                        "portNum": "11000000002000000152"
+                    }
+                ],
+                "longitude": "117.97082131585832",
+                "latitude": "28.44216139758548"
+            }
+        },
+        "deviceInfo": {
+            "device-1": {
+                "name": "camera-1",
+                "status": "ON",
+                "parental": 1,
+                "manufacturer": "MY_CAMERA",
+                "model": "MY_CAMERA_1",
+                "block": "video",
+                "safetyWay": 0,
+                "registerWay": 1,
+                "secrecy": 0,
+                "deviceID": "11000000001310000059",
+                "parentID": "11000000002160000029",
+                "platformID": "11000000002000000001",
+                "owner": "lowerSipServer",
+                "deviceIp": "192.168.1.10",
+                "devicePort": 18080,
+                "deviceChannel": 33,
+                "deviceStream": "main",
+                "longitude": "117.97082131585832",
+                "latitude": "28.44216139758548"
+            }
+        }
+    }
+}

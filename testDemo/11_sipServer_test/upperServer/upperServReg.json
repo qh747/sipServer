@@ -1,0 +1,20 @@
+{
+    "registerServer-1": {
+      "id": "10000000002000000001",
+      "lowerServer": [
+        {
+          "id": "11000000002000000001",
+          "ipAddr": "192.168.1.10",
+          "port": "15060",
+          "name": "lowerSipServer",
+          "domain": "lowerSipServer.com",
+          "proto": "udp",
+          "expired": "3600",
+          "auth": "true",
+          "authName": "admin",
+          "authPwd": "123456",
+          "authRealm": "123456"
+        }
+      ]
+    }
+  }

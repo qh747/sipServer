@@ -1,0 +1,10 @@
+{
+    "sipServer-1": {
+      "id": "10000000002000000001",
+      "ipAddr": "127.0.0.1",
+      "port": "5060",
+      "regPort": "5061",
+      "name": "upperSipServer",
+      "domain": "upperSipServer.com"
+    }
+}
