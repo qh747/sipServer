@@ -36,6 +36,7 @@ typedef         pjsip_tx_data*                                              MySi
 typedef         pjsip_date_hdr*                                             MySipMsgDateHdrPtr;
 typedef         pjsip_www_authenticate_hdr*                                 MySipMsgAuthHdrPtr;
 typedef         pjsip_regc_cbparam*                                         MySipRegCbParamPtr;
+typedef         pjsip_inv_session*                                          MySipInvSessionPtr;
 typedef         pjsip_transaction*                                          MySipTsxPtr;
 typedef         pj_thread_t*                                                MySipThdPtr; 
 typedef         void*                                                       MySipCbParamPtr;
@@ -43,9 +44,13 @@ typedef         void*                                                       MySi
 typedef         MySipServAddrCfg_dt*                                        MySipServAddrCfgPtr;
 typedef         MySipRegUpServCfg_dt*                                       MySipRegUpServCfgPtr;
 typedef         std::atomic<MyStatus_t>*                                    MySipStatusPtr;
+typedef         pjsip_module*                                               MySipModPtr;
 typedef         std::shared_ptr<pjsip_module>                               MySipModSmtPtr;
+typedef         std::shared_ptr<pjsip_inv_callback>                         MySipInvCbSmtPtr;
 typedef         std::shared_ptr<MySipUpRegServInfo_dt>                      MySipUpRegServInfoSmtPtr;
 typedef         std::shared_ptr<MySipLowRegServInfo_dt>                     MySipLowRegServInfoSmtPtr;
+
+typedef         std::atomic<MY_COMMON::MyStatus_t>                          MySipStatusAtomic;
 
 // key = local sip server id, value = sip server address config
 typedef         std::map<std::string, MySipServAddrCfg_dt>                  MySipServAddrMap;

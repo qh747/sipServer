@@ -2,6 +2,7 @@
 #include <string>
 #include "utils/myBaseHelper.h"
 #include "app/mySipRegApp.h"
+#include "app/mySipInviteApp.h"
 #include "app/mySipCatalogApp.h"
 #include "app/mySipMsgProcApp.h"
 using namespace MY_APP; 
@@ -63,6 +64,14 @@ public:
      * @param appSmtWkPtr                           sip设备目录应用弱引用指针
      */
     static MY_COMMON::MyStatus_t                    GetSipCatalogApp(const std::string& servId, MySipCatalogApp::SmtWkPtr& appSmtWkPtr);
+
+    /**
+     * @brief                                       获取sip会话邀请应用
+     * @return                                      获取结果，0-success，-1-failed
+     * @param servId                                sip服务id
+     * @param appSmtWkPtr                           sip会话邀请应用弱引用指针
+     */
+    static MY_COMMON::MyStatus_t                    GetSipInviteApp(const std::string& servId, MySipInviteApp::SmtWkPtr& appSmtWkPtr);
 };
 
 }; // namespace MY_MANAGER

@@ -113,6 +113,7 @@ public:
         return this->stop(m_sipMsgProcAppSmtPtrMap);
     }
 
+public:
     void addSipRegApp(const std::string& servId, MySipRegApp::SmtPtr sipRegAppSmtPtr) {
         if (MyStatus_t::SUCCESS != this->add(servId, sipRegAppSmtPtr, m_sipRegAppSmtPtrMap)) {
             std::string appId;
@@ -153,6 +154,7 @@ public:
         return this->stop(m_sipRegAppSmtPtrMap);
     }
 
+public:
     void addSipCatalogApp(const std::string& servId, MySipCatalogApp::SmtPtr sipCatalogAppSmtPtr) {
         if (MyStatus_t::SUCCESS != this->add(servId, sipCatalogAppSmtPtr, m_sipCatalogAppSmtPtrMap)) {
             std::string appId;
@@ -193,6 +195,47 @@ public:
         return this->stop(m_sipCatalogAppSmtPtrMap);
     }
 
+public:
+    void addSipInviteApp(const std::string& servId, MySipInviteApp::SmtPtr sipInviteAppSmtPtr) {
+        if (MyStatus_t::SUCCESS != this->add(servId, sipInviteAppSmtPtr, m_sipInviteAppSmtPtrMap)) {
+            std::string appId;
+            if (MyStatus_t::SUCCESS != sipInviteAppSmtPtr->getId(appId)) {
+                LOG(ERROR) << "addSipInviteApp failed, servId: " << servId << "appId: " << appId << " get app id failed.";
+            }
+
+            LOG(ERROR) << "addSipInviteApp failed, servId: " << servId << "appId: " << appId << " already exist.";
+        }
+    }
+
+    void delSipInviteApp(const std::string& servId) {
+        if (MyStatus_t::SUCCESS != this->del(servId, m_sipInviteAppSmtPtrMap)) {
+            LOG(ERROR) << "delSipInviteApp failed, servId: " << servId << " not exist.";
+        }
+    }
+
+    MyStatus_t getSipInviteApp(const std::string& servId, MySipInviteApp::SmtWkPtr& appSmtWkPtr) {
+        boost::shared_lock<boost::shared_mutex> lock(m_rwMutex);
+
+        auto iter = m_sipInviteAppSmtPtrMap.find(servId);
+        if (m_sipInviteAppSmtPtrMap.end() == iter) {
+            return MyStatus_t::FAILED;
+        }
+        appSmtWkPtr = iter->second;
+        return MyStatus_t::SUCCESS;
+    }
+
+    MyStatus_t hasSipInviteApp(const std::string& servId) {
+        return this->has(servId, m_sipInviteAppSmtPtrMap);
+    }
+
+    MyStatus_t startSipInviteApp() {
+        return this->start(m_sipInviteAppSmtPtrMap);
+    }
+
+    MyStatus_t stopSipInviteApp() {
+        return this->stop(m_sipInviteAppSmtPtrMap);
+    }
+
 private:
     boost::shared_mutex                             m_rwMutex;
     // key = server id, value = sip msg proc app
@@ -201,6 +244,8 @@ private:
     std::map<std::string, MySipRegApp::SmtPtr>      m_sipRegAppSmtPtrMap;
     // key = server id, value = sip catalog app
     std::map<std::string, MySipCatalogApp::SmtPtr>  m_sipCatalogAppSmtPtrMap;
+    // key = server id, value = sip invite app
+    std::map<std::string, MySipInviteApp::SmtPtr>   m_sipInviteAppSmtPtrMap;
 };
 
 static MyAppManage::MyAppManageObject ManageObject;
@@ -214,6 +259,7 @@ MyStatus_t MyAppManage::Init()
         return MyStatus_t::FAILED;
     }
 
+    unsigned int idx = 1;
     for (const auto& pair : serAddrMap) {
         if (MyStatus_t::SUCCESS != MyServManage::HasSipServer(pair.second.id)) {
             LOG(WARNING) << "Init sip app failed. sip server not exist. servId: " << pair.second.id;
@@ -221,31 +267,58 @@ MyStatus_t MyAppManage::Init()
         }
 
         // 初始化sip消息处理应用
-        MySipMsgProcApp::SmtPtr sipMsgProcAppSmtPtr = std::make_shared<MySipMsgProcApp>();
-        if (MyStatus_t::SUCCESS != sipMsgProcAppSmtPtr->init(pair.second.id, "sipMsgProcApp_1", PJSIP_MOD_PRIORITY_APPLICATION)) {
-            LOG(WARNING) << "Init sip app failed. sip msg proc app init failed.";
-        }
-        else {
-            ManageObject.addSipMsgProcApp(pair.second.id, sipMsgProcAppSmtPtr);
+        {
+            std::string appId = "sipMsgProcApp_" + std::to_string(idx);
+
+            MySipMsgProcApp::SmtPtr sipMsgProcAppSmtPtr = std::make_shared<MySipMsgProcApp>();
+            if (MyStatus_t::SUCCESS != sipMsgProcAppSmtPtr->init(pair.second.id, appId, PJSIP_MOD_PRIORITY_APPLICATION)) {
+                LOG(WARNING) << "Init sip app failed. sip msg proc app init failed.";
+            }
+            else {
+                ManageObject.addSipMsgProcApp(pair.second.id, sipMsgProcAppSmtPtr);
+            }
         }
         
         // 初始化sip注册应用
-        MySipRegApp::SmtPtr sipRegAppSmtPtr = std::make_shared<MySipRegApp>();
-        if (MyStatus_t::SUCCESS != sipRegAppSmtPtr->init(pair.second.id, "sipRegApp_1", "sipRegApp_1", PJSIP_MOD_PRIORITY_APPLICATION)) {
-            LOG(WARNING) << "Init sip app failed. sip reg app init failed.";
-        }
-        else{
-            ManageObject.addSipRegApp(pair.second.id, sipRegAppSmtPtr);
-        }
+        {
+            std::string appId = "sipRegApp_" + std::to_string(idx);
 
+            MySipRegApp::SmtPtr sipRegAppSmtPtr = std::make_shared<MySipRegApp>();
+            if (MyStatus_t::SUCCESS != sipRegAppSmtPtr->init(pair.second.id, appId, appId, PJSIP_MOD_PRIORITY_APPLICATION)) {
+                LOG(WARNING) << "Init sip app failed. sip reg app init failed.";
+            }
+            else{
+                ManageObject.addSipRegApp(pair.second.id, sipRegAppSmtPtr);
+            }
+        }
+        
         // 初始化sip目录应用
-        MySipCatalogApp::SmtPtr sipCatalogAppSmtPtr = std::make_shared<MySipCatalogApp>();
-        if (MyStatus_t::SUCCESS != sipCatalogAppSmtPtr->init(pair.second.id, "sipCatalogApp_1", "sipCatalogApp_1", PJSIP_MOD_PRIORITY_APPLICATION)) {
-            LOG(WARNING) << "Init sip app failed. sip catalog app init failed.";
+        {
+            std::string appId = "sipCatalogApp_" + std::to_string(idx);
+
+            MySipCatalogApp::SmtPtr sipCatalogAppSmtPtr = std::make_shared<MySipCatalogApp>();
+            if (MyStatus_t::SUCCESS != sipCatalogAppSmtPtr->init(pair.second.id, appId, appId, PJSIP_MOD_PRIORITY_APPLICATION)) {
+                LOG(WARNING) << "Init sip app failed. sip catalog app init failed.";
+            }
+            else{
+                ManageObject.addSipCatalogApp(pair.second.id, sipCatalogAppSmtPtr);
+            }
         }
-        else{
-            ManageObject.addSipCatalogApp(pair.second.id, sipCatalogAppSmtPtr);
+        
+        // 初始化sip会话邀请应用
+        {
+            std::string appId = "sipInviteApp_" + std::to_string(idx);
+
+            MySipInviteApp::SmtPtr sipInviteAppSmtPtr = std::make_shared<MySipInviteApp>();
+            if (MyStatus_t::SUCCESS != sipInviteAppSmtPtr->init(pair.second.id, appId, PJSIP_MOD_PRIORITY_APPLICATION)) {
+                LOG(WARNING) << "Init sip app failed. sip invite app init failed.";
+            }
+            else{
+                ManageObject.addSipInviteApp(pair.second.id, sipInviteAppSmtPtr);
+            }
         }
+        
+        ++idx;
     }
     return MyStatus_t::SUCCESS;
 }                    
@@ -261,6 +334,9 @@ MyStatus_t MyAppManage::Run()
     // 启动sip目录应用
     ManageObject.startSipCatalogApp();
 
+    // 启动sip会话邀请应用
+    ManageObject.startSipInviteApp();
+
     return MyStatus_t::SUCCESS;
 }
 
@@ -274,6 +350,9 @@ MyStatus_t MyAppManage::Shutdown()
 
     // 停止sip目录应用
     ManageObject.stopSipCatalogApp();
+
+    // 停止sip会话邀请应用
+    ManageObject.stopSipInviteApp();
 
     return MyStatus_t::SUCCESS;
 }
@@ -291,6 +370,11 @@ MyStatus_t MyAppManage::GetSipMsgProcApp(const std::string& servId, MySipMsgProc
 MyStatus_t MyAppManage::GetSipCatalogApp(const std::string& servId, MySipCatalogApp::SmtWkPtr& appSmtWkPtr)
 {
     return ManageObject.getSipCatalogApp(servId, appSmtWkPtr);
+}
+
+MyStatus_t MyAppManage::GetSipInviteApp(const std::string& servId, MySipInviteApp::SmtWkPtr& appSmtWkPtr)
+{
+    return ManageObject.getSipInviteApp(servId, appSmtWkPtr);
 }
 
 }; // namespace MY_MANAGER

@@ -1,5 +1,4 @@
 #pragma once
-#include <atomic>
 #include <string>
 #include <memory>
 #include "common/myTypeDef.h"
@@ -162,7 +161,7 @@ private:
     MY_COMMON::MySipAppIdCfg_dt                 m_appIdCfg;
 
     //                                          启动状态 
-    std::atomic<MY_COMMON::MyStatus_t>          m_status; 
+    MY_COMMON::MySipStatusAtomic                m_status; 
 
     //                                          应用模块指针
     MY_COMMON::MySipModSmtPtr                   m_appModPtr;

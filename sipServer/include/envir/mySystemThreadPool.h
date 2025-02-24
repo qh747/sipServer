@@ -1,9 +1,8 @@
 #pragma once
-#include <atomic>
 #include <memory>
 #include <functional>
 #include <Thread/ThreadPool.h>
-#include "common/myDataDef.h"
+#include "common/myTypeDef.h"
 #include "utils/myBaseHelper.h"
 
 namespace MY_ENVIR {
@@ -54,7 +53,7 @@ public:
 
 private:    
     //                                              启动状态 
-    static std::atomic<MY_COMMON::MyStatus_t>       SysThdPoolState;
+    static MY_COMMON::MySipStatusAtomic             SysThdPoolState;
 
     //                                              系统线程池
     static ThreadPoolPtr                            SysThdPool;

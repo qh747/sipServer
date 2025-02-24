@@ -148,7 +148,7 @@ public:
 
 private:
     //                                      启动状态 
-    std::atomic<MY_COMMON::MyStatus_t>      m_status; 
+    MY_COMMON::MySipStatusAtomic            m_status; 
     
     //                                      sip服务多线程互斥量
     boost::shared_mutex                     m_rwMutex;

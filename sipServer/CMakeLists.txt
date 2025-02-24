@@ -7,6 +7,9 @@ project(sipServer)
 # 设置编译器
 set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# 关闭三方库警告
+add_definitions(-w)
+
 # 设置为debug可调试
 set(CMAKE_BUILD_TYPE Debug)
 

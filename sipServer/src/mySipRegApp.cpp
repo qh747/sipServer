@@ -7,7 +7,7 @@
 #include "envir/mySystemPjsip.h"
 #include "manager/myServManage.h"
 #include "manager/mySipServRegManage.h"
-#include "manager/mySipServCatalogManager.h"
+#include "manager/mySipServCatalogManage.h"
 #include "utils/myXmlHelper.h"
 #include "utils/myTimeHelper.h"
 #include "utils/mySipAppHelper.h"

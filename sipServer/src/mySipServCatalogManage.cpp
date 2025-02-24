@@ -1,5 +1,5 @@
 #include <boost/thread/shared_mutex.hpp>
-#include "manager/mySipServCatalogManager.h"
+#include "manager/mySipServCatalogManage.h"
 using namespace MY_COMMON;
 
 namespace MY_MANAGER

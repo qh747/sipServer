@@ -1,5 +1,4 @@
 #pragma once
-#include <atomic>
 #include "common/myTypeDef.h"
 #include "utils/myBaseHelper.h"
 
@@ -60,7 +59,7 @@ private:
 
 private:
     //                                          启动状态 
-    static std::atomic<MY_COMMON::MyStatus_t>   SysPjsipState;
+    static MY_COMMON::MySipStatusAtomic         SysPjsipState;
 
     //                                          pjsip内存池
     static pj_caching_pool                      SysPjsipCachingPool;

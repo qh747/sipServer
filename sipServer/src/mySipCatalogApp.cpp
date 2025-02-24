@@ -12,7 +12,7 @@
 #include "utils/mySipServerHelper.h"
 #include "manager/myServManage.h"
 #include "manager/mySipServRegManage.h"
-#include "manager/mySipServCatalogManager.h"
+#include "manager/mySipServCatalogManage.h"
 #include "app/mySipCatalogApp.h"
 using namespace MY_UTILS;
 using namespace MY_COMMON;
