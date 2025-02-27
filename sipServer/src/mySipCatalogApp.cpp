@@ -11,8 +11,8 @@
 #include "utils/mySipMsgHelper.h"
 #include "utils/mySipServerHelper.h"
 #include "manager/myServManage.h"
-#include "manager/mySipServRegManage.h"
-#include "manager/mySipServCatalogManage.h"
+#include "manager/mySipRegManage.h"
+#include "manager/mySipCatalogManage.h"
 #include "app/mySipCatalogApp.h"
 using namespace MY_UTILS;
 using namespace MY_COMMON;
@@ -20,8 +20,8 @@ using MY_ENVIR::MySystemPjsip;
 using MY_ENVIR::MySystemConfig;
 using MY_ENVIR::MySystemThdPool;
 using MY_MANAGER::MyServManage;
-using MY_MANAGER::MySipServRegManage;
-using MY_MANAGER::MySipServCatalogManage;
+using MY_MANAGER::MySipRegManage;
+using MY_MANAGER::MySipCatalogManage;
 
 namespace MY_APP {
 
@@ -95,13 +95,13 @@ int MySipCatalogApp::SipCatalogAppPushCatalogThdFunc(MySipCbParamPtr arg)
     auto pushCatalogFunc = [endptPtr, &sn, &regUpServCfg, &upRegServInfo, &csep](const MySipServAddrCfg_dt& servAddrCfg) {
         // 获取设备目录配置
         MySipCatalogPlatCfgMap platCfgMap;
-        if (MyStatus_t::SUCCESS != MySipServCatalogManage::GetSipServCatalogPlatCfgMap(servAddrCfg.id, platCfgMap)) {
+        if (MyStatus_t::SUCCESS != MySipCatalogManage::GetSipCatalogPlatCfgMap(servAddrCfg.id, platCfgMap)) {
             LOG(ERROR) << "Sip catalog app push local server catalog failed. get catalog plat cfg failed. "  << upRegServInfo << ".";
             return;
         }
 
         MySipCatalogSubPlatCfgMap subPlatCfgMap;
-        if (MyStatus_t::SUCCESS != MySipServCatalogManage::GetSipServCatalogSubPlatCfgMap(servAddrCfg.id, subPlatCfgMap)) {
+        if (MyStatus_t::SUCCESS != MySipCatalogManage::GetSipCatalogSubPlatCfgMap(servAddrCfg.id, subPlatCfgMap)) {
             LOG(ERROR) << "Sip catalog app push local server catalog failed. get catalog sub plat cfg failed. " << upRegServInfo << ".";
             return;
         }
@@ -118,7 +118,7 @@ int MySipCatalogApp::SipCatalogAppPushCatalogThdFunc(MySipCbParamPtr arg)
         }
 
         MySipCatalogSubVirtualPlatCfgMap subVirtualCfgMap;
-        if (MyStatus_t::SUCCESS != MySipServCatalogManage::GetSipServCatalogSubVirtualPlatCfgMap(servAddrCfg.id, subVirtualCfgMap)) {
+        if (MyStatus_t::SUCCESS != MySipCatalogManage::GetSipCatalogSubVirtualPlatCfgMap(servAddrCfg.id, subVirtualCfgMap)) {
             LOG(ERROR) << "Sip catalog app push local server catalog failed. get catalog sub virtual plat cfg failed. " << upRegServInfo << ".";
             return;
         }
@@ -126,7 +126,7 @@ int MySipCatalogApp::SipCatalogAppPushCatalogThdFunc(MySipCbParamPtr arg)
         auto subVirtualCfgMapIter = subVirtualCfgMap.begin();
         while (subVirtualCfgMapIter != subVirtualCfgMap.end()) {
             // 删除无效虚拟子平台
-            if (platCfgMap.end() == platCfgMap.find(subVirtualCfgMapIter->second.parentID) &&
+            if (platCfgMap.end()    == platCfgMap.find(subVirtualCfgMapIter->second.parentID) &&
                 subPlatCfgMap.end() == subPlatCfgMap.find(subVirtualCfgMapIter->second.parentID)) {
                 subVirtualCfgMapIter = subVirtualCfgMap.erase(subVirtualCfgMapIter);
             }
@@ -136,7 +136,7 @@ int MySipCatalogApp::SipCatalogAppPushCatalogThdFunc(MySipCbParamPtr arg)
         }
 
         MySipCatalogDeviceCfgMap deviceCfgMap;
-        if (MyStatus_t::SUCCESS != MySipServCatalogManage::GetSipServCatalogDeviceCfgMap(servAddrCfg.id, deviceCfgMap)) {
+        if (MyStatus_t::SUCCESS != MySipCatalogManage::GetSipCatalogDeviceCfgMap(servAddrCfg.id, deviceCfgMap)) {
             LOG(ERROR) << "Sip catalog app push local server catalog failed. get catalog device cfg failed. " << upRegServInfo << ".";
             return;
         }
@@ -144,8 +144,8 @@ int MySipCatalogApp::SipCatalogAppPushCatalogThdFunc(MySipCbParamPtr arg)
         auto deviceCfgMapIter = deviceCfgMap.begin();
         while (deviceCfgMapIter != deviceCfgMap.end()) {
             // 删除无效设备
-            if (platCfgMap.end() == platCfgMap.find(deviceCfgMapIter->second.parentID) &&
-                subPlatCfgMap.end() == subPlatCfgMap.find(deviceCfgMapIter->second.parentID) &&
+            if (platCfgMap.end()       == platCfgMap.find(deviceCfgMapIter->second.parentID) &&
+                subPlatCfgMap.end()    == subPlatCfgMap.find(deviceCfgMapIter->second.parentID) &&
                 subVirtualCfgMap.end() == subVirtualCfgMap.find(deviceCfgMapIter->second.parentID)) {
                 deviceCfgMapIter = deviceCfgMap.erase(deviceCfgMapIter);
             }
@@ -155,7 +155,7 @@ int MySipCatalogApp::SipCatalogAppPushCatalogThdFunc(MySipCbParamPtr arg)
         }
 
         // 获取设备目录总数
-        std::size_t sumNum = platCfgMap.size() + subPlatCfgMap.size() + subVirtualCfgMap.size() + deviceCfgMap.size();
+        std::size_t sumNum = 1 + subPlatCfgMap.size() + subVirtualCfgMap.size() + deviceCfgMap.size();
 
         // sip catalog消息首部生成
         std::string sURL;
@@ -195,16 +195,14 @@ int MySipCatalogApp::SipCatalogAppPushCatalogThdFunc(MySipCbParamPtr arg)
 
             MySipTransportPtr transportPtr = nullptr;
             if (MyTpProto_t::UDP == regUpServCfg.proto) {
-                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegUdpTp(servAddrCfg.id, &transportPtr)) {
+                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegUdpTp(&transportPtr)) {
                     LOG(ERROR) << "Sip catalog app push local server catalog failed. get sip serv reg udp tp failed. " << upRegServInfo << ".";
                     return;
                 }
             }
             else {
-                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegTcpTp(servAddrCfg.id, 
-                                                                      &transportPtr, 
-                                                                      regUpServCfg.upSipServRegAddrCfg.ipAddr, 
-                                                                        regUpServCfg.upSipServRegAddrCfg.port)) {
+                const auto& upRegServAddr = regUpServCfg.upSipServRegAddrCfg;
+                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegTcpTp(&transportPtr, upRegServAddr.ipAddr, upRegServAddr.port)) {
                     LOG(ERROR) << "Sip reg app register up server failed. get sip serv reg tcp tp failed. " << upRegServInfo << ".";
                     return;
                 }
@@ -264,16 +262,14 @@ int MySipCatalogApp::SipCatalogAppPushCatalogThdFunc(MySipCbParamPtr arg)
 
             MySipTransportPtr transportPtr = nullptr;
             if (MyTpProto_t::UDP == regUpServCfg.proto) {
-                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegUdpTp(servAddrCfg.id, &transportPtr)) {
+                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegUdpTp(&transportPtr)) {
                     LOG(ERROR) << "Sip catalog app push local server catalog failed. get sip serv reg udp tp failed. " << upRegServInfo << ".";
                     return;
                 }
             }
             else {
-                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegTcpTp(servAddrCfg.id, 
-                                                                      &transportPtr, 
-                                                                      regUpServCfg.upSipServRegAddrCfg.ipAddr, 
-                                                                        regUpServCfg.upSipServRegAddrCfg.port)) {
+                const auto& upRegServAddr = regUpServCfg.upSipServRegAddrCfg;
+                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegTcpTp(&transportPtr, upRegServAddr.ipAddr, upRegServAddr.port)) {
                     LOG(ERROR) << "Sip reg app register up server failed. get sip serv reg tcp tp failed. " << upRegServInfo << ".";
                     return;
                 }
@@ -333,16 +329,14 @@ int MySipCatalogApp::SipCatalogAppPushCatalogThdFunc(MySipCbParamPtr arg)
 
             MySipTransportPtr transportPtr = nullptr;
             if (MyTpProto_t::UDP == regUpServCfg.proto) {
-                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegUdpTp(servAddrCfg.id, &transportPtr)) {
+                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegUdpTp(&transportPtr)) {
                     LOG(ERROR) << "Sip catalog app push local server catalog failed. get sip serv reg udp tp failed. " << upRegServInfo << ".";
                     return;
                 }
             }
             else {
-                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegTcpTp(servAddrCfg.id, 
-                                                                      &transportPtr, 
-                                                                      regUpServCfg.upSipServRegAddrCfg.ipAddr, 
-                                                                        regUpServCfg.upSipServRegAddrCfg.port)) {
+                const auto& upRegServAddr = regUpServCfg.upSipServRegAddrCfg;
+                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegTcpTp(&transportPtr, upRegServAddr.ipAddr, upRegServAddr.port)) {
                     LOG(ERROR) << "Sip reg app register up server failed. get sip serv reg tcp tp failed. " << upRegServInfo << ".";
                     return;
                 }
@@ -402,16 +396,14 @@ int MySipCatalogApp::SipCatalogAppPushCatalogThdFunc(MySipCbParamPtr arg)
 
             MySipTransportPtr transportPtr = nullptr;
             if (MyTpProto_t::UDP == regUpServCfg.proto) {
-                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegUdpTp(servAddrCfg.id, &transportPtr)) {
+                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegUdpTp(&transportPtr)) {
                     LOG(ERROR) << "Sip catalog app push local server catalog failed. get sip serv reg udp tp failed. " << upRegServInfo << ".";
                     return;
                 }
             }
             else {
-                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegTcpTp(servAddrCfg.id, 
-                                                                      &transportPtr, 
-                                                                      regUpServCfg.upSipServRegAddrCfg.ipAddr, 
-                                                                        regUpServCfg.upSipServRegAddrCfg.port)) {
+                const auto& upRegServAddr = regUpServCfg.upSipServRegAddrCfg;
+                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegTcpTp(&transportPtr, upRegServAddr.ipAddr, upRegServAddr.port)) {
                     LOG(ERROR) << "Sip reg app register up server failed. get sip serv reg tcp tp failed. " << upRegServInfo << ".";
                     return;
                 }
@@ -457,7 +449,7 @@ int MySipCatalogApp::SipCatalogAppPushCatalogThdFunc(MySipCbParamPtr arg)
 
     // 获取下级sip服务信息
     MySipRegLowServCfgMap lowRegCfgMap;
-    if (MyStatus_t::SUCCESS != MySipServRegManage::GetSipRegLowServCfgMap(localServAddrCfg.id, lowRegCfgMap)) {
+    if (MyStatus_t::SUCCESS != MySipRegManage::GetSipRegLowServCfgMap(lowRegCfgMap)) {
         LOG(WARNING) << "Sip catalog app push lower server catalog failed. get low reg serv config map failed.";
     }
 
@@ -515,16 +507,15 @@ int MySipCatalogApp::SipCatalogAppUpdateCatalogThdFunc(MySipCbParamPtr arg)
     MySipCatalogPlatCfgMap uptLowPlatCfgMap;
     {
         MySipCatalogPlatCfgMap oldLowPlatCfgMap;
-        MySipServCatalogManage::GetSipServCatalogPlatCfgMap(catalogRespMsgBody.deviceId, oldLowPlatCfgMap);
+        MySipCatalogManage::GetSipCatalogPlatCfgMap(catalogRespMsgBody.deviceId, oldLowPlatCfgMap);
 
         const MySipCatalogPlatCfgMap& newLowPlatCfgMap = catalogRespMsgBody.platCfgMap;
         for (const auto& newLowPlatCfgPair : newLowPlatCfgMap) {
-            const auto& oldLowPlatCfgIter = oldLowPlatCfgMap.find(newLowPlatCfgPair.first);
-            if (oldLowPlatCfgMap.end() != oldLowPlatCfgIter) {
+            auto iter = oldLowPlatCfgMap.find(newLowPlatCfgPair.first);
+            if (oldLowPlatCfgMap.end() == iter) {
                 uptLowPlatCfgMap.insert(newLowPlatCfgPair);
-                continue;
             }
-            if (newLowPlatCfgPair.second != oldLowPlatCfgIter->second) {
+            else if (newLowPlatCfgPair.second != iter->second) {
                 uptLowPlatCfgMap.insert(newLowPlatCfgPair);
             }
         }
@@ -533,7 +524,7 @@ int MySipCatalogApp::SipCatalogAppUpdateCatalogThdFunc(MySipCbParamPtr arg)
     MySipCatalogSubPlatCfgMap uptLowSubPlatCfgMap;
     {
         MySipCatalogSubPlatCfgMap oldLowSubPlatCfgMap;
-        MySipServCatalogManage::GetSipServCatalogSubPlatCfgMap(catalogRespMsgBody.deviceId, oldLowSubPlatCfgMap);
+        MySipCatalogManage::GetSipCatalogSubPlatCfgMap(catalogRespMsgBody.deviceId, oldLowSubPlatCfgMap);
 
         const MySipCatalogSubPlatCfgMap& newLowSubPlatCfgMap = catalogRespMsgBody.subPlatCfgMap;
         for (const auto& newLowSubPlatCfgPair : newLowSubPlatCfgMap) {
@@ -551,7 +542,7 @@ int MySipCatalogApp::SipCatalogAppUpdateCatalogThdFunc(MySipCbParamPtr arg)
     MySipCatalogSubVirtualPlatCfgMap uptLowSubVirtualPlatCfgMap;
     {
         MySipCatalogSubVirtualPlatCfgMap oldLowSubVirtualPlatCfgMap;
-        MySipServCatalogManage::GetSipServCatalogSubVirtualPlatCfgMap(catalogRespMsgBody.deviceId, oldLowSubVirtualPlatCfgMap);
+        MySipCatalogManage::GetSipCatalogSubVirtualPlatCfgMap(catalogRespMsgBody.deviceId, oldLowSubVirtualPlatCfgMap);
 
         const MySipCatalogSubVirtualPlatCfgMap& newLowSubVirtualPlatCfgMap = catalogRespMsgBody.subVirtualPlatCfgMap;
         for (const auto& newLowSubVirtualPlatCfgPair : newLowSubVirtualPlatCfgMap) {
@@ -569,7 +560,7 @@ int MySipCatalogApp::SipCatalogAppUpdateCatalogThdFunc(MySipCbParamPtr arg)
     MySipCatalogDeviceCfgMap uptLowDeviceCfgMap;
     {
         MySipCatalogDeviceCfgMap oldLowDeviceCfgMap;
-        MySipServCatalogManage::GetSipServCatalogDeviceCfgMap(catalogRespMsgBody.deviceId, oldLowDeviceCfgMap);
+        MySipCatalogManage::GetSipCatalogDeviceCfgMap(catalogRespMsgBody.deviceId, oldLowDeviceCfgMap);
         
         const MySipCatalogDeviceCfgMap& newLowDeviceCfgMap = catalogRespMsgBody.deviceCfgMap;
         for (const auto& newLowDeviceCfgPair : newLowDeviceCfgMap) {
@@ -592,11 +583,11 @@ int MySipCatalogApp::SipCatalogAppUpdateCatalogThdFunc(MySipCbParamPtr arg)
     sipCatalogInfo.sipDeviceMap         = uptLowDeviceCfgMap;
 
     // 更新本级设备目录信息
-    if (MyStatus_t::SUCCESS != MySipServCatalogManage::HasSipServCatalogInfo(catalogRespMsgBody.deviceId)) {
-        MySipServCatalogManage::AddSipServCatalogInfo(catalogRespMsgBody.deviceId, sipCatalogInfo);
+    if (MyStatus_t::SUCCESS != MySipCatalogManage::HasSipCatalogInfo(catalogRespMsgBody.deviceId)) {
+        MySipCatalogManage::AddSipCatalogInfo(catalogRespMsgBody.deviceId, sipCatalogInfo);
     }
     else {
-        MySipServCatalogManage::UptSipServCatalogInfo(catalogRespMsgBody.deviceId, sipCatalogInfo);
+        MySipCatalogManage::UptSipCatalogInfo(catalogRespMsgBody.deviceId, sipCatalogInfo);
     }
 
     // 获取endpoint
@@ -608,14 +599,14 @@ int MySipCatalogApp::SipCatalogAppUpdateCatalogThdFunc(MySipCbParamPtr arg)
 
     // 获取本地sip服务地址配置
     MySipServAddrCfg_dt servAddrCfg;
-    if (MyStatus_t::SUCCESS != MyServManage::GetSipServAddrCfg(servId, servAddrCfg)) {
+    if (MyStatus_t::SUCCESS != MyServManage::GetSipServAddrCfg(servAddrCfg)) {
         LOG(ERROR) << "Sip catalog app update catalog to up server failed. get sip serv addr cfg failed. local serv id: " << servId << ".";
         return -1;
     }
 
     // 查询请求过本级设备目录信息的上级服务(用于向上级服务发送更新)
     MySipRegServAddrMap upServAddrMap;
-    MySipServCatalogManage::GetSipUpQueryServInfo(servId, upServAddrMap);
+    MySipCatalogManage::GetSipQueryInfo(upServAddrMap);
 
     // 记录上级服务响应消息状态
     auto cbStatuePtr = new std::atomic<MyStatus_t>(MyStatus_t::FAILED);
@@ -623,7 +614,7 @@ int MySipCatalogApp::SipCatalogAppUpdateCatalogThdFunc(MySipCbParamPtr arg)
 
     for (const auto& upServAddrCfgPair: upServAddrMap) {
         std::string sn;
-        if (MyStatus_t::SUCCESS != MySipServCatalogManage::GetSipServCatalogSN(upServAddrCfgPair.second.id, sn)) {
+        if (MyStatus_t::SUCCESS != MySipCatalogManage::GetSipCatalogSN(upServAddrCfgPair.second.id, sn)) {
             LOG(ERROR) << "Sip catalog app update catalog to up server failed. get catalog sn failed. local serv id: " << servId << ".";
             return -1;
         }
@@ -632,7 +623,7 @@ int MySipCatalogApp::SipCatalogAppUpdateCatalogThdFunc(MySipCbParamPtr arg)
         MySipServerHelper::PrintSipRegServInfo(upServAddrCfgPair.second, upRegServInfo);
 
         MyTpProto_t proto = MyTpProto_t::UDP;
-        MySipServRegManage::GetSipRegUpServProto(servId, upServAddrCfgPair.second.id, proto);
+        MySipRegManage::GetSipRegUpServProto(upServAddrCfgPair.second.id, proto);
 
         // 获取设备目录总数
         std::size_t sumNum = uptLowPlatCfgMap.size() + uptLowSubPlatCfgMap.size() + uptLowSubVirtualPlatCfgMap.size() + uptLowDeviceCfgMap.size();
@@ -670,16 +661,14 @@ int MySipCatalogApp::SipCatalogAppUpdateCatalogThdFunc(MySipCbParamPtr arg)
 
             MySipTransportPtr transportPtr = nullptr;
             if (MyTpProto_t::UDP == proto) {
-                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegUdpTp(servAddrCfg.id, &transportPtr)) {
+                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegUdpTp(&transportPtr)) {
                     LOG(ERROR) << "Sip catalog app update catalog to up server failed. get sip serv reg udp tp failed. " << upRegServInfo << ".";
                     return -1;
                 }
             }
             else {
-                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegTcpTp(servAddrCfg.id, 
-                                                                      &transportPtr, 
-                                                                      upServAddrCfgPair.second.ipAddr, 
-                                                                        upServAddrCfgPair.second.port)) {
+                const auto& upRegServAddr = upServAddrCfgPair.second;
+                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegTcpTp(&transportPtr, upRegServAddr.ipAddr, upRegServAddr.port)) {
                     LOG(ERROR) << "Sip reg app register up server failed. get sip serv reg tcp tp failed. " << upRegServInfo << ".";
                     return -1;
                 }
@@ -738,16 +727,14 @@ int MySipCatalogApp::SipCatalogAppUpdateCatalogThdFunc(MySipCbParamPtr arg)
 
             MySipTransportPtr transportPtr = nullptr;
             if (MyTpProto_t::UDP == proto) {
-                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegUdpTp(servAddrCfg.id, &transportPtr)) {
+                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegUdpTp(&transportPtr)) {
                     LOG(ERROR) << "Sip catalog app update catalog to up server failed. get sip serv reg udp tp failed. " << upRegServInfo << ".";
                     return -1;
                 }
             }
             else {
-                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegTcpTp(servAddrCfg.id, 
-                                                                      &transportPtr, 
-                                                                      upServAddrCfgPair.second.ipAddr, 
-                                                                        upServAddrCfgPair.second.port)) {
+                const auto& upRegServAddr = upServAddrCfgPair.second;
+                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegTcpTp(&transportPtr, upRegServAddr.ipAddr, upRegServAddr.port)) {
                     LOG(ERROR) << "Sip reg app register up server failed. get sip serv reg tcp tp failed. " << upRegServInfo << ".";
                     return -1;
                 }
@@ -806,16 +793,14 @@ int MySipCatalogApp::SipCatalogAppUpdateCatalogThdFunc(MySipCbParamPtr arg)
 
             MySipTransportPtr transportPtr = nullptr;
             if (MyTpProto_t::UDP == proto) {
-                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegUdpTp(servAddrCfg.id, &transportPtr)) {
+                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegUdpTp(&transportPtr)) {
                     LOG(ERROR) << "Sip catalog app update catalog to up server failed. get sip serv reg udp tp failed. " << upRegServInfo << ".";
                     return -1;
                 }
             }
             else {
-                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegTcpTp(servAddrCfg.id, 
-                                                                      &transportPtr, 
-                                                                      upServAddrCfgPair.second.ipAddr, 
-                                                                        upServAddrCfgPair.second.port)) {
+                const auto& upRegServAddr = upServAddrCfgPair.second;
+                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegTcpTp(&transportPtr, upRegServAddr.ipAddr, upRegServAddr.port)) {
                     LOG(ERROR) << "Sip reg app register up server failed. get sip serv reg tcp tp failed. " << upRegServInfo << ".";
                     return -1;
                 }
@@ -874,16 +859,14 @@ int MySipCatalogApp::SipCatalogAppUpdateCatalogThdFunc(MySipCbParamPtr arg)
 
             MySipTransportPtr transportPtr = nullptr;
             if (MyTpProto_t::UDP == proto) {
-                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegUdpTp(servAddrCfg.id, &transportPtr)) {
+                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegUdpTp(&transportPtr)) {
                     LOG(ERROR) << "Sip catalog app update catalog to up server failed. get sip serv reg udp tp failed. " << upRegServInfo << ".";
                     return -1;
                 }
             }
             else {
-                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegTcpTp(servAddrCfg.id, 
-                                                                      &transportPtr, 
-                                                                      upServAddrCfgPair.second.ipAddr, 
-                                                                        upServAddrCfgPair.second.port)) {
+                const auto& upRegServAddr = upServAddrCfgPair.second;
+                if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegTcpTp(&transportPtr, upRegServAddr.ipAddr, upRegServAddr.port)) {
                     LOG(ERROR) << "Sip reg app register up server failed. get sip serv reg tcp tp failed. " << upRegServInfo << ".";
                     return -1;
                 }
@@ -979,31 +962,21 @@ MyStatus_t MySipCatalogApp::init(const std::string& servId, const std::string& i
     MySipCatalogInfo_dt catalogInfo;
 
     // 添加设备目录平台信息
-    MySipCatalogPlatCfgMap platCfgMap;
-    MySystemConfig::GetSipCatalogPlatCfgMap(m_servId, platCfgMap);
+    MySipCatalogCfg_dt catalogCfg;
+    MySystemConfig::GetSipCatalogCfg(catalogCfg);
 
-    for (const auto& platCfgPair : platCfgMap) {
-        // 确保平台id与服务id一致
-        if (platCfgPair.first != m_servId) {
-            continue;
-        }
-
-        // 确保平台id未重复
-        if (catalogInfo.sipPlatMap.end() != catalogInfo.sipPlatMap.find(platCfgPair.first)) {
-            continue;
-        }
-
-        // 插入设备目录平台配置
-        catalogInfo.sipPlatMap.insert(std::make_pair(platCfgPair.first, platCfgPair.second));
+    // 确保平台id与服务id一致
+    if (catalogCfg.catalogPlatCfg.deviceID != m_servId) {
+        LOG(ERROR) << "Sip catalog app module init failed. invalid catalog plat cfg.";
+        return MyStatus_t::FAILED;
     }
 
-    const auto& sipPlatMap = catalogInfo.sipPlatMap;
-
-    // 添加设备目录子平台信息
-    MySipCatalogSubPlatCfgMap subPlatCfgMap;
-    MySystemConfig::GetSipCatalogSubPlatCfgMap(m_servId, subPlatCfgMap);
+    // 插入设备目录平台配置
+    catalogInfo.sipPlatMap.insert(std::make_pair(catalogCfg.catalogPlatCfg.deviceID, catalogCfg.catalogPlatCfg));
     
-    for (const auto& subPlatCfgPair : subPlatCfgMap) {
+    // 添加设备目录子平台信息
+    const auto& sipPlatMap = catalogInfo.sipPlatMap;
+    for (const auto& subPlatCfgPair : catalogCfg.catalogSubPlatCfgMap) {
         // 确保子平台id关联的平台id存在
         if (sipPlatMap.end() == sipPlatMap.find(subPlatCfgPair.second.parentID)) {
             continue;
@@ -1018,13 +991,9 @@ MyStatus_t MySipCatalogApp::init(const std::string& servId, const std::string& i
         catalogInfo.sipSubPlatMap.insert(std::make_pair(subPlatCfgPair.first, subPlatCfgPair.second));
     }
 
-    const auto& sipSubPlatMap = catalogInfo.sipSubPlatMap;
-
     // 添加设备目录虚拟子平台信息
-    MySipCatalogSubVirtualPlatCfgMap subVirtualCfgMap;
-    MySystemConfig::GetSipCatalogSubVirtualPlatCfgMap(m_servId, subVirtualCfgMap);
-
-    for (const auto& subVirtualCfgPair : subVirtualCfgMap) {
+    const auto& sipSubPlatMap = catalogInfo.sipSubPlatMap;
+    for (const auto& subVirtualCfgPair : catalogInfo.sipSubVirtualPlatMap) {
         // 确保虚拟子平台id关联的平台/子平台id存在
         if (sipSubPlatMap.end() == sipSubPlatMap.find(subVirtualCfgPair.second.parentID) &&
             sipPlatMap.end() == sipPlatMap.find(subVirtualCfgPair.second.parentID)) {
@@ -1040,13 +1009,9 @@ MyStatus_t MySipCatalogApp::init(const std::string& servId, const std::string& i
         catalogInfo.sipSubVirtualPlatMap.insert(std::make_pair(subVirtualCfgPair.first, subVirtualCfgPair.second));
     }
 
-    const auto& sipSubVirtualPlatMap = catalogInfo.sipSubVirtualPlatMap;
-
     // 添加设备目录设备信息
-    MySipCatalogDeviceCfgMap deviceCfgMap;
-    MySystemConfig::GetSipCatalogDeviceCfgMap(m_servId, deviceCfgMap);
-
-    for (const auto& deviceCfgPair : deviceCfgMap) {
+    const auto& sipSubVirtualPlatMap = catalogInfo.sipSubVirtualPlatMap;
+    for (const auto& deviceCfgPair : catalogInfo.sipDeviceMap) {
         // 确保设备id关联的虚拟子平台/子平台/平台id存在
         if (sipSubVirtualPlatMap.end() == sipSubVirtualPlatMap.find(deviceCfgPair.second.parentID) &&
             sipSubPlatMap.end() == sipSubPlatMap.find(deviceCfgPair.second.parentID) &&
@@ -1064,7 +1029,7 @@ MyStatus_t MySipCatalogApp::init(const std::string& servId, const std::string& i
     }
 
     // 添加设备目录信息
-    MySipServCatalogManage::AddSipServCatalogInfo(m_servId, catalogInfo);
+    MySipCatalogManage::AddSipCatalogInfo(catalogCfg.catalogPlatCfg.deviceID, catalogInfo);
 
     std::string sipAppInfo;
     MySipAppHelper::GetSipAppInfo(m_appIdCfg, sipAppInfo);
@@ -1120,7 +1085,7 @@ MyStatus_t MySipCatalogApp::onSipCatalogAppRecvSipCatalogQueryReqMsg(MySipRxData
     }
 
     MySipRegUpServCfg_dt upServRegCfg;
-    if (MyStatus_t::SUCCESS != MySipServRegManage::GetSipRegUpServCfg(m_servId, upRegServId, upServRegCfg)) {
+    if (MyStatus_t::SUCCESS != MySipRegManage::GetSipRegUpServCfg(upRegServId, upServRegCfg)) {
         LOG(ERROR) << "Sip catalog app module recv catalog message. get up reg serv cfg failed. " << upRegServId << ".";
         return MyStatus_t::FAILED;
     }
@@ -1132,7 +1097,7 @@ MyStatus_t MySipCatalogApp::onSipCatalogAppRecvSipCatalogQueryReqMsg(MySipRxData
 
     // 获取本地服务配置
     MySipServAddrCfg_dt localServCfg;
-    if (MyStatus_t::SUCCESS != MyServManage::GetSipServAddrCfg(m_servId, localServCfg)) {
+    if (MyStatus_t::SUCCESS != MyServManage::GetSipServAddrCfg(localServCfg)) {
         LOG(ERROR) << "Sip catalog app module recv catalog message. get local serv cfg failed. " << m_servId << ".";
         return MyStatus_t::FAILED;
     }
@@ -1143,7 +1108,7 @@ MyStatus_t MySipCatalogApp::onSipCatalogAppRecvSipCatalogQueryReqMsg(MySipRxData
     }
 
     // 设备目录信息不存在
-    if (MyStatus_t::SUCCESS != MySipServCatalogManage::HasSipServCatalogInfo(m_servId)) {
+    if (MyStatus_t::SUCCESS != MySipCatalogManage::HasSipCatalogInfo(m_servId)) {
         LOG(ERROR) << "Sip catalog app module recv catalog message. invalid catalog info. local serv id. " << m_servId << ".";
         return MyStatus_t::FAILED;
     }
@@ -1162,10 +1127,10 @@ MyStatus_t MySipCatalogApp::onSipCatalogAppRecvSipCatalogQueryReqMsg(MySipRxData
     }
 
     // 更新SN号
-    MySipServCatalogManage::UpdateSipServCatalogSN(m_servId, catalogMsgBody.sn);
+    MySipCatalogManage::UpdateSipCatalogSN(m_servId, catalogMsgBody.sn);
 
     // 添加上级服务信息
-    MySipServCatalogManage::AddSipUpQueryServInfo(m_servId, upServRegCfg.upSipServRegAddrCfg);
+    MySipCatalogManage::AddSipQueryInfo(upServRegCfg.upSipServRegAddrCfg);
 
     // 创建发送sip设备目录消息线程参数，delete in function: MySipCatalogApp::SipCatalogAppPushCatalogThdFunc()
     MySipCatalogAppPushCatalogThdParamPtr thdParamPtr = new MySipCatalogAppPushCatalogThdParam_dt();
@@ -1201,7 +1166,7 @@ MyStatus_t MySipCatalogApp::onSipCatalogAppRecvSipCatalogResponseReqMsg(MySipRxD
     }
 
     // 判断下级sip服务是否有效
-    if (MyStatus_t::SUCCESS != MySipServRegManage::HasSipRegLowServInfo(m_servId, thdParamPtr->m_catalogRespMsgBody.deviceId)) {
+    if (MyStatus_t::SUCCESS != MySipRegManage::HasSipRegLowServInfo(thdParamPtr->m_catalogRespMsgBody.deviceId)) {
         LOG(ERROR) << "Sip catalog app module recv catalog response message. invalid low serv id. " << thdParamPtr->m_catalogRespMsgBody.deviceId << ".";
         return MyStatus_t::FAILED;
     }
@@ -1299,16 +1264,14 @@ MyStatus_t MySipCatalogApp::onSipCatalogAppReqLowServCatalog(const MySipRegLowSe
 
     MySipTransportPtr transportPtr = nullptr;
     if (MyTpProto_t::UDP == regLowServCfg.proto) {
-        if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegUdpTp(localServCfg.id, &transportPtr)) {
+        if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegUdpTp(&transportPtr)) {
             LOG(ERROR) << "Sip catalog app request low server catalog failed. get sip serv reg udp tp failed. " << lowRegServInfo << ".";
             return MyStatus_t::FAILED;
         }
     }
     else {
-        if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegTcpTp(localServCfg.id, 
-                                                              &transportPtr, 
-                                                              regLowServCfg.lowSipServRegAddrCfg.ipAddr, 
-                                                                regLowServCfg.lowSipServRegAddrCfg.port)) {
+        const auto& regLowServAddr = regLowServCfg.lowSipServRegAddrCfg;
+        if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegTcpTp(&transportPtr, regLowServAddr.ipAddr, regLowServAddr.port)) {
             LOG(ERROR) << "Sip catalog app request low server catalog failed. get sip serv reg tcp tp failed. " << lowRegServInfo << ".";
             return MyStatus_t::FAILED;
         }

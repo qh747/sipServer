@@ -8,7 +8,7 @@ using namespace MY_COMMON;
 
 namespace MY_UTILS {
 
-MyStatus_t MyJsonHelper::ParseSipServAddrJsonFile(const std::string& filePath, MySipServAddrMap& cfgMap)
+MyStatus_t MyJsonHelper::ParseSipRegJsonFile(const std::string& filePath, MySipRegServCfg_dt& regCfg)
 {
     if (filePath.empty()) {
         return MyStatus_t::FAILED;
@@ -19,242 +19,147 @@ MyStatus_t MyJsonHelper::ParseSipServAddrJsonFile(const std::string& filePath, M
     Json::Value rootNode;
     ifs >> rootNode;
 
-    int size = rootNode.size();
-    for (unsigned int i = 1; i <= rootNode.size(); ++i) {
-        // 解析json根节点
-        std::string sRootNodeName = std::string("sipServer-") + std::to_string(i);
-        if (!(rootNode.isMember(sRootNodeName.c_str()))) {
-            break;
-        }
+    // 解析上级注册服务根节点
+    if (rootNode.isMember("upperServer")) {
+        const Json::Value& regUpServNode = rootNode["upperServer"];
+        for (const auto& curServNode : regUpServNode) {
+            MySipRegUpServCfg_dt upRegServCfg;
 
-        const Json::Value& sipServNode = rootNode[sRootNodeName.c_str()];
-        // 解析本级服务id
-        if (!(sipServNode.isMember("id"))) {
-            continue;
-        }
-
-        MySipServAddrCfg_dt cfg;
-        cfg.id      = sipServNode["id"].asString();
-        cfg.ipAddr  = sipServNode["ipAddr"].asString();
-        cfg.port    = static_cast<uint16_t>(std::stoi(sipServNode["port"].asString()));
-        cfg.regPort = static_cast<uint16_t>(std::stoi(sipServNode["regPort"].asString()));
-        cfg.name    = sipServNode["name"].asString();
-        cfg.domain  = sipServNode["domain"].asString();
-
-        if (!cfg.id.empty() && (cfgMap.end() == cfgMap.find(cfg.id))) {
-            cfgMap.insert(std::make_pair(cfg.id, std::move(cfg)));
-        }
-    }
-
-    ifs.close();
-    return MyStatus_t::SUCCESS;
-}
-
-MyStatus_t MyJsonHelper::ParseSipServRegJsonFile(const std::string& filePath, MySipRegServCfgMap& cfgMap)
-{
-    if (filePath.empty()) {
-        return MyStatus_t::FAILED;
-    }
-
-    // 读取 json 文件
-    std::ifstream ifs(filePath.c_str());
-    Json::Value rootNode;
-    ifs >> rootNode;
-
-    for (unsigned int i = 1; i <= rootNode.size(); ++i) {
-        // 解析json根节点
-        std::string sRootNodeName = std::string("registerServer-") + std::to_string(i);
-        if (!(rootNode.isMember(sRootNodeName.c_str()))) {
-            break;
-        }
-
-        const Json::Value& regServNode = rootNode[sRootNodeName.c_str()];
-        // 解析本级服务id
-        if (!(regServNode.isMember("id"))) {
-            continue;
-        }
-
-        MySipRegServCfg_dt cfg;
-        cfg.localServId = regServNode["id"].asString();
-
-        // 解析上级注册服务
-        if ((regServNode.isMember("upperServer"))) {
-            const Json::Value& upServNodes = regServNode["upperServer"];
-            for (const auto& curServNode : upServNodes) {
-                MySipRegUpServCfg_dt upRegServCfg;
-
-                upRegServCfg.upSipServRegAddrCfg.id = curServNode["id"].asString();
-                if (upRegServCfg.upSipServRegAddrCfg.id.empty() || (cfg.upRegSipServMap.end() != cfg.upRegSipServMap.find(upRegServCfg.upSipServRegAddrCfg.id))) {
-                    continue;
-                }
-
-                upRegServCfg.upSipServRegAddrCfg.ipAddr  = curServNode["ipAddr"].asString();
-                upRegServCfg.upSipServRegAddrCfg.port    = static_cast<uint16_t>(std::stoi(curServNode["port"].asString()));
-                upRegServCfg.upSipServRegAddrCfg.name    = curServNode["name"].asString();
-                upRegServCfg.upSipServRegAddrCfg.domain  = curServNode["domain"].asString();
-
-                if (upRegServCfg.upSipServRegAddrCfg.id.empty()   || upRegServCfg.upSipServRegAddrCfg.ipAddr.empty() || (0 == upRegServCfg.upSipServRegAddrCfg.port) || 
-                    upRegServCfg.upSipServRegAddrCfg.name.empty() || upRegServCfg.upSipServRegAddrCfg.domain.empty()) {
-                    continue;
-                }
-
-                if ("true" == curServNode["auth"].asString()) {
-                    upRegServCfg.upSipServRegAuthCfg.enableAuth  = true;
-                    upRegServCfg.upSipServRegAuthCfg.authName    = curServNode["authName"].asString();
-                    upRegServCfg.upSipServRegAuthCfg.authPwd     = curServNode["authPwd"].asString();
-                    upRegServCfg.upSipServRegAuthCfg.authRealm   = curServNode["authRealm"].asString();
-                }
-                else {
-                    upRegServCfg.upSipServRegAuthCfg.enableAuth  = false;
-                    upRegServCfg.upSipServRegAuthCfg.authName    = "";
-                    upRegServCfg.upSipServRegAuthCfg.authPwd     = "";
-                    upRegServCfg.upSipServRegAuthCfg.authRealm   = "";
-                }
-
-                std::string sProto = curServNode["proto"].asString();
-                if      ("udp" == sProto) { upRegServCfg.proto = MyTpProto_t::UDP; }
-                else if ("tcp" == sProto) { upRegServCfg.proto = MyTpProto_t::TCP; }
-                else                      { upRegServCfg.proto = MyTpProto_t::UDP; }
-
-                cfg.upRegSipServMap.insert(std::make_pair(upRegServCfg.upSipServRegAddrCfg.id, std::move(upRegServCfg)));
-            }
-        }
-
-        // 解析下级注册服务
-        if ((regServNode.isMember("lowerServer"))) {
-            const Json::Value& lowServNodes = regServNode["lowerServer"];
-            for (const auto& curServNode : lowServNodes) {
-                MySipRegLowServCfg_dt regLowServCfg;
-
-                regLowServCfg.lowSipServRegAddrCfg.id = curServNode["id"].asString();
-                if (regLowServCfg.lowSipServRegAddrCfg.id.empty() || (cfg.lowRegSipServMap.end() != cfg.lowRegSipServMap.find(regLowServCfg.lowSipServRegAddrCfg.id))) {
-                    continue;
-                }
-            
-                regLowServCfg.lowSipServRegAddrCfg.ipAddr  = curServNode["ipAddr"].asString();
-                regLowServCfg.lowSipServRegAddrCfg.port    = static_cast<uint16_t>(std::stoi(curServNode["port"].asString()));
-                regLowServCfg.lowSipServRegAddrCfg.name    = curServNode["name"].asString();
-                regLowServCfg.lowSipServRegAddrCfg.domain  = curServNode["domain"].asString();
-            
-                if (regLowServCfg.lowSipServRegAddrCfg.id.empty()   || regLowServCfg.lowSipServRegAddrCfg.ipAddr.empty() || (0 == regLowServCfg.lowSipServRegAddrCfg.port) || 
-                    regLowServCfg.lowSipServRegAddrCfg.name.empty() || regLowServCfg.lowSipServRegAddrCfg.domain.empty()) {
-                    continue;
-                }
-
-                if ("true" == curServNode["auth"].asString()) {
-                    regLowServCfg.lowSipServRegAuthCfg.enableAuth  = true;
-                    regLowServCfg.lowSipServRegAuthCfg.authName    = curServNode["authName"].asString();
-                    regLowServCfg.lowSipServRegAuthCfg.authPwd     = curServNode["authPwd"].asString();
-                    regLowServCfg.lowSipServRegAuthCfg.authRealm   = curServNode["authRealm"].asString();
-                }
-                else {
-                    regLowServCfg.lowSipServRegAuthCfg.enableAuth  = false;
-                    regLowServCfg.lowSipServRegAuthCfg.authName    = "";
-                    regLowServCfg.lowSipServRegAuthCfg.authPwd     = "";
-                    regLowServCfg.lowSipServRegAuthCfg.authRealm   = "";
-                }
-            
-                std::string sProto = curServNode["proto"].asString();
-                if      ("udp" == sProto)   { regLowServCfg.proto = MyTpProto_t::UDP; }
-                else if ("tcp" == sProto)   { regLowServCfg.proto = MyTpProto_t::TCP; }
-                else                        { regLowServCfg.proto = MyTpProto_t::UDP; }
-
-                cfg.lowRegSipServMap.insert(std::make_pair(regLowServCfg.lowSipServRegAddrCfg.id, std::move(regLowServCfg)));
-            }
-        }
-        
-        if (!cfg.localServId.empty() && (cfgMap.end() == cfgMap.find(cfg.localServId))) {
-            cfgMap.insert(std::make_pair(cfg.localServId, std::move(cfg)));
-        }
-    }
-
-    ifs.close();
-    return MyStatus_t::SUCCESS;
-}
-
-MyStatus_t MyJsonHelper::ParseSipServCatalogJsonFile(const std::string&                    filePath, 
-                                                     MySipServCatalogPlatCfgMap&           platCfgMap,
-                                                     MySipServCatalogSubPlatCfgMap&        subPlatCfgMap,
-                                                     MySipServCatalogSubVirtualPlatCfgMap& subVirtualPlatCfgMap,
-                                                     MySipServCatalogDeviceCfgMap&         deviceCfgMap)
-{
-    if (filePath.empty()) {
-        return MyStatus_t::FAILED;
-    }
-
-    // 读取 json 文件
-    std::ifstream ifs(filePath.c_str());
-    Json::Value rootNode;
-    ifs >> rootNode;
-
-    for (unsigned int i = 1; i <= rootNode.size(); ++i) {
-        // 解析json根节点
-        std::string sRootNodeName = std::string("catalog-") + std::to_string(i);
-        if (!(rootNode.isMember(sRootNodeName.c_str()))) {
-            break;
-        }
-
-        const Json::Value& catalogNode = rootNode[sRootNodeName.c_str()];
-        // 解析本级服务id
-        if (!(catalogNode.isMember("id"))) {
-            continue;
-        }
-        std::string localSevrId = catalogNode["id"].asString();
-
-        // 解析平台信息
-        for (unsigned int j = 1; j <= catalogNode["platInfo"].size(); ++j) {
-            std::string sPlatNodeName = std::string("plat-") + std::to_string(j);
-            if (!(catalogNode["platInfo"].isMember(sPlatNodeName.c_str()))) {
+            upRegServCfg.upSipServRegAddrCfg.id = curServNode["id"].asString();
+            if (upRegServCfg.upSipServRegAddrCfg.id.empty() || (regCfg.upRegSipServMap.end() != regCfg.upRegSipServMap.find(upRegServCfg.upSipServRegAddrCfg.id))) {
                 continue;
             }
-        
-            const Json::Value& curPlatNode = catalogNode["platInfo"][sPlatNodeName.c_str()];
 
-            MySipCatalogPlatCfg_dt cfg;
-            cfg.name          = curPlatNode["name"].asString();
-            cfg.status        = curPlatNode["status"].asString();
-            cfg.parental      = curPlatNode["parental"].asInt();
-            cfg.manufacturer  = curPlatNode["manufacturer"].asString();
-            cfg.model         = curPlatNode["model"].asString();
-            cfg.block         = curPlatNode["block"].asString();
-            cfg.safetyWay     = curPlatNode["safetyWay"].asInt();
-            cfg.registerWay   = curPlatNode["registerWay"].asInt();
-            cfg.secrecy       = curPlatNode["secrecy"].asInt();
-            cfg.deviceID      = curPlatNode["deviceID"].asString();
-            cfg.parentID      = curPlatNode["parentID"].asString();
-            cfg.platformID    = curPlatNode["platformID"].asString();
-            cfg.platformIp    = curPlatNode["platformIp"].asString();
-            cfg.platformPort  = curPlatNode["platformPort"].asInt();
-            cfg.owner         = curPlatNode["owner"].asString();
-            cfg.deviceIp      = curPlatNode["deviceIp"].asString();
-            cfg.devicePort    = curPlatNode["devicePort"].asInt();
-            cfg.deviceChannel = curPlatNode["deviceChannel"].asInt();
-            cfg.deviceStream  = curPlatNode["deviceStream"].asString();
-            cfg.longitude     = curPlatNode["longitude"].asString();
-            cfg.latitude      = curPlatNode["latitude"].asString();
+            upRegServCfg.upSipServRegAddrCfg.ipAddr  = curServNode["ipAddr"].asString();
+            upRegServCfg.upSipServRegAddrCfg.port    = static_cast<uint16_t>(std::stoi(curServNode["port"].asString()));
+            upRegServCfg.upSipServRegAddrCfg.name    = curServNode["name"].asString();
+            upRegServCfg.upSipServRegAddrCfg.domain  = curServNode["domain"].asString();
 
-            auto iter = platCfgMap.find(localSevrId);
-            if (platCfgMap.end() != iter) {
-                if (iter->second.end() == iter->second.find(cfg.deviceID)) {
-                    iter->second.insert(std::make_pair(cfg.deviceID, cfg));
-                }
+            if (upRegServCfg.upSipServRegAddrCfg.id.empty()   || upRegServCfg.upSipServRegAddrCfg.ipAddr.empty() || (0 == upRegServCfg.upSipServRegAddrCfg.port) || 
+                upRegServCfg.upSipServRegAddrCfg.name.empty() || upRegServCfg.upSipServRegAddrCfg.domain.empty()) {
+                continue;
+            }
+
+            if ("true" == curServNode["auth"].asString()) {
+                upRegServCfg.upSipServRegAuthCfg.enableAuth  = true;
+                upRegServCfg.upSipServRegAuthCfg.authName    = curServNode["authName"].asString();
+                upRegServCfg.upSipServRegAuthCfg.authPwd     = curServNode["authPwd"].asString();
+                upRegServCfg.upSipServRegAuthCfg.authRealm   = curServNode["authRealm"].asString();
             }
             else {
-                MySipCatalogPlatCfgMap catalogPlatCfgmap;
-                catalogPlatCfgmap.insert(std::make_pair(cfg.deviceID, cfg));
-
-                platCfgMap.insert(std::make_pair(localSevrId, catalogPlatCfgmap));
+                upRegServCfg.upSipServRegAuthCfg.enableAuth  = false;
+                upRegServCfg.upSipServRegAuthCfg.authName    = "";
+                upRegServCfg.upSipServRegAuthCfg.authPwd     = "";
+                upRegServCfg.upSipServRegAuthCfg.authRealm   = "";
             }
-        }
 
-        // 解析子平台信息
-        for (unsigned int j = 1; j <= catalogNode["subPlatInfo"].size(); ++j) {
-            std::string sSubPlatNodeName = std::string("subPlat-") + std::to_string(j);
-            if (!(catalogNode["subPlatInfo"].isMember(sSubPlatNodeName.c_str()))) {
+            std::string sProto = curServNode["proto"].asString();
+            if      ("udp" == sProto) { upRegServCfg.proto = MyTpProto_t::UDP; }
+            else if ("tcp" == sProto) { upRegServCfg.proto = MyTpProto_t::TCP; }
+            else                      { upRegServCfg.proto = MyTpProto_t::UDP; }
+
+            regCfg.upRegSipServMap.insert(std::make_pair(upRegServCfg.upSipServRegAddrCfg.id, std::move(upRegServCfg)));
+        }
+    }
+
+    // 解析下级注册服务
+    if (rootNode.isMember("lowerServer")) {
+        const Json::Value& regLowServNode = rootNode["lowerServer"];
+        for (const auto& curServNode : regLowServNode) {
+            MySipRegLowServCfg_dt regLowServCfg;
+
+            regLowServCfg.lowSipServRegAddrCfg.id = curServNode["id"].asString();
+            if (regLowServCfg.lowSipServRegAddrCfg.id.empty() || (regCfg.lowRegSipServMap.end() != regCfg.lowRegSipServMap.find(regLowServCfg.lowSipServRegAddrCfg.id))) {
                 continue;
             }
         
-            const Json::Value& curSubPlatNode = catalogNode["subPlatInfo"][sSubPlatNodeName.c_str()];
+            regLowServCfg.lowSipServRegAddrCfg.ipAddr  = curServNode["ipAddr"].asString();
+            regLowServCfg.lowSipServRegAddrCfg.port    = static_cast<uint16_t>(std::stoi(curServNode["port"].asString()));
+            regLowServCfg.lowSipServRegAddrCfg.name    = curServNode["name"].asString();
+            regLowServCfg.lowSipServRegAddrCfg.domain  = curServNode["domain"].asString();
+        
+            if (regLowServCfg.lowSipServRegAddrCfg.id.empty()   || regLowServCfg.lowSipServRegAddrCfg.ipAddr.empty() || (0 == regLowServCfg.lowSipServRegAddrCfg.port) || 
+                regLowServCfg.lowSipServRegAddrCfg.name.empty() || regLowServCfg.lowSipServRegAddrCfg.domain.empty()) {
+                continue;
+            }
+
+            if ("true" == curServNode["auth"].asString()) {
+                regLowServCfg.lowSipServRegAuthCfg.enableAuth  = true;
+                regLowServCfg.lowSipServRegAuthCfg.authName    = curServNode["authName"].asString();
+                regLowServCfg.lowSipServRegAuthCfg.authPwd     = curServNode["authPwd"].asString();
+                regLowServCfg.lowSipServRegAuthCfg.authRealm   = curServNode["authRealm"].asString();
+            }
+            else {
+                regLowServCfg.lowSipServRegAuthCfg.enableAuth  = false;
+                regLowServCfg.lowSipServRegAuthCfg.authName    = "";
+                regLowServCfg.lowSipServRegAuthCfg.authPwd     = "";
+                regLowServCfg.lowSipServRegAuthCfg.authRealm   = "";
+            }
+        
+            std::string sProto = curServNode["proto"].asString();
+            if      ("udp" == sProto)   { regLowServCfg.proto = MyTpProto_t::UDP; }
+            else if ("tcp" == sProto)   { regLowServCfg.proto = MyTpProto_t::TCP; }
+            else                        { regLowServCfg.proto = MyTpProto_t::UDP; }
+
+            regCfg.lowRegSipServMap.insert(std::make_pair(regLowServCfg.lowSipServRegAddrCfg.id, std::move(regLowServCfg)));
+        }
+    }
+
+    ifs.close();
+    return MyStatus_t::SUCCESS;
+}
+
+MyStatus_t MyJsonHelper::ParseSipCatalogJsonFile(const std::string& filePath, MySipCatalogCfg_dt& catalogCfg)
+{
+    if (filePath.empty()) {
+        return MyStatus_t::FAILED;
+    }
+
+    // 读取 json 文件
+    std::ifstream ifs(filePath.c_str());
+    Json::Value rootNode;
+    ifs >> rootNode;
+
+    // 解析平台配置节点
+    if (rootNode.isMember("platInfo")) {
+        const Json::Value& platNode             = rootNode["platInfo"];
+        catalogCfg.catalogPlatCfg.name          = platNode["name"].asString();
+        catalogCfg.catalogPlatCfg.status        = platNode["status"].asString();
+        catalogCfg.catalogPlatCfg.parental      = platNode["parental"].asInt();
+        catalogCfg.catalogPlatCfg.manufacturer  = platNode["manufacturer"].asString();
+        catalogCfg.catalogPlatCfg.model         = platNode["model"].asString();
+        catalogCfg.catalogPlatCfg.block         = platNode["block"].asString();
+        catalogCfg.catalogPlatCfg.safetyWay     = platNode["safetyWay"].asInt();
+        catalogCfg.catalogPlatCfg.registerWay   = platNode["registerWay"].asInt();
+        catalogCfg.catalogPlatCfg.secrecy       = platNode["secrecy"].asInt();
+        catalogCfg.catalogPlatCfg.deviceID      = platNode["deviceID"].asString();
+        catalogCfg.catalogPlatCfg.parentID      = platNode["parentID"].asString();
+        catalogCfg.catalogPlatCfg.platformID    = platNode["platformID"].asString();
+        catalogCfg.catalogPlatCfg.platformIp    = platNode["platformIp"].asString();
+        catalogCfg.catalogPlatCfg.platformPort  = platNode["platformPort"].asInt();
+        catalogCfg.catalogPlatCfg.owner         = platNode["owner"].asString();
+        catalogCfg.catalogPlatCfg.deviceIp      = platNode["deviceIp"].asString();
+        catalogCfg.catalogPlatCfg.devicePort    = platNode["devicePort"].asInt();
+        catalogCfg.catalogPlatCfg.deviceChannel = platNode["deviceChannel"].asInt();
+        catalogCfg.catalogPlatCfg.deviceStream  = platNode["deviceStream"].asString();
+        catalogCfg.catalogPlatCfg.longitude     = platNode["longitude"].asString();
+        catalogCfg.catalogPlatCfg.latitude      = platNode["latitude"].asString();
+    }
+    else {
+        return MyStatus_t::FAILED;
+    }
+
+    // 解析子平台配置节点
+    if (rootNode.isMember("subPlatInfo")) {
+        const Json::Value& subPlatNode = rootNode["subPlatInfo"];
+
+        for (unsigned int j = 1; j <= subPlatNode.size(); ++j) {
+            std::string sSubPlatNodeName = std::string("subPlat-") + std::to_string(j);
+            if (!(subPlatNode.isMember(sSubPlatNodeName.c_str()))) {
+                continue;
+            }
+        
+            const Json::Value& curSubPlatNode = subPlatNode[sSubPlatNodeName.c_str()];
 
             MySipCatalogSubPlatCfg_dt cfg;
             cfg.name          = curSubPlatNode["name"].asString();
@@ -279,28 +184,33 @@ MyStatus_t MyJsonHelper::ParseSipServCatalogJsonFile(const std::string&         
             cfg.longitude     = curSubPlatNode["longitude"].asString();
             cfg.latitude      = curSubPlatNode["latitude"].asString();
 
-            auto iter = subPlatCfgMap.find(localSevrId);
-            if (subPlatCfgMap.end() != iter) {
-                if (iter->second.end() == iter->second.find(cfg.deviceID)) {
-                    iter->second.insert(std::make_pair(cfg.deviceID, cfg));
-                }
+            if (catalogCfg.catalogSubPlatCfgMap.end() != catalogCfg.catalogSubPlatCfgMap.find(cfg.deviceID)) {
+                return MyStatus_t::FAILED;
+            }
+
+            const auto& platCfg = catalogCfg.catalogPlatCfg;
+            const auto& subPlatCfgMap = catalogCfg.catalogSubPlatCfgMap;
+
+            if (platCfg.deviceID == cfg.parentID && platCfg.deviceID == cfg.platformID) {
+                catalogCfg.catalogSubPlatCfgMap.insert(std::make_pair(cfg.deviceID, cfg));
             }
             else {
-                MySipCatalogSubPlatCfgMap catalogSubPlatCfgmap;
-                catalogSubPlatCfgmap.insert(std::make_pair(cfg.deviceID, cfg));
-
-                subPlatCfgMap.insert(std::make_pair(localSevrId, catalogSubPlatCfgmap));
+                return MyStatus_t::FAILED;
             }
         }
+    }
 
-        // 解析虚拟子平台信息
-        for (unsigned int j = 1; j <= catalogNode["subVirtualPlatInfo"].size(); ++j) {
-            std::string sSubVirtualPlatNodeName = std::string("subVirtualPlat-") + std::to_string(j);
-            if (!(catalogNode["subVirtualPlatInfo"].isMember(sSubVirtualPlatNodeName.c_str()))) {
+    // 解析虚拟子平台配置节点
+    if (rootNode.isMember("subVirtualPlatInfo")) {
+        const Json::Value& subVirtualPlatNode = rootNode["subVirtualPlatInfo"];
+
+        for (unsigned int j = 1; j <= subVirtualPlatNode.size(); ++j) {
+            std::string subVirtualPlatNodeName = std::string("subVirtualPlat-") + std::to_string(j);
+            if (!(subVirtualPlatNode.isMember(subVirtualPlatNodeName.c_str()))) {
                 continue;
             }
         
-            const Json::Value& curSubVirtualPlatNode = catalogNode["subVirtualPlatInfo"][sSubVirtualPlatNodeName.c_str()];
+            const Json::Value& curSubVirtualPlatNode = subVirtualPlatNode[subVirtualPlatNodeName.c_str()];
 
             MySipCatalogVirtualSubPlatCfg_dt cfg;
             cfg.name          = curSubVirtualPlatNode["name"].asString();
@@ -339,28 +249,33 @@ MyStatus_t MyJsonHelper::ParseSipServCatalogJsonFile(const std::string&         
                 }
             }
 
-            auto iter = subVirtualPlatCfgMap.find(localSevrId);
-            if (subVirtualPlatCfgMap.end() != iter) {
-                if (iter->second.end() == iter->second.find(cfg.deviceID)) {
-                    iter->second.insert(std::make_pair(cfg.deviceID, cfg));
-                }
+            if (catalogCfg.catalogVirtualSubPlatCfgMap.end() != catalogCfg.catalogVirtualSubPlatCfgMap.find(cfg.deviceID)) {
+                return MyStatus_t::FAILED;
+            }
+
+            const auto& platCfg = catalogCfg.catalogPlatCfg;
+            const auto& subPlatCfgMap = catalogCfg.catalogSubPlatCfgMap;
+
+            if ((platCfg.deviceID == cfg.parentID || subPlatCfgMap.end() != subPlatCfgMap.find(cfg.parentID)) && (platCfg.deviceID == cfg.platformID)) {
+                catalogCfg.catalogVirtualSubPlatCfgMap.insert(std::make_pair(cfg.deviceID, cfg));
             }
             else {
-                MySipCatalogSubVirtualPlatCfgMap catalogSubVirtualPlatCfgmap;
-                catalogSubVirtualPlatCfgmap.insert(std::make_pair(cfg.deviceID, cfg));
-
-                subVirtualPlatCfgMap.insert(std::make_pair(localSevrId, catalogSubVirtualPlatCfgmap));
+                return MyStatus_t::FAILED;
             }
         }
+    }
 
-        // 解析设备信息
-        for (unsigned int j = 1; j <= catalogNode["deviceInfo"].size(); ++j) {
-            std::string sDeviceNodeName = std::string("device-") + std::to_string(j);
-            if (!(catalogNode["deviceInfo"].isMember(sDeviceNodeName.c_str()))) {
+    // 解析设备配置节点
+    if (rootNode.isMember("deviceInfo")) {
+        const Json::Value& deviceNode = rootNode["deviceInfo"];
+    
+        for (unsigned int j = 1; j <= deviceNode.size(); ++j) {
+            std::string deviceNodeName = std::string("device-") + std::to_string(j);
+            if (!(deviceNode.isMember(deviceNodeName.c_str()))) {
                 continue;
             }
         
-            const Json::Value& curDeviceNode = catalogNode["deviceInfo"][sDeviceNodeName.c_str()];
+            const Json::Value& curDeviceNode = deviceNode[deviceNodeName.c_str()];
 
             MySipCatalogDeviceCfg_dt cfg;
             cfg.name          = curDeviceNode["name"].asString();
@@ -383,20 +298,26 @@ MyStatus_t MyJsonHelper::ParseSipServCatalogJsonFile(const std::string&         
             cfg.longitude     = curDeviceNode["longitude"].asString();
             cfg.latitude      = curDeviceNode["latitude"].asString();
 
-            auto iter = deviceCfgMap.find(localSevrId);
-            if (deviceCfgMap.end() != iter) {
-                if (iter->second.end() == iter->second.find(cfg.deviceID)) {
-                    iter->second.insert(std::make_pair(cfg.deviceID, cfg));
-                }
+            if (catalogCfg.catalogDeviceCfgMap.end() != catalogCfg.catalogDeviceCfgMap.find(cfg.deviceID)) {
+                return MyStatus_t::FAILED;
+            }
+
+            const auto& platCfg = catalogCfg.catalogPlatCfg;
+            const auto& subPlatCfgMap = catalogCfg.catalogSubPlatCfgMap;
+            const auto& virtualSubPlatCfgMap = catalogCfg.catalogVirtualSubPlatCfgMap;
+
+            if ((platCfg.deviceID == cfg.parentID || 
+                subPlatCfgMap.end() != subPlatCfgMap.find(cfg.parentID) || 
+                virtualSubPlatCfgMap.end() != virtualSubPlatCfgMap.find(cfg.parentID)) &&
+                (platCfg.deviceID == cfg.platformID)) {
+                catalogCfg.catalogDeviceCfgMap.insert(std::make_pair(cfg.deviceID, cfg));
             }
             else {
-                MySipCatalogDeviceCfgMap catalogDeviceCfgmap;
-                catalogDeviceCfgmap.insert(std::make_pair(cfg.deviceID, cfg));
-
-                deviceCfgMap.insert(std::make_pair(localSevrId, catalogDeviceCfgmap));
+                return MyStatus_t::FAILED;
             }
         }
     }
+    
     return MyStatus_t::SUCCESS;
 }
 

@@ -13,12 +13,10 @@ MyServThdPoolCfg_dt                     MySystemConfig::ServThdPoolCfg;
 MySipStackCfg_dt                        MySystemConfig::SipStackCfg;
 MySipTimerCfg_dt                        MySystemConfig::SipTimerCfg;
 MySipEvThdMemCfg_dt                     MySystemConfig::SipEvThdMemCfg;
-MySipServAddrMap                        MySystemConfig::SipServAddrCfgMap;
-MySipRegServCfgMap                      MySystemConfig::SipRegServCfgMap;
-MySipServCatalogPlatCfgMap              MySystemConfig::SipCatalogPlatCfgMap;
-MySipServCatalogSubPlatCfgMap           MySystemConfig::SipCatalogSubPlatCfgMap;
-MySipServCatalogSubVirtualPlatCfgMap    MySystemConfig::SipCatalogSubVirtualPlatCfgMap;
-MySipServCatalogDeviceCfgMap            MySystemConfig::SipCatalogDeviceCfgMap;
+MySipServAddrCfg_dt                     MySystemConfig::SipServAddrCfg;
+MyHttpServAddrCfg_dt                    MySystemConfig::HttpServAddrCfg;
+MySipRegServCfg_dt                      MySystemConfig::SipRegServCfg;
+MySipCatalogCfg_dt                      MySystemConfig::SipCatalogCfg;
 
 MyStatus_t MySystemConfig::Init(const std::string& path)
 {
@@ -33,62 +31,67 @@ MyStatus_t MySystemConfig::Init(const std::string& path)
     }
 
     // 读取服务端日志配置                 
-    ServLogCfg.logLevel                     = SysCfgIni.GetValue("log", "logLevel", "info");
-    ServLogCfg.logPath                      = SysCfgIni.GetValue("log", "logPath", "./log");
-    ServLogCfg.enableOutputToConsole        = SysCfgIni.GetBoolValue("log", "enableOutputToConsole", true);
-    ServLogCfg.enableUseDiffColorDisplay    = SysCfgIni.GetBoolValue("log", "enableUseDiffColorDisplay", true);
+    ServLogCfg.logLevel                         = SysCfgIni.GetValue("log", "logLevel", "info");
+    ServLogCfg.logPath                          = SysCfgIni.GetValue("log", "logPath", "./log");
+    ServLogCfg.enableOutputToConsole            = SysCfgIni.GetBoolValue("log", "enableOutputToConsole", true);
+    ServLogCfg.enableUseDiffColorDisplay        = SysCfgIni.GetBoolValue("log", "enableUseDiffColorDisplay", true);
 
-    // 读取服务线程池配置
-    ServThdPoolCfg.threadNum                = SysCfgIni.GetLongValue("threadPool", "threadNum", 4);
-    ServThdPoolCfg.threadPriority           = SysCfgIni.GetLongValue("threadPool", "threadPriority", 4);
-    ServThdPoolCfg.enableAutoRun            = SysCfgIni.GetBoolValue("threadPool", "threadAutoRun", true);
-    ServThdPoolCfg.enableAffinity           = SysCfgIni.GetBoolValue("threadPool", "threadAffinity", false);
+    // 读取服务线程池配置   
+    ServThdPoolCfg.threadNum                    = SysCfgIni.GetLongValue("threadPool", "threadNum", 4);
+    ServThdPoolCfg.threadPriority               = SysCfgIni.GetLongValue("threadPool", "threadPriority", 4);
+    ServThdPoolCfg.enableAutoRun                = SysCfgIni.GetBoolValue("threadPool", "threadAutoRun", true);
+    ServThdPoolCfg.enableAffinity               = SysCfgIni.GetBoolValue("threadPool", "threadAffinity", false);
 
-    // 读取SIP协议栈配置
-    SipStackCfg.sipStackSize                = SysCfgIni.GetLongValue("sipStack", "sipStackSize", 1024*256);
-    SipStackCfg.sipStackName                = SysCfgIni.GetValue("sipStack", "sipStackName", "sipStack");
+    // 读取SIP协议栈配置    
+    SipStackCfg.sipStackSize                    = SysCfgIni.GetLongValue("sipStack", "sipStackSize", 1024*256);
+    SipStackCfg.sipStackName                    = SysCfgIni.GetValue("sipStack", "sipStackName", "sipStack");
 
     // 读取SIP定时器配置
-    SipTimerCfg.sipServRegExpiredTimeInterval  = SysCfgIni.GetLongValue("sipTimer", "sipServerRegistExpired", 3600);
-    SipTimerCfg.sipServRegistJugdeTimeInterval = SysCfgIni.GetLongValue("sipTimer", "sipServerRegistJudgeInterval", 30);
+    SipTimerCfg.sipServRegExpiredTimeInterval   = SysCfgIni.GetLongValue("sipTimer", "sipServerRegistExpired", 3600);
+    SipTimerCfg.sipServRegistJugdeTimeInterval  = SysCfgIni.GetLongValue("sipTimer", "sipServerRegistJudgeInterval", 30);
     
     // 读取事件线程内存配置
-    SipEvThdMemCfg.sipEvThdInitSize        = SysCfgIni.GetLongValue("sipEventThread", "sipEventThreadInitSize", 1024*1024*1);
-    SipEvThdMemCfg.sipEvThdIncreSize       = SysCfgIni.GetLongValue("sipEventThread", "sipEventThreadIncrementSize", 1024*1024*1);
+    SipEvThdMemCfg.sipEvThdInitSize             = SysCfgIni.GetLongValue("sipEventThread", "sipEventThreadInitSize", 1024*1024*1);
+    SipEvThdMemCfg.sipEvThdIncreSize            = SysCfgIni.GetLongValue("sipEventThread", "sipEventThreadIncrementSize", 1024*1024*1);
 
-    // 读取sip服务地址文件配置
-    std::string sipServAddrfilePath        = SysCfgIni.GetValue("sipServerAddr", "sipServerAddrFilePath", ".");
-    std::string sipServAddrfileName        = SysCfgIni.GetValue("sipServerAddr", "sipServerAddrFileName", "servAddr.json");
-    sipServAddrfileName                    = sipServAddrfilePath + std::string("/") + sipServAddrfileName;
+    // 读取sip服务地址配置
+    SipServAddrCfg.id                           = SysCfgIni.GetValue("sipServer", "id", "10000100001000010000");
+    SipServAddrCfg.ipAddr                       = SysCfgIni.GetValue("sipServer", "ipAddr", "127.0.0.1");
+    SipServAddrCfg.port                         = SysCfgIni.GetLongValue("sipServer", "port", 5060);
+    SipServAddrCfg.regPort                      = SysCfgIni.GetLongValue("sipServer", "regPort", 5061);
+    SipServAddrCfg.name                         = SysCfgIni.GetValue("sipServer", "name", "mySipServer");
+    SipServAddrCfg.domain                       = SysCfgIni.GetValue("sipServer", "domain", "mySipServer.com");
 
-    // 解析sip服务地址文件
-    if (MyStatus_t::SUCCESS != MyJsonHelper::ParseSipServAddrJsonFile(sipServAddrfileName, SipServAddrCfgMap)) {
-        return MyStatus_t::FAILED;
-    }
+    // 读取http服务地址配置
+    HttpServAddrCfg.id                          = SysCfgIni.GetValue("sipServer", "id", "10000100001000010000");
+    HttpServAddrCfg.ipAddr                      = SysCfgIni.GetValue("sipServer", "ipAddr", "127.0.0.1");
+    HttpServAddrCfg.port                        = SysCfgIni.GetLongValue("sipServer", "port", 8080);
+    HttpServAddrCfg.name                        = SysCfgIni.GetValue("sipServer", "name", "myHttpServer");
+    HttpServAddrCfg.domain                      = SysCfgIni.GetValue("sipServer", "domain", "myHttpServer.com");
 
     // 读取sip服务注册文件配置
-    std::string sipServRegfilePath         = SysCfgIni.GetValue("sipServerRegist", "sipServerRegistFilePath", ".");
-    std::string sipServRegfileName         = SysCfgIni.GetValue("sipServerRegist", "sipServerRegistFileName", "servReg.json");
-    sipServRegfileName                     = sipServRegfilePath + std::string("/") + sipServRegfileName;
-
-    // 解析sip服务注册文件
-    if (MyStatus_t::SUCCESS != MyJsonHelper::ParseSipServRegJsonFile(sipServRegfileName, SipRegServCfgMap)) {
-        return MyStatus_t::FAILED;
-    }
-
-    // 读取sip服务设备目录文件配置
-    std::string sipServCatalogfilePath     = SysCfgIni.GetValue("sipServerCatalog", "sipServerCatalogFilePath", ".");
-    std::string sipServCatalogfileName     = SysCfgIni.GetValue("sipServerCatalog", "sipServerCatalogFileName", "servCatalog.json");
+    std::string sipRegfilePath                  = SysCfgIni.GetValue("sipReg", "sipRegFilePath", ".");
+    std::string sipRegfileName                  = SysCfgIni.GetValue("sipReg", "sipRegFileName", "reg.json");
     
-    if (!sipServCatalogfilePath.empty() && !sipServCatalogfileName.empty()) {
-        sipServCatalogfileName = sipServCatalogfilePath + std::string("/") + sipServCatalogfileName;
+    if (!sipRegfilePath.empty() && !sipRegfileName.empty()) {
+        sipRegfileName = sipRegfilePath + std::string("/") + sipRegfileName;
+        SipRegServCfg.localServId = SipServAddrCfg.id;
+
+        // 解析sip服务注册文件
+        if (MyStatus_t::SUCCESS != MyJsonHelper::ParseSipRegJsonFile(sipRegfileName, SipRegServCfg)) {
+            return MyStatus_t::FAILED;
+        }
+    }
+    
+    // 读取sip服务设备目录文件配置
+    std::string sipCatalogfilePath              = SysCfgIni.GetValue("sipCatalog", "sipCatalogFilePath", ".");
+    std::string sipCatalogfileName              = SysCfgIni.GetValue("sipCatalog", "sipCatalogFileName", "catalog.json");
+    
+    if (!sipCatalogfilePath.empty() && !sipCatalogfileName.empty()) {
+        sipCatalogfileName = sipCatalogfilePath + std::string("/") + sipCatalogfileName;
 
         // 解析sip服务设备目录文件
-        if (MyStatus_t::SUCCESS != MyJsonHelper::ParseSipServCatalogJsonFile(sipServCatalogfileName, 
-                                                                          SipCatalogPlatCfgMap,
-                                                                       SipCatalogSubPlatCfgMap,
-                                                                SipCatalogSubVirtualPlatCfgMap,
-                                                                        SipCatalogDeviceCfgMap)) {
+        if (MyStatus_t::SUCCESS != MyJsonHelper::ParseSipCatalogJsonFile(sipCatalogfileName, SipCatalogCfg)) {
             return MyStatus_t::FAILED;
         }
     }
@@ -143,95 +146,35 @@ MyStatus_t MySystemConfig::GetSipEvThdMemCfg(MySipEvThdMemCfg_dt& cfg)
     return MyStatus_t::SUCCESS;
 }
 
-MyStatus_t MySystemConfig::GetSipServAddrCfgMap(MySipServAddrMap& cfg)
+MyStatus_t MySystemConfig::GetSipServAddrCfg(MySipServAddrCfg_dt& cfg)
 {
     boost::shared_lock<boost::shared_mutex> lock(CfgMutex);
 
-    cfg = SipServAddrCfgMap;
+    cfg = SipServAddrCfg;
     return MyStatus_t::SUCCESS;
 }
 
-MyStatus_t MySystemConfig::GetSipServAddrCfg(const std::string& localServId, MySipServAddrCfg_dt& cfg)
+MyStatus_t MySystemConfig::GetSipUpRegServCfgMap(MySipRegUpServCfgMap& cfg)
 {
     boost::shared_lock<boost::shared_mutex> lock(CfgMutex);
 
-    auto iter = SipServAddrCfgMap.find(localServId);
-    if (SipServAddrCfgMap.end() == iter) {
-        return MyStatus_t::FAILED;
-    }
-    cfg = iter->second;
+    cfg = SipRegServCfg.upRegSipServMap;
     return MyStatus_t::SUCCESS;
 }
 
-MyStatus_t MySystemConfig::GetSipUpRegServCfgMap(const std::string& localServId, MySipRegUpServCfgMap& cfg)
+MyStatus_t MySystemConfig::GetSipLowRegServCfgMap(MySipRegLowServCfgMap& cfg)
 {
     boost::shared_lock<boost::shared_mutex> lock(CfgMutex);
 
-    auto iter = SipRegServCfgMap.find(localServId);
-    if (SipRegServCfgMap.end() == iter) {
-        return MyStatus_t::FAILED;
-    }
-    cfg = iter->second.upRegSipServMap;
+    cfg = SipRegServCfg.lowRegSipServMap;
     return MyStatus_t::SUCCESS;
 }
 
-MyStatus_t MySystemConfig::GetSipLowRegServCfgMap(const std::string& localServId, MySipRegLowServCfgMap& cfg)
+MyStatus_t MySystemConfig::GetSipCatalogCfg(MySipCatalogCfg_dt& cfg)
 {
     boost::shared_lock<boost::shared_mutex> lock(CfgMutex);
 
-    auto iter = SipRegServCfgMap.find(localServId);
-    if (SipRegServCfgMap.end() == iter) {
-        return MyStatus_t::FAILED;
-    }
-    cfg = iter->second.lowRegSipServMap;
-    return MyStatus_t::SUCCESS;
-}
-
-MyStatus_t MySystemConfig::GetSipCatalogPlatCfgMap(const std::string& localServId, MySipCatalogPlatCfgMap& cfg)
-{
-    boost::shared_lock<boost::shared_mutex> lock(CfgMutex);
-
-    auto iter = SipCatalogPlatCfgMap.find(localServId);
-    if (SipCatalogPlatCfgMap.end() == iter) {
-        return MyStatus_t::FAILED;
-    }
-    cfg = iter->second;
-    return MyStatus_t::SUCCESS;
-}
-
-MyStatus_t MySystemConfig::GetSipCatalogSubPlatCfgMap(const std::string& localServId, MySipCatalogSubPlatCfgMap& cfg)
-{
-    boost::shared_lock<boost::shared_mutex> lock(CfgMutex);
-
-    auto iter = SipCatalogSubPlatCfgMap.find(localServId);
-    if (SipCatalogSubPlatCfgMap.end() == iter) {
-        return MyStatus_t::FAILED;
-    }
-    cfg = iter->second;
-    return MyStatus_t::SUCCESS;
-}
-                       
-MyStatus_t MySystemConfig::GetSipCatalogSubVirtualPlatCfgMap(const std::string& localServId, MySipCatalogSubVirtualPlatCfgMap& cfg)
-{
-    boost::shared_lock<boost::shared_mutex> lock(CfgMutex);
-
-    auto iter = SipCatalogSubVirtualPlatCfgMap.find(localServId);
-    if (SipCatalogSubVirtualPlatCfgMap.end() == iter) {
-        return MyStatus_t::FAILED;
-    }
-    cfg = iter->second;
-    return MyStatus_t::SUCCESS;
-}
-                              
-MyStatus_t MySystemConfig::GetSipCatalogDeviceCfgMap(const std::string& localServId, MySipCatalogDeviceCfgMap& cfg)
-{
-    boost::shared_lock<boost::shared_mutex> lock(CfgMutex);
-
-    auto iter = SipCatalogDeviceCfgMap.find(localServId);
-    if (SipCatalogDeviceCfgMap.end() == iter) {
-        return MyStatus_t::FAILED;
-    }
-    cfg = iter->second;
+    cfg = SipCatalogCfg;
     return MyStatus_t::SUCCESS;
 }
 

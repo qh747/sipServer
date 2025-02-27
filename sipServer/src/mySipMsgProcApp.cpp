@@ -5,7 +5,7 @@
 #include "envir/mySystemPjsip.h"
 #include "manager/myAppManage.h"
 #include "manager/myServManage.h"
-#include "manager/mySipServRegManage.h"
+#include "manager/mySipRegManage.h"
 #include "utils/myXmlHelper.h"
 #include "utils/myStrHelper.h"
 #include "utils/mySipAppHelper.h"
@@ -156,8 +156,13 @@ MyStatus_t MySipMsgProcApp::onProcSipRegisterReqMsg(MY_COMMON::MySipRxDataPtr rd
         return MyStatus_t::FAILED;
     }
 
+    if (sipUri.id != m_servId) {
+        LOG(ERROR) << "Sip app module recv sip register message failed. invalid service id. uri: " << buf << ".";
+        return MyStatus_t::FAILED;
+    }
+
     MySipServer::SmtWkPtr sipServWkPtr;
-    if (MyStatus_t::SUCCESS != MyServManage::GetSipServer(sipUri.id, sipServWkPtr)) {
+    if (MyStatus_t::SUCCESS != MyServManage::GetSipServer(sipServWkPtr)) {
         LOG(ERROR) << "Sip app module recv sip register message failed. find sip server failed. uri: " << buf << ".";
         return MyStatus_t::FAILED;
     }
@@ -190,14 +195,8 @@ MyStatus_t MySipMsgProcApp::onProcSipKeepAliveReqMsg(MY_COMMON::MySipRxDataPtr r
         return MyStatus_t::FAILED;
     }
 
-    std::string localServId;
-    if (MyStatus_t::SUCCESS != MySipServRegManage::GetSipLocalServId(keepAliveMsgBody.deviceId, false, localServId)) {
-        LOG(ERROR) << "Sip app module recv keepalive message failed. get local serv id failed. " << msgInfo << ".";
-        return MyStatus_t::FAILED;
-    }
-
     MySipServer::SmtWkPtr sipServWkPtr;
-    if (MyStatus_t::SUCCESS != MyServManage::GetSipServer(localServId, sipServWkPtr)) {
+    if (MyStatus_t::SUCCESS != MyServManage::GetSipServer(sipServWkPtr)) {
         LOG(ERROR) << "Sip app module recv keepalive message failed. find sip server failed. " << msgInfo << ".";
         return MyStatus_t::FAILED;
     }
@@ -228,8 +227,13 @@ MyStatus_t MySipMsgProcApp::onProcSipCatalogQueryReqMsg(MY_COMMON::MySipRxDataPt
         return MyStatus_t::FAILED;
     }
 
+    if (catalogMsgBody.deviceId != m_servId) {
+        LOG(ERROR) << "Sip app module recv catalog query message failed. get local serv id failed. " << msgInfo << ".";
+        return MyStatus_t::FAILED;
+    }
+
     MySipServer::SmtWkPtr sipServWkPtr; 
-    if (MyStatus_t::SUCCESS != MyServManage::GetSipServer(catalogMsgBody.deviceId, sipServWkPtr)) {
+    if (MyStatus_t::SUCCESS != MyServManage::GetSipServer(sipServWkPtr)) {
         LOG(ERROR) << "Sip app module recv catalog query message failed. find sip server failed. message serv id: " << catalogMsgBody.deviceId << ".";
         return MyStatus_t::FAILED;
     }
@@ -255,15 +259,14 @@ MyStatus_t MySipMsgProcApp::onProcSipCatalogResponseReqMsg(MY_COMMON::MySipRxDat
     LOG(INFO) << "Sip app module recv catalog response message. device id: " << sipRegLowServId << ".";
 
     // 获取本级服务id
-    std::string localServId;
-    if (MyStatus_t::SUCCESS != MySipServRegManage::GetSipLocalServId(sipRegLowServId, false, localServId)) {
-        LOG(ERROR) << "Sip app module recv catalog response message failed. get local serv id failed. message serv id: " << sipRegLowServId << ".";
+    if (MyStatus_t::SUCCESS != MySipRegManage::HasSipRegLowServInfo(sipRegLowServId)) {
+        LOG(ERROR) << "Sip app module recv catalog response message failed. invalid low reg serv. message serv id: " << sipRegLowServId << ".";
         return MyStatus_t::FAILED;
     }
 
     MySipServer::SmtWkPtr sipServWkPtr; 
-    if (MyStatus_t::SUCCESS != MyServManage::GetSipServer(localServId, sipServWkPtr)) {
-        LOG(ERROR) << "Sip app module recv catalog response message failed. find sip server failed. message serv id: " << localServId << ".";
+    if (MyStatus_t::SUCCESS != MyServManage::GetSipServer(sipServWkPtr)) {
+        LOG(ERROR) << "Sip app module recv catalog response message failed.  sip server invalid.";
         return MyStatus_t::FAILED;
     }
 
@@ -303,9 +306,20 @@ pj_bool_t MySipMsgProcApp::OnAppModuleRecvReqCb(MySipRxDataPtr rdataPtr)
         return PJ_FALSE;
     }
 
+    std::string localServId;
+    if (MyStatus_t::SUCCESS != MyServManage::GetSipServId(localServId)) {
+        LOG(ERROR) << "Sip msg proc app module recv sip request message failed. get local serv id failed. uri: " << buf << ".";
+        return PJ_FALSE;
+    }
+
+    if (sipUri.id != localServId) {
+        LOG(ERROR) << "Sip msg proc app module recv sip request message failed. invalid serv id. uri: " << buf << ".";
+        return PJ_FALSE;
+    }
+
     // 消息处理app获取
     MySipMsgProcApp::SmtWkPtr sipMsgProcAppWkPtr;
-    if (MyStatus_t::SUCCESS != MyAppManage::GetSipMsgProcApp(sipUri.id, sipMsgProcAppWkPtr)) {
+    if (MyStatus_t::SUCCESS != MyAppManage::GetSipMsgProcApp(sipMsgProcAppWkPtr)) {
         LOG(ERROR) << "Sip msg proc app module recv sip request message failed. find msg proc app failed. uri: " << buf << ".";
         return PJ_FALSE;
     }

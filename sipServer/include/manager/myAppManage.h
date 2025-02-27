@@ -1,5 +1,4 @@
 #pragma once
-#include <string>
 #include "utils/myBaseHelper.h"
 #include "app/mySipRegApp.h"
 #include "app/mySipInviteApp.h"
@@ -44,34 +43,30 @@ public:
     /**
      * @brief                                       获取sip注册应用
      * @return                                      获取结果，0-success，-1-failed
-     * @param servId                                sip服务id
      * @param appSmtWkPtr                           sip注册应用弱引用指针
      */
-    static MY_COMMON::MyStatus_t                    GetSipRegApp(const std::string& servId, MySipRegApp::SmtWkPtr& appSmtWkPtr);
+    static MY_COMMON::MyStatus_t                    GetSipRegApp(MySipRegApp::SmtWkPtr& appSmtWkPtr);
 
     /**
      * @brief                                       获取sip消息处理应用
      * @return                                      获取结果，0-success，-1-failed
-     * @param servId                                sip服务id
      * @param appSmtWkPtr                           sip消息处理应用弱引用指针
      */
-    static MY_COMMON::MyStatus_t                    GetSipMsgProcApp(const std::string& servId, MySipMsgProcApp::SmtWkPtr& appSmtWkPtr);
+    static MY_COMMON::MyStatus_t                    GetSipMsgProcApp(MySipMsgProcApp::SmtWkPtr& appSmtWkPtr);
 
     /**
      * @brief                                       获取sip设备目录应用
      * @return                                      获取结果，0-success，-1-failed
-     * @param servId                                sip服务id
      * @param appSmtWkPtr                           sip设备目录应用弱引用指针
      */
-    static MY_COMMON::MyStatus_t                    GetSipCatalogApp(const std::string& servId, MySipCatalogApp::SmtWkPtr& appSmtWkPtr);
+    static MY_COMMON::MyStatus_t                    GetSipCatalogApp(MySipCatalogApp::SmtWkPtr& appSmtWkPtr);
 
     /**
      * @brief                                       获取sip会话邀请应用
      * @return                                      获取结果，0-success，-1-failed
-     * @param servId                                sip服务id
      * @param appSmtWkPtr                           sip会话邀请应用弱引用指针
      */
-    static MY_COMMON::MyStatus_t                    GetSipInviteApp(const std::string& servId, MySipInviteApp::SmtWkPtr& appSmtWkPtr);
+    static MY_COMMON::MyStatus_t                    GetSipInviteApp(MySipInviteApp::SmtWkPtr& appSmtWkPtr);
 };
 
 }; // namespace MY_MANAGER

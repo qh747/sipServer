@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include "common/myTypeDef.h"
+#include "common/myDataDef.h"
 #include "utils/myBaseHelper.h"
 
 namespace MY_UTILS {
@@ -12,35 +12,20 @@ class MyJsonHelper : public MyNonConstructableAndNonCopyable
 {
 public:
     /** 
-     * @brief                       sip服务地址json文件解析
+     * @brief                       sip注册json文件解析
      * @return                      解析结果，0-success, -1-failed
      * @param filePath              json文件路径
-     * @param cfgMap                sip服务地址配置
+     * @param regCfg                sip注册配置
      */
-    static MY_COMMON::MyStatus_t    ParseSipServAddrJsonFile(const std::string& filePath, MY_COMMON::MySipServAddrMap& cfgMap);
-    
-    /** 
-     * @brief                       sip注册服务json文件解析
-     * @return                      解析结果，0-success, -1-failed
-     * @param filePath              json文件路径
-     * @param cfgMap                sip注册服务配置
-     */
-    static MY_COMMON::MyStatus_t    ParseSipServRegJsonFile(const std::string& filePath, MY_COMMON::MySipRegServCfgMap& cfgMap);
+    static MY_COMMON::MyStatus_t    ParseSipRegJsonFile(const std::string& filePath, MY_COMMON::MySipRegServCfg_dt& regCfg);
 
     /** 
      * @brief                       sip服务设备目录json文件解析
      * @return                      解析结果，0-success, -1-failed
      * @param filePath              json文件路径
-     * @param platCfgMap            平台配置
-     * @param subPlatCfgMap         子平台配置
-     * @param subVirtualPlatCfgMap  虚拟子平台配置
-     * @param deviceCfgMap          设备配置
+     * @param catalogCfg            设备目录配置
      */
-    static MY_COMMON::MyStatus_t    ParseSipServCatalogJsonFile(const std::string&                           filePath, 
-                                                            MY_COMMON::MySipServCatalogPlatCfgMap&           platCfgMap,
-                                                            MY_COMMON::MySipServCatalogSubPlatCfgMap&        subPlatCfgMap,
-                                                            MY_COMMON::MySipServCatalogSubVirtualPlatCfgMap& subVirtualPlatCfgMap,
-                                                            MY_COMMON::MySipServCatalogDeviceCfgMap&         deviceCfgMap);
+    static MY_COMMON::MyStatus_t    ParseSipCatalogJsonFile(const std::string& filePath, MY_COMMON::MySipCatalogCfg_dt& catalogCfg);
 };
 
 }; // namespace MY_UTILS

@@ -35,7 +35,7 @@ int MySipServer::SipServerThdFunc(MySipCbParamPtr arg)
 
     // 获取sip服务
     MySipServer::SmtWkPtr servWkPtr;
-    if (MyStatus_t::SUCCESS != MyServManage::GetSipServer(servAddrCfgPtr->id, servWkPtr)) {
+    if (MyStatus_t::SUCCESS != MyServManage::GetSipServer(servWkPtr)) {
         LOG(ERROR) << "SipServerThdFunc() error. MyServManage::GetSipServer() error.";
         return -1;
     }
@@ -224,7 +224,7 @@ MyStatus_t MySipServer::shutdown()
 MyStatus_t MySipServer::onSipServRecvSipRegisterReqMsg(MySipRxDataPtr regReqMsgPtr)
 {
     MySipRegApp::SmtWkPtr sipRegAppWkPtr;
-    if (MyStatus_t::SUCCESS != MyAppManage::GetSipRegApp(m_servAddrCfg.id, sipRegAppWkPtr)) {
+    if (MyStatus_t::SUCCESS != MyAppManage::GetSipRegApp(sipRegAppWkPtr)) {
         LOG(ERROR) << "SipServer recv sip register request failed. GetSipRegApp() error.";
         return MyStatus_t::FAILED;
     }
@@ -234,7 +234,7 @@ MyStatus_t MySipServer::onSipServRecvSipRegisterReqMsg(MySipRxDataPtr regReqMsgP
 MyStatus_t MySipServer::onSipServRecvSipKeepAliveReqMsg(MySipRxDataPtr keepAliveReqMsgPtr)
 {
     MySipRegApp::SmtWkPtr sipRegAppWkPtr;
-    if (MyStatus_t::SUCCESS != MyAppManage::GetSipRegApp(m_servAddrCfg.id, sipRegAppWkPtr)) {
+    if (MyStatus_t::SUCCESS != MyAppManage::GetSipRegApp(sipRegAppWkPtr)) {
         LOG(ERROR) << "SipServer recv sip keepAlive request failed. sipRegApp invalid.";
         return MyStatus_t::FAILED;
     }
@@ -244,7 +244,7 @@ MyStatus_t MySipServer::onSipServRecvSipKeepAliveReqMsg(MySipRxDataPtr keepAlive
 MyStatus_t MySipServer::onSipServRecvSipCatalogQueryReqMsg(MySipRxDataPtr catalogQueryReqMsgPtr)
 {
     MySipCatalogApp::SmtWkPtr sipCatalogAppWkPtr;
-    if (MyStatus_t::SUCCESS != MyAppManage::GetSipCatalogApp(m_servAddrCfg.id, sipCatalogAppWkPtr)) {
+    if (MyStatus_t::SUCCESS != MyAppManage::GetSipCatalogApp(sipCatalogAppWkPtr)) {
         LOG(ERROR) << "SipServer recv sip catalog query request failed. sipCatalogApp invalid.";
         return MyStatus_t::FAILED;
     }
@@ -253,7 +253,7 @@ MyStatus_t MySipServer::onSipServRecvSipCatalogQueryReqMsg(MySipRxDataPtr catalo
 MyStatus_t MySipServer::onSipServRecvSipCatalogResponseReqMsg(MySipRxDataPtr catalogResponseReqMsgPtr)
 {
     MySipCatalogApp::SmtWkPtr sipCatalogAppWkPtr;
-    if (MyStatus_t::SUCCESS != MyAppManage::GetSipCatalogApp(m_servAddrCfg.id, sipCatalogAppWkPtr)) {
+    if (MyStatus_t::SUCCESS != MyAppManage::GetSipCatalogApp(sipCatalogAppWkPtr)) {
         LOG(ERROR) << "SipServer recv sip catalog response request failed. sipCatalogApp invalid.";
         return MyStatus_t::FAILED;
     }
@@ -263,7 +263,7 @@ MyStatus_t MySipServer::onSipServRecvSipCatalogResponseReqMsg(MySipRxDataPtr cat
 MyStatus_t MySipServer::onReqLowSipServCatalog(const MySipRegLowServCfg_dt& lowSipRegServAddrCfg)
 {
     MySipCatalogApp::SmtWkPtr sipCatalogAppWkPtr;
-    if (MyStatus_t::SUCCESS != MyAppManage::GetSipCatalogApp(m_servAddrCfg.id, sipCatalogAppWkPtr)) {
+    if (MyStatus_t::SUCCESS != MyAppManage::GetSipCatalogApp(sipCatalogAppWkPtr)) {
         LOG(ERROR) << "SipServer onReqLowSipServCatalog() failed. sipCatalogApp invalid.";
         return MyStatus_t::FAILED;
     }

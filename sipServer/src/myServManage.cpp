@@ -16,98 +16,68 @@ namespace MY_MANAGER {
 class MyServManage::MyServManageObject
 {
 public:
-    void add(const std::string& servId, MySipServer::SmtPtr sipServPtr) {
+    void add(MySipServer::SmtPtr sipServPtr) {
         boost::unique_lock<boost::shared_mutex> lock(m_rwMutex);
 
-        if (m_sipServMap.end() == m_sipServMap.find(servId)) {
-            m_sipServMap.insert(std::make_pair(servId, sipServPtr));
+        if (nullptr == m_sipServPtr) {
+            m_sipServPtr = sipServPtr;
             return;
         }
-        LOG(ERROR) << "addSipServ failed, servId: " << servId << " already exist.";
+        LOG(ERROR) << "addSipServ failed. server already exist.";
     }
 
-    void del(const std::string& servId) {
+    void del() {
         boost::unique_lock<boost::shared_mutex> lock(m_rwMutex);
 
-        auto iter = m_sipServMap.find(servId);  
-        if (iter != m_sipServMap.end()) {
-            m_sipServMap.erase(iter);
+        if (nullptr != m_sipServPtr) {
+            m_sipServPtr.reset();
             return;
         }
-        LOG(ERROR) << "delSipServ failed, servId: " << servId << " not exist.";
+        LOG(ERROR) << "delSipServ failed. server not exist.";
     }
 
-    MyStatus_t get(const std::string& servId, MySipServer::SmtWkPtr& sipServWkPtr) {
+    MyStatus_t get(MySipServer::SmtWkPtr& sipServWkPtr) {
         boost::shared_lock<boost::shared_mutex> lock(m_rwMutex);
 
-        auto iter = m_sipServMap.find(servId);
-        if (m_sipServMap.end() == iter) {
+        if (nullptr == m_sipServPtr) {
             return MyStatus_t::FAILED;
         }
-        sipServWkPtr = iter->second;
+        sipServWkPtr = m_sipServPtr;
         return MyStatus_t::SUCCESS;
     }
 
-    MyStatus_t has(const std::string& servId) {
+    MyStatus_t IsValid() {
         boost::shared_lock<boost::shared_mutex> lock(m_rwMutex);
-
-        auto iter = m_sipServMap.find(servId);
-        if (iter != m_sipServMap.end()) {
-            return MyStatus_t::SUCCESS;
-        }
-        return MyStatus_t::FAILED;
-    }
-
-    MyStatus_t conflict(uint16_t port, uint16_t regPort) {
-        boost::shared_lock<boost::shared_mutex> lock(m_rwMutex);
-
-        for (auto& iter : m_sipServMap) {
-            MySipServAddrCfg_dt curServAddrCfg;
-            if (MyStatus_t::SUCCESS != iter.second->getSipServAddrCfg(curServAddrCfg)) {
-                return MyStatus_t::FAILED;
-            }
-            
-            if ((port == curServAddrCfg.port) || (regPort == curServAddrCfg.regPort) || 
-                (port == curServAddrCfg.regPort) || (regPort == curServAddrCfg.port)) {
-                return MyStatus_t::SUCCESS;
-            }
-        }
-        return MyStatus_t::FAILED;
+        return (nullptr != m_sipServPtr ? MyStatus_t::SUCCESS : MyStatus_t::FAILED);
     }
 
     MyStatus_t start() {
         boost::shared_lock<boost::shared_mutex> lock(m_rwMutex);
         
-        for (auto& iter : m_sipServMap) {
-            iter.second->run();
-        }
+        m_sipServPtr->run();
         return MyStatus_t::SUCCESS;
     }
 
     MyStatus_t stop() {
         boost::unique_lock<boost::shared_mutex> lock(m_rwMutex);
 
-        for (auto& iter : m_sipServMap) {
-            iter.second->shutdown();
-        }
-
-        m_sipServMap.clear();
+        m_sipServPtr->shutdown();
+        m_sipServPtr.reset();
         return MyStatus_t::SUCCESS;
     }
 
 private:
-    boost::shared_mutex                         m_rwMutex;
-    // key = server id, value = sip server      
-    std::map<std::string, MySipServer::SmtPtr>  m_sipServMap;
+    boost::shared_mutex     m_rwMutex;
+    MySipServer::SmtPtr     m_sipServPtr;
 };
 
 static MyServManage::MyServManageObject ManageObject;
 
 MyStatus_t MyServManage::Init()
 {
-    // 获取所有sip服务
-    MySipServAddrMap sipServAddrCfgMap;
-    if (MyStatus_t::SUCCESS != MySystemConfig::GetSipServAddrCfgMap(sipServAddrCfgMap)) {
+    // 获取sip服务配置
+    MySipServAddrCfg_dt sipServAddrCfg;
+    if (MyStatus_t::SUCCESS != MySystemConfig::GetSipServAddrCfg(sipServAddrCfg)) {
         return MyStatus_t::FAILED;
     }
 
@@ -118,21 +88,9 @@ MyStatus_t MyServManage::Init()
     }
 
     // 创建sip服务对象
-    for (const auto& pair : sipServAddrCfgMap) {
-        // 判断服务id是否冲突
-        if (MyStatus_t::SUCCESS == ManageObject.has(pair.second.id)) {
-            continue;
-        }
-
-        // 判断服务端口是否冲突
-        if (MyStatus_t::SUCCESS == ManageObject.conflict(pair.second.port, pair.second.regPort)) {
-            continue;
-        }
-
-        MySipServer::SmtPtr sipServPtr = std::make_shared<MySipServer>();
-        if (MyStatus_t::SUCCESS == sipServPtr->init(pair.second, sipEvThdMemCfg)) {
-            ManageObject.add(pair.second.id, sipServPtr);
-        }
+    MySipServer::SmtPtr sipServPtr = std::make_shared<MySipServer>();
+    if (MyStatus_t::SUCCESS == sipServPtr->init(sipServAddrCfg, sipEvThdMemCfg)) {
+        ManageObject.add(sipServPtr);
     }
     return MyStatus_t::SUCCESS;
 }
@@ -151,20 +109,36 @@ MyStatus_t MyServManage::Shutdown()
     return MyStatus_t::SUCCESS;
 }
 
-MyStatus_t MyServManage::HasSipServer(const std::string& servId)
+MyStatus_t MyServManage::IsSipServValid()
 {   
-    return ManageObject.has(servId);
+    return ManageObject.IsValid();
 }
 
-MyStatus_t MyServManage::GetSipServer(const std::string& servId, MySipServer::SmtWkPtr& sipServWkPtr)
+MyStatus_t MyServManage::GetSipServer(MySipServer::SmtWkPtr& sipServWkPtr)
 {
-    return ManageObject.get(servId, sipServWkPtr);
+    return ManageObject.get(sipServWkPtr);
 }
 
-MyStatus_t MyServManage::GetSipServAddrCfg(const std::string& servId, MySipServAddrCfg_dt& sipServAddrCfg)
+MyStatus_t MyServManage::GetSipServId(std::string& id)
 {
     MySipServer::SmtWkPtr sipServWkPtr;
-    if (MyStatus_t::SUCCESS != ManageObject.get(servId, sipServWkPtr)) {
+    if (MyStatus_t::SUCCESS != ManageObject.get(sipServWkPtr)) {
+        return MyStatus_t::FAILED;
+    }
+    
+    MySipServAddrCfg_dt sipServAddrCfg;
+    if (MyStatus_t::SUCCESS != sipServWkPtr.lock()->getSipServAddrCfg(sipServAddrCfg)) {
+        return MyStatus_t::FAILED;
+    }
+
+    id = sipServAddrCfg.id;
+    return MyStatus_t::SUCCESS;
+}
+
+MyStatus_t MyServManage::GetSipServAddrCfg(MySipServAddrCfg_dt& sipServAddrCfg)
+{
+    MySipServer::SmtWkPtr sipServWkPtr;
+    if (MyStatus_t::SUCCESS != ManageObject.get(sipServWkPtr)) {
         return MyStatus_t::FAILED;
     }
     
@@ -174,10 +148,10 @@ MyStatus_t MyServManage::GetSipServAddrCfg(const std::string& servId, MySipServA
     return MyStatus_t::SUCCESS;
 }
 
-MyStatus_t MyServManage::GetSipServUdpTp(const std::string& servId, MySipTransportPtrAddr udpTpPtrAddr)
+MyStatus_t MyServManage::GetSipServUdpTp(MySipTransportPtrAddr udpTpPtrAddr)
 {
     MySipServer::SmtWkPtr sipServWkPtr;
-    if (MyStatus_t::SUCCESS != ManageObject.get(servId, sipServWkPtr)) {
+    if (MyStatus_t::SUCCESS != ManageObject.get(sipServWkPtr)) {
         return MyStatus_t::FAILED;
     }
     
@@ -187,10 +161,10 @@ MyStatus_t MyServManage::GetSipServUdpTp(const std::string& servId, MySipTranspo
     return MyStatus_t::SUCCESS;
 }
 
-MyStatus_t MyServManage::GetSipServRegUdpTp(const std::string& servId, MySipTransportPtrAddr udpTpPtrAddr)
+MyStatus_t MyServManage::GetSipServRegUdpTp(MySipTransportPtrAddr udpTpPtrAddr)
 {
     MySipServer::SmtWkPtr sipServWkPtr;
-    if (MyStatus_t::SUCCESS != ManageObject.get(servId, sipServWkPtr)) {
+    if (MyStatus_t::SUCCESS != ManageObject.get(sipServWkPtr)) {
         return MyStatus_t::FAILED;
     }
     
@@ -200,27 +174,27 @@ MyStatus_t MyServManage::GetSipServRegUdpTp(const std::string& servId, MySipTran
     return MyStatus_t::SUCCESS;
 }
 
-MyStatus_t MyServManage::GetSipServTcpTp(const std::string& servId, MySipTransportPtrAddr tcpTpPtrAddr, const std::string& remoteIpAddr, uint16_t remotePort)
+MyStatus_t MyServManage::GetSipServTcpTp(MySipTransportPtrAddr tcpTpPtrAddr, const std::string& remoteIp, uint16_t remotePort)
 {   
     MySipServer::SmtWkPtr sipServWkPtr;
-    if (MyStatus_t::SUCCESS != ManageObject.get(servId, sipServWkPtr)) {
+    if (MyStatus_t::SUCCESS != ManageObject.get(sipServWkPtr)) {
         return MyStatus_t::FAILED;
     }
     
-    if (MyStatus_t::SUCCESS != sipServWkPtr.lock()->getSipServTcpTp(tcpTpPtrAddr, remoteIpAddr, remotePort)) {
+    if (MyStatus_t::SUCCESS != sipServWkPtr.lock()->getSipServTcpTp(tcpTpPtrAddr, remoteIp, remotePort)) {
         return MyStatus_t::FAILED;
     }
     return MyStatus_t::SUCCESS;
 }
 
-MyStatus_t MyServManage::GetSipServRegTcpTp(const std::string& servId, MySipTransportPtrAddr tcpTpPtrAddr, const std::string& remoteIpAddr, uint16_t remotePort)
+MyStatus_t MyServManage::GetSipServRegTcpTp(MySipTransportPtrAddr tcpTpPtrAddr, const std::string& remoteIp, uint16_t remotePort)
 {
     MySipServer::SmtWkPtr sipServWkPtr;
-    if (MyStatus_t::SUCCESS != ManageObject.get(servId, sipServWkPtr)) {
+    if (MyStatus_t::SUCCESS != ManageObject.get(sipServWkPtr)) {
         return MyStatus_t::FAILED;
     }
     
-    if (MyStatus_t::SUCCESS != sipServWkPtr.lock()->getSipServTcpTp(tcpTpPtrAddr, remoteIpAddr, remotePort)) {
+    if (MyStatus_t::SUCCESS != sipServWkPtr.lock()->getSipServTcpTp(tcpTpPtrAddr, remoteIp, remotePort)) {
         return MyStatus_t::FAILED;
     }
     return MyStatus_t::SUCCESS;

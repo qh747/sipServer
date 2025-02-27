@@ -105,7 +105,25 @@ typedef struct MySipServerAddressConfigDataType
     //                                                  服务端域名
     std::string                                         domain;      
 
-} MySipServAddrCfg_dt;  
+} MySipServAddrCfg_dt;
+
+/** 
+ * @brief http服务端地址配置 
+ */ 
+typedef struct MyHttpServerAddressConfigDataType     
+{   
+    //                                                  服务端ID
+    std::string                                         id;
+    //                                                  服务端IP地址
+    std::string                                         ipAddr;    
+    //                                                  服务端端口号
+    uint16_t                                            port; 
+    //                                                  服务端名称
+    std::string                                         name;  
+    //                                                  服务端域名
+    std::string                                         domain;      
+
+} MyHttpServAddrCfg_dt;  
 
 /** 
  * @brief sip服务端注册地址配置 
@@ -175,9 +193,9 @@ typedef struct MySipRegisterServerConfigDataType
 {   
     //                                                  本机SIP服务ID
     std::string                                         localServId;  
-    //                                                  SIP上级注册服务map
+    //                                                  SIP上级注册服务map, key = 上级服务ID, value = 上级服务配置
     std::map<std::string, MySipRegUpServCfg_dt>         upRegSipServMap;
-    //                                                  SIP下级注册服务map
+    //                                                  SIP下级注册服务map, key = 下级服务ID, value = 下级服务配置
     std::map<std::string, MySipRegLowServCfg_dt>        lowRegSipServMap;
 
 } MySipRegServCfg_dt;   
@@ -503,5 +521,22 @@ typedef struct MySipPlatformConfigDataType
     }
 
 } MySipCatalogPlatCfg_dt;
+
+/** 
+ * @brief SIP设备目录配置   
+ */ 
+typedef struct MySipCatalogConfigDataType  
+{    
+    //                                                          SIP设备目录平台配置
+    MySipCatalogPlatCfg_dt                                      catalogPlatCfg;
+    //                                                          SIP设备目录子平台配置map，key = 子平台ID, value = 子平台配置
+    std::map<std::string, MySipCatalogSubPlatCfg_dt>            catalogSubPlatCfgMap;
+    //                                                          SIP设备目录虚拟子平台配置map，key = 虚拟子平台ID, value = 虚拟子平台配置
+    std::map<std::string, MySipCatalogVirtualSubPlatCfg_dt>     catalogVirtualSubPlatCfgMap;
+    //                                                          SIP设备目录设备配置map，key = 设备ID, value = 设备配置
+    std::map<std::string, MySipCatalogDeviceCfg_dt>             catalogDeviceCfgMap;
+
+} MySipCatalogCfg_dt;   
+
 
 }; // MY_COMMON
