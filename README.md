@@ -2,6 +2,9 @@
 
 For SIP server code practice.
 
+# Note
+ 1. support  sip upstream and downstream service interaction. see example: sipServer_rootPath/sipServer/testDemo/11_sipServer_test
+
 # Directory
 
 ```
@@ -14,7 +17,7 @@ For SIP server code practice.
 # build
 
 ``` command
- 1. cd ./sipServer
+ 1. cd sipServer_rootPath/sipServer
  2. cmake -B build
  3. cmake --build build
 ```
@@ -22,14 +25,14 @@ For SIP server code practice.
 # clean
 
 ``` command
- 1. rm -rf ./sipServer/build
- 2. rm -rf ./sipServer/bin/sipServer
+ 1. rm -rf sipServer_rootPath/sipServer/build
+ 2. rm -rf sipServer_rootPath/sipServer/bin/sipServer
 ```
 
 # run
 
 ``` command
- ./bin/sipServer --cfg ./bin/servCfg.ini
+ ./sipServer_rootPath/bin/sipServer --cfg ./sipServer_rootPath/bin/servCfg.ini
 ```
 
 # exit
