@@ -3,12 +3,14 @@
 #define GLOG_USE_GLOG_EXPORT
 #include <glog/logging.h>
 #include <gflags/gflags.h>
+#include "event/myEventListener.h"
 #include "envir/mySystemPjsip.h"
 #include "manager/myAppManage.h"
 #include "manager/myServManage.h"
 #include "utils/myServerHelper.h"
 #include "server/mySipServer.h"
 using namespace MY_COMMON;
+using MY_EVENT::MyMediaReqEvListener;
 using MY_ENVIR::MySystemPjsip;
 using MY_MANAGER::MyAppManage;
 using MY_MANAGER::MyServManage;
@@ -75,6 +77,48 @@ int MySipServer::ServThdFunc(MyFuncCbParamPtr arg)
         }
     }
     return 0;
+}
+
+void MySipServer::ServMediaReqEvFunc(MY_MEDIA_REQ_EV_ARGS)
+{
+    // 获取sip服务
+    MySipServer::SmtWkPtr servWkPtr;
+    if (MyStatus_t::SUCCESS != MyServManage::GetSipServer(servWkPtr)) {
+        LOG(ERROR) << "ServMediaReqEvFunc() error. MyServManage::GetSipServer() error.";
+        return;
+    }
+
+    if (servWkPtr.expired()) {
+        LOG(ERROR) << "ServMediaReqEvFunc() error. servWkPtr is invalid.";
+        return;
+    }
+
+    // 服务状态校验
+    MySipServer::SmtPtr servPtr = servWkPtr.lock();
+
+    MyStatus_t servState = MyStatus_t::FAILED;
+    if (MyStatus_t::SUCCESS != servPtr->getState(servState)) {
+        LOG(ERROR) << "ServMediaReqEvFunc() error. get server state error.";
+        return;
+    }
+
+    if (MyStatus_t::SUCCESS != servState) {
+        LOG(ERROR) << "ServMediaReqEvFunc() error. server state invalid.";
+        return;
+    }
+
+    // 请求处理
+    if (MyStatus_t::SUCCESS != servPtr->onReqDeviceMedia(deviceId)) {
+        status = MyStatus_t::FAILED;
+        info = "sip server process media request failed.";
+        return;
+    }
+    else {
+        status = MyStatus_t::SUCCESS;
+        info = "sip server process media request success.";
+    }
+    
+    LOG(INFO) << "ServMediaReqEvFunc() success. request media device id: " << deviceId << ".";
 }
 
 MySipServer::MySipServer() : m_status(MyStatus_t::FAILED), m_servThdPoolPtr(nullptr),
@@ -147,6 +191,11 @@ MyStatus_t MySipServer::init(const MySipServAddrCfg_dt& addrCfg, const MySipEvTh
             LOG(ERROR) << "SipServer init failed. pjsip_tcp_transport_start() for sip regist error.";
             return MyStatus_t::FAILED;
         }
+    }
+
+    // 添加媒体请求事件监听(事件监听不影响服务正常运行)
+    if (MyStatus_t::SUCCESS != MyMediaReqEvListener::AddListener(&MySipServer::ServMediaReqEvFunc)) {
+        LOG(WARNING) << "SipServer init warning. listen media request event failed.";
     }
 
     // 事件线程池初始化
@@ -268,6 +317,16 @@ MyStatus_t MySipServer::onReqLowServCatalog(const MySipRegLowServCfg_dt& lowSipR
         return MyStatus_t::FAILED;
     }
     return sipCatalogAppWkPtr.lock()->onSipCatalogAppReqLowServCatalog(lowSipRegServAddrCfg, m_servAddrCfg);
+}
+
+MyStatus_t MySipServer::onReqDeviceMedia(const std::string& deviceId)
+{
+    MySipInviteApp::SmtWkPtr sipInviteAppWkPtr;
+    if (MyStatus_t::SUCCESS != MyAppManage::GetSipInviteApp(sipInviteAppWkPtr)) {
+        LOG(ERROR) << "SipServer onReqDeviceMedia() failed. sipInviteApp invalid.";
+        return MyStatus_t::FAILED;
+    }
+    return sipInviteAppWkPtr.lock()->onSipInviteAppReqDeviceMedia(deviceId);
 }
 
 MyStatus_t MySipServer::getState(MyStatus_t& status) const

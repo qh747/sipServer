@@ -49,6 +49,8 @@ typedef         MySipRegUpServCfg_dt*                                       MySi
 typedef         std::atomic<MyStatus_t>*                                    MySipStatusPtr;
 typedef         std::atomic<MY_COMMON::MyStatus_t>                          MyAtomicStatus;
 
+typedef         void*                                                       MyEventTagPtr;
+
 // key = reg sip server id, value = reg sip server address config
 typedef         std::map<std::string, MySipServRegAddrCfg_dt>               MySipRegServAddrMap;
 // key = remote server ip + remote port, value = sip server transport

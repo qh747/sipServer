@@ -69,6 +69,14 @@ public:
      */ 
     MY_COMMON::MyStatus_t                       shutdown();
 
+public:
+    /** 
+     * @brief                                   请求设备媒体流
+     * @return                                  请求结果，0-success，-1-failed
+     * @param deviceId                          设备ID
+     */ 
+    MY_COMMON::MyStatus_t                       onSipInviteAppReqDeviceMedia(const std::string deviceId);
+
 public:     
     /**     
      * @brief                                   应用是否启动

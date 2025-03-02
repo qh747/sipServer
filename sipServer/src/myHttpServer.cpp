@@ -1,13 +1,17 @@
 #include <string>
+#include <Util/NoticeCenter.h>
 #define GLOG_USE_GLOG_EXPORT
 #include <glog/logging.h>
 #include <gflags/gflags.h>
 #include "utils/myJsonHelper.h"
 #include "utils/myServerHelper.h"
+#include "event/myEvent.h"
 #include "envir/mySystemThreadPool.h"
 #include "manager/mySipCatalogManage.h"
 #include "server/myHttpServer.h"
 using namespace MY_COMMON;
+using namespace MY_EVENT;
+using toolkit::NoticeHelper;
 using MY_UTILS::MyJsonHelper;
 using MY_UTILS::MyServerHelper;
 using MY_ENVIR::MySystemThdPool;
@@ -97,7 +101,7 @@ MyStatus_t MyHttpServer::ServThdFunc(MyFuncCbParamPtr arg)
                 LOG(WARNING) << "HttpServer execute thread function failed. onRecvHttpGetReq failed.";
             } 
             else {
-                LOG(INFO) << "HttpServer execute thread function success. proce client http get request. ip addr: " 
+                LOG(INFO) << "HttpServer execute thread function success. proc client http get request. ip addr: " 
                           << endpoint.address().to_string() << ". port: " << endpoint.port()
                           << ". url: " << url;
             }
@@ -107,7 +111,7 @@ MyStatus_t MyHttpServer::ServThdFunc(MyFuncCbParamPtr arg)
                 LOG(WARNING) << "HttpServer execute thread function failed. onRecvHttpPostReq failed.";
             } 
             else {
-                LOG(INFO) << "HttpServer execute thread function success. proce client http post request. ip addr: " 
+                LOG(INFO) << "HttpServer execute thread function success. proc client http post request. ip addr: " 
                           << endpoint.address().to_string() << ". port: " << endpoint.port()
                           << ". url: " << url;
             }
@@ -246,19 +250,43 @@ MyStatus_t MyHttpServer::onRecvHttpGetReq(const std::string& url, http::status& 
 
 MyStatus_t MyHttpServer::onRecvHttpPostReq(const std::string& url, http::status& statusCode, std::string& respBody)
 {
-    if (HTTP_URL_REQ_DEVICE_MEDIA == url) {
-        // 请求设备媒体流
+    if (std::string::npos != url.find(HTTP_URL_REQ_DEVICE_MEDIA)) {
+        // 解析设备id
+        size_t lastSlashPos = url.find_last_of('/');
+        
+        if (std::string::npos != lastSlashPos && url.length() - 1 != lastSlashPos) {
+            // 获取设备信息
+            std::string deviceId = url.substr(lastSlashPos + 1);
+            
+            // 请求设备媒体流
+            std::string procInfo;
+            MyStatus_t procStatus = MyStatus_t::FAILED;
+            
+            // 触发事件通知，外部请求设备媒体流
+            NOTICE_EMIT(MY_MEDIA_REQ_EV_ARGS, MY_EVENT::kMyMediaRequestEvent, deviceId, procStatus, procInfo);
+
+            if (MyStatus_t::SUCCESS == procStatus) {
+                statusCode = http::status::ok;
+                return MyStatus_t::SUCCESS;
+            }
+            else {
+                statusCode = http::status::internal_server_error;
+                MyJsonHelper::GenerateHttpErrMsgBody(procInfo, respBody);
+            }
+        }
+        else {
+            statusCode = http::status::not_found;
+            MyJsonHelper::GenerateHttpErrMsgBody(std::string("request device media failed. device not exists. url: " + url), respBody);
+        }
     }
     else {
         statusCode = http::status::not_found;
 
         std::string errInfo = "invalid url: " + url;
         MyJsonHelper::GenerateHttpErrMsgBody(errInfo, respBody);
-
-        return MyStatus_t::FAILED;
     }
 
-    return MyStatus_t::SUCCESS;
+    return MyStatus_t::FAILED;
 }
     
 MyStatus_t MyHttpServer::getState(MyStatus_t& status) const

@@ -115,6 +115,13 @@ MyStatus_t MySipInviteApp::shutdown()
     return MyStatus_t::SUCCESS;
 }
 
+MyStatus_t MySipInviteApp::onSipInviteAppReqDeviceMedia(const std::string deviceId)
+{
+
+    
+    return MyStatus_t::SUCCESS;
+}
+
 MyStatus_t MySipInviteApp::getState(MyStatus_t& status) const
 {
     status = m_status.load();

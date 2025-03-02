@@ -3,6 +3,7 @@
 #include <cstdbool>
 #include <boost/thread/shared_mutex.hpp>
 #include "common/myTypeDef.h"
+#include "event/myEvent.h"
 
 namespace MY_SERVER {
 
@@ -23,6 +24,14 @@ public:
      * @param arg                           回调参数
      */
     static int                              ServThdFunc(MY_COMMON::MyFuncCbParamPtr arg);
+
+    /**
+     * @brief                               sip服务监听事件回调函数
+     * @param deviceId                      设备id
+     * @param status                        处理状态
+     * @param info                          处理信息
+     */
+    static void                             ServMediaReqEvFunc(MY_MEDIA_REQ_EV_ARGS);
 
 public:         
     MySipServer();          
@@ -82,10 +91,17 @@ public:
 public:
     /**
      * @brief                               向下级sip注册服务请求设备目录
-     * @return                              处理结果，0-success，-1-failed
+     * @return                              请求结果，0-success，-1-failed
      * @param lowSipRegServAddrCfg          sip注册服务地址配置
      */
     MY_COMMON::MyStatus_t                   onReqLowServCatalog(const MY_COMMON::MySipRegLowServCfg_dt& lowSipRegServAddrCfg);
+
+    /**
+     * @brief                               请求设备媒体流
+     * @return                              请求结果，0-success，-1-failed
+     * @param deviceId                      设备id
+     */
+    MY_COMMON::MyStatus_t                   onReqDeviceMedia(const std::string& deviceId);
 
 public:     
     /**     
