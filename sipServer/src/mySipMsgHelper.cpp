@@ -110,7 +110,7 @@ MyStatus_t MySipMsgHelper::ParseSipMsgFromHdr(const std::string& fromHeader, std
     }
 }
 
-MyStatus_t MySipMsgHelper::PrintSipMsgContactHdr(const MY_COMMON::MySipMsgContactHdr_dt& sipContactHeader, std::string& str)
+MyStatus_t MySipMsgHelper::PrintSipMsgContactHdr(const MySipMsgContactHdr_dt& sipContactHeader, std::string& str)
 {
     std::stringstream ss;
     ss << "id: " << sipContactHeader.id << " ip addr: " << sipContactHeader.ipAddr << " port: " << sipContactHeader.port;
@@ -119,7 +119,7 @@ MyStatus_t MySipMsgHelper::PrintSipMsgContactHdr(const MY_COMMON::MySipMsgContac
     return MyStatus_t::SUCCESS;
 }
 
-MyStatus_t MySipMsgHelper::PrintSipKeepAliveMsgBody(const MY_COMMON::MySipKeepAliveMsgBody_dt& keepAliveMsgBody, std::string& str)
+MyStatus_t MySipMsgHelper::PrintSipKeepAliveMsgBody(const MySipKeepAliveMsgBody_dt& keepAliveMsgBody, std::string& str)
 {
     std::stringstream ss;
     ss << "cmdType: " << keepAliveMsgBody.cmdType << " DeviceID: " << keepAliveMsgBody.deviceId 
@@ -129,7 +129,7 @@ MyStatus_t MySipMsgHelper::PrintSipKeepAliveMsgBody(const MY_COMMON::MySipKeepAl
     return MyStatus_t::SUCCESS;
 }
 
-MyStatus_t MySipMsgHelper::PrintSipCatalogMsgBody(const MY_COMMON::MySipCatalogReqMsgBody_dt& catalogMsgBody, std::string& str)
+MyStatus_t MySipMsgHelper::PrintSipCatalogMsgBody(const MySipCatalogReqMsgBody_dt& catalogMsgBody, std::string& str)
 {
     std::stringstream ss;
     ss << "cmdType: " << catalogMsgBody.cmdType << " DeviceID: " << catalogMsgBody.deviceId  << " SN: " << catalogMsgBody.sn;

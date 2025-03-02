@@ -104,6 +104,8 @@ MyStatus_t MySipInviteApp::shutdown()
         return MyStatus_t::SUCCESS;
     }
 
+    m_invCbPtr.reset();
+
     m_status.store(MyStatus_t::FAILED);
 
     std::string appInfo;

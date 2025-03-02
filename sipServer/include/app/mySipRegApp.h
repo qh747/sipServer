@@ -40,8 +40,8 @@ public:
      * @param evParamPtr                    回调参数
      * @param evPtr                         回调事件
      */ 
-    static void                             OnKeepAliveRespCb(MY_COMMON::MySipCbParamPtr evParamPtr, 
-                                                              MY_COMMON::MySipEvPtr      evPtr);
+    static void                             OnKeepAliveRespCb(MY_COMMON::MyFuncCbParamPtr evParamPtr, 
+                                                              MY_COMMON::MySipEvPtr       evPtr);
 
 public:
     MySipRegApp();
@@ -150,7 +150,7 @@ private:
     MY_COMMON::MySipAppIdCfg_dt             m_appIdCfg;
 
     //                                      启动状态 
-    MY_COMMON::MySipStatusAtomic            m_status; 
+    MY_COMMON::MyAtomicStatus               m_status; 
 
     //                                      定时器
     toolkit::Timer::Ptr                     m_timePtr;

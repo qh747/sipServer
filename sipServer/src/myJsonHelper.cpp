@@ -125,22 +125,22 @@ MyStatus_t MyJsonHelper::ParseSipCatalogJsonFile(const std::string& filePath, My
         const Json::Value& platNode             = rootNode["platInfo"];
         catalogCfg.catalogPlatCfg.name          = platNode["name"].asString();
         catalogCfg.catalogPlatCfg.status        = platNode["status"].asString();
-        catalogCfg.catalogPlatCfg.parental      = platNode["parental"].asInt();
+        catalogCfg.catalogPlatCfg.parental      = platNode["parental"].asString();
         catalogCfg.catalogPlatCfg.manufacturer  = platNode["manufacturer"].asString();
         catalogCfg.catalogPlatCfg.model         = platNode["model"].asString();
         catalogCfg.catalogPlatCfg.block         = platNode["block"].asString();
-        catalogCfg.catalogPlatCfg.safetyWay     = platNode["safetyWay"].asInt();
-        catalogCfg.catalogPlatCfg.registerWay   = platNode["registerWay"].asInt();
-        catalogCfg.catalogPlatCfg.secrecy       = platNode["secrecy"].asInt();
+        catalogCfg.catalogPlatCfg.safetyWay     = platNode["safetyWay"].asString();
+        catalogCfg.catalogPlatCfg.registerWay   = platNode["registerWay"].asString();
+        catalogCfg.catalogPlatCfg.secrecy       = platNode["secrecy"].asString();
         catalogCfg.catalogPlatCfg.deviceID      = platNode["deviceID"].asString();
         catalogCfg.catalogPlatCfg.parentID      = platNode["parentID"].asString();
         catalogCfg.catalogPlatCfg.platformID    = platNode["platformID"].asString();
         catalogCfg.catalogPlatCfg.platformIp    = platNode["platformIp"].asString();
-        catalogCfg.catalogPlatCfg.platformPort  = platNode["platformPort"].asInt();
+        catalogCfg.catalogPlatCfg.platformPort  = platNode["platformPort"].asString();
         catalogCfg.catalogPlatCfg.owner         = platNode["owner"].asString();
         catalogCfg.catalogPlatCfg.deviceIp      = platNode["deviceIp"].asString();
-        catalogCfg.catalogPlatCfg.devicePort    = platNode["devicePort"].asInt();
-        catalogCfg.catalogPlatCfg.deviceChannel = platNode["deviceChannel"].asInt();
+        catalogCfg.catalogPlatCfg.devicePort    = platNode["devicePort"].asString();
+        catalogCfg.catalogPlatCfg.deviceChannel = platNode["deviceChannel"].asString();
         catalogCfg.catalogPlatCfg.deviceStream  = platNode["deviceStream"].asString();
         catalogCfg.catalogPlatCfg.longitude     = platNode["longitude"].asString();
         catalogCfg.catalogPlatCfg.latitude      = platNode["latitude"].asString();
@@ -164,22 +164,22 @@ MyStatus_t MyJsonHelper::ParseSipCatalogJsonFile(const std::string& filePath, My
             MySipCatalogSubPlatCfg_dt cfg;
             cfg.name          = curSubPlatNode["name"].asString();
             cfg.status        = curSubPlatNode["status"].asString();
-            cfg.parental      = curSubPlatNode["parental"].asInt();
+            cfg.parental      = curSubPlatNode["parental"].asString();
             cfg.manufacturer  = curSubPlatNode["manufacturer"].asString();
             cfg.model         = curSubPlatNode["model"].asString();
             cfg.block         = curSubPlatNode["block"].asString();
-            cfg.safetyWay     = curSubPlatNode["safetyWay"].asInt();
-            cfg.registerWay   = curSubPlatNode["registerWay"].asInt();
-            cfg.secrecy       = curSubPlatNode["secrecy"].asInt();
+            cfg.safetyWay     = curSubPlatNode["safetyWay"].asString();
+            cfg.registerWay   = curSubPlatNode["registerWay"].asString();
+            cfg.secrecy       = curSubPlatNode["secrecy"].asString();
             cfg.deviceID      = curSubPlatNode["deviceID"].asString();
             cfg.parentID      = curSubPlatNode["parentID"].asString();
             cfg.platformID    = curSubPlatNode["platformID"].asString();
             cfg.platformIp    = curSubPlatNode["platformIp"].asString();
-            cfg.platformPort  = curSubPlatNode["platformPort"].asInt();
+            cfg.platformPort  = curSubPlatNode["platformPort"].asString();
             cfg.owner         = curSubPlatNode["owner"].asString();
             cfg.deviceIp      = curSubPlatNode["deviceIp"].asString();
-            cfg.devicePort    = curSubPlatNode["devicePort"].asInt();
-            cfg.deviceChannel = curSubPlatNode["deviceChannel"].asInt();
+            cfg.devicePort    = curSubPlatNode["devicePort"].asString();
+            cfg.deviceChannel = curSubPlatNode["deviceChannel"].asString();
             cfg.deviceStream  = curSubPlatNode["deviceStream"].asString();
             cfg.longitude     = curSubPlatNode["longitude"].asString();
             cfg.latitude      = curSubPlatNode["latitude"].asString();
@@ -215,22 +215,22 @@ MyStatus_t MyJsonHelper::ParseSipCatalogJsonFile(const std::string& filePath, My
             MySipCatalogVirtualSubPlatCfg_dt cfg;
             cfg.name          = curSubVirtualPlatNode["name"].asString();
             cfg.status        = curSubVirtualPlatNode["status"].asString();
-            cfg.parental      = curSubVirtualPlatNode["parental"].asInt();
+            cfg.parental      = curSubVirtualPlatNode["parental"].asString();
             cfg.manufacturer  = curSubVirtualPlatNode["manufacturer"].asString();
             cfg.model         = curSubVirtualPlatNode["model"].asString();
             cfg.block         = curSubVirtualPlatNode["block"].asString();
-            cfg.safetyWay     = curSubVirtualPlatNode["safetyWay"].asInt();
-            cfg.registerWay   = curSubVirtualPlatNode["registerWay"].asInt();
-            cfg.secrecy       = curSubVirtualPlatNode["secrecy"].asInt();
+            cfg.safetyWay     = curSubVirtualPlatNode["safetyWay"].asString();
+            cfg.registerWay   = curSubVirtualPlatNode["registerWay"].asString();
+            cfg.secrecy       = curSubVirtualPlatNode["secrecy"].asString();
             cfg.deviceID      = curSubVirtualPlatNode["deviceID"].asString();
             cfg.parentID      = curSubVirtualPlatNode["parentID"].asString();
             cfg.platformID    = curSubVirtualPlatNode["platformID"].asString();
             cfg.platformIp    = curSubVirtualPlatNode["platformIp"].asString();
-            cfg.platformPort  = curSubVirtualPlatNode["platformPort"].asInt();
+            cfg.platformPort  = curSubVirtualPlatNode["platformPort"].asString();
             cfg.owner         = curSubVirtualPlatNode["owner"].asString();
             cfg.deviceIp      = curSubVirtualPlatNode["deviceIp"].asString();
-            cfg.devicePort    = curSubVirtualPlatNode["devicePort"].asInt();
-            cfg.deviceChannel = curSubVirtualPlatNode["deviceChannel"].asInt();
+            cfg.devicePort    = curSubVirtualPlatNode["devicePort"].asString();
+            cfg.deviceChannel = curSubVirtualPlatNode["deviceChannel"].asString();
             cfg.deviceStream  = curSubVirtualPlatNode["deviceStream"].asString();
             cfg.longitude     = curSubVirtualPlatNode["longitude"].asString();
             cfg.latitude      = curSubVirtualPlatNode["latitude"].asString();
@@ -280,20 +280,20 @@ MyStatus_t MyJsonHelper::ParseSipCatalogJsonFile(const std::string& filePath, My
             MySipCatalogDeviceCfg_dt cfg;
             cfg.name          = curDeviceNode["name"].asString();
             cfg.status        = curDeviceNode["status"].asString();
-            cfg.parental      = curDeviceNode["parental"].asInt();
+            cfg.parental      = curDeviceNode["parental"].asString();
             cfg.manufacturer  = curDeviceNode["manufacturer"].asString();
             cfg.model         = curDeviceNode["model"].asString();
             cfg.block         = curDeviceNode["block"].asString();
-            cfg.safetyWay     = curDeviceNode["safetyWay"].asInt();
-            cfg.registerWay   = curDeviceNode["registerWay"].asInt();
-            cfg.secrecy       = curDeviceNode["secrecy"].asInt();
+            cfg.safetyWay     = curDeviceNode["safetyWay"].asString();
+            cfg.registerWay   = curDeviceNode["registerWay"].asString();
+            cfg.secrecy       = curDeviceNode["secrecy"].asString();
             cfg.deviceID      = curDeviceNode["deviceID"].asString();
             cfg.parentID      = curDeviceNode["parentID"].asString();
             cfg.platformID    = curDeviceNode["platformID"].asString();
             cfg.owner         = curDeviceNode["owner"].asString();
             cfg.deviceIp      = curDeviceNode["deviceIp"].asString();
-            cfg.devicePort    = curDeviceNode["devicePort"].asInt();
-            cfg.deviceChannel = curDeviceNode["deviceChannel"].asInt();
+            cfg.devicePort    = curDeviceNode["devicePort"].asString();
+            cfg.deviceChannel = curDeviceNode["deviceChannel"].asString();
             cfg.deviceStream  = curDeviceNode["deviceStream"].asString();
             cfg.longitude     = curDeviceNode["longitude"].asString();
             cfg.latitude      = curDeviceNode["latitude"].asString();
@@ -318,6 +318,325 @@ MyStatus_t MyJsonHelper::ParseSipCatalogJsonFile(const std::string& filePath, My
         }
     }
     
+    return MyStatus_t::SUCCESS;
+}
+
+MyStatus_t MyJsonHelper::GenerateHttpErrMsgBody(const std::string& errInfo, std::string& msgBody)
+{
+    Json::Value root;
+    root["errInfo"] = errInfo;
+
+    Json::StreamWriterBuilder builder;
+    msgBody = Json::writeString(builder, root);
+    return MyStatus_t::SUCCESS;
+}
+
+MyStatus_t MyJsonHelper::GenerateDeviceListInfo(const std::map<std::string, MySipCatalogInfo_dt>& deviceInfoMap, std::string& deviceInfoStr)
+{
+    Json::Value root;
+
+    // json数据添加
+    for (const auto& deviceInfoPair : deviceInfoMap) {
+        for (const auto& platPair : deviceInfoPair.second.sipPlatMap) {
+            Json::Value platNode;
+
+            // 平台信息添加
+            platNode["name"]       = platPair.second.name;
+            platNode["deviceID"]   = platPair.second.deviceID;
+            platNode["deviceIp"]   = platPair.second.deviceIp;
+            platNode["devicePort"] = platPair.second.devicePort; 
+
+            // 平台下挂载子平台信息添加
+            if (!deviceInfoPair.second.sipSubPlatMap.empty()) {
+                Json::Value subPlatArray;
+
+                for (const auto& subPlatPair : deviceInfoPair.second.sipSubPlatMap) {
+                    if (subPlatPair.second.parentID != platPair.first) {
+                        continue;
+                    }
+
+                    Json::Value subPlatNode;
+                    subPlatNode["name"]       = subPlatPair.second.name;
+                    subPlatNode["deviceID"]   = subPlatPair.second.deviceID;
+                    subPlatNode["deviceIp"]   = subPlatPair.second.deviceIp;
+                    subPlatNode["devicePort"] = subPlatPair.second.devicePort; 
+
+                    // 子平台下挂载虚拟子平台信息添加
+                    if (!deviceInfoPair.second.sipSubVirtualPlatMap.empty()) {
+                        Json::Value subVirtualPlatArray;
+
+                        for (const auto& subVirtualPlatPair : deviceInfoPair.second.sipSubVirtualPlatMap) {
+                            if (subVirtualPlatPair.second.parentID != subPlatPair.first) {
+                                continue;
+                            }
+
+                            Json::Value subVirtualPlatNode;
+                            subVirtualPlatNode["name"]       = subVirtualPlatPair.second.name;
+                            subVirtualPlatNode["deviceID"]   = subVirtualPlatPair.second.deviceID;
+                            subVirtualPlatNode["deviceIp"]   = subVirtualPlatPair.second.deviceIp;
+                            subVirtualPlatNode["devicePort"] = subVirtualPlatPair.second.devicePort; 
+
+                            // 虚拟子平台下挂载设备信息添加
+                            if (!deviceInfoPair.second.sipDeviceMap.empty()) {
+                                Json::Value deviceArray;
+
+                                for (const auto& devicePair : deviceInfoPair.second.sipDeviceMap) {
+                                    if (devicePair.second.parentID != subVirtualPlatPair.first) {
+                                        continue;
+                                    }
+                                
+                                    Json::Value deviceNode;
+                                    deviceNode["name"]       = devicePair.second.name;
+                                    deviceNode["deviceID"]   = devicePair.second.deviceID;
+                                    deviceNode["deviceIp"]   = devicePair.second.deviceIp;
+                                    deviceNode["devicePort"] = devicePair.second.devicePort; 
+                                    deviceArray["subDevice_" + devicePair.first] = deviceNode;
+                                }
+                                
+                                if (!deviceArray.empty()) {
+                                    subVirtualPlatNode["subDevice"] = deviceArray;
+                                }
+                            }
+
+                            if (!subVirtualPlatNode.empty()) {
+                                subVirtualPlatArray["subVirtualPlatform" + subVirtualPlatPair.first] = subVirtualPlatNode;
+                            }
+                        }
+
+                        if (!subVirtualPlatArray.empty()) {
+                            subPlatNode["subVirtualPlatform"] = subVirtualPlatArray;
+                        }
+                    }
+
+                    // 子平台下挂载设备信息添加
+                    if (!deviceInfoPair.second.sipDeviceMap.empty()) {
+                        Json::Value deviceArray;
+
+                        for (const auto& devicePair : deviceInfoPair.second.sipDeviceMap) {
+                            if (devicePair.second.parentID != subPlatPair.first) {
+                                continue;
+                            }
+                            Json::Value deviceNode;
+                            deviceNode["name"]       = devicePair.second.name;
+                            deviceNode["deviceID"]   = devicePair.second.deviceID;
+                            deviceNode["deviceIp"]   = devicePair.second.deviceIp;
+                            deviceNode["devicePort"] = devicePair.second.devicePort; 
+                            deviceArray["device" + devicePair.first] = deviceNode;
+                        }
+
+                        if (!deviceArray.empty()) {
+                            subPlatNode["subDevice"] = deviceArray;
+                        }
+                    }
+
+                    if (!subPlatNode.empty()) {
+                        subPlatArray["subPlatform_" + subPlatPair.first] = subPlatNode;
+                    }
+                }
+
+                if (!subPlatArray.empty()) {
+                    platNode["subPlatform"] = subPlatArray;
+                }
+            }
+            
+            // 平台下挂载虚拟子平台信息添加
+            if (!deviceInfoPair.second.sipSubVirtualPlatMap.empty()) {
+                Json::Value subVirtualPlatArray;                
+                for (const auto& subVirtualPlatPair : deviceInfoPair.second.sipSubVirtualPlatMap) {
+                    if (subVirtualPlatPair.second.parentID != platPair.first) {
+                        continue;
+                    }
+
+                    Json::Value subVirtualPlatNode;
+                    subVirtualPlatNode["name"]       = subVirtualPlatPair.second.name;
+                    subVirtualPlatNode["deviceID"]   = subVirtualPlatPair.second.deviceID;
+                    subVirtualPlatNode["deviceIp"]   = subVirtualPlatPair.second.deviceIp;
+                    subVirtualPlatNode["devicePort"] = subVirtualPlatPair.second.devicePort; 
+
+                    // 虚拟子平台下挂载设备信息添加
+                    if (!deviceInfoPair.second.sipDeviceMap.empty()) {
+                        Json::Value deviceArray;
+                        for (const auto& devicePair : deviceInfoPair.second.sipDeviceMap) {
+                            if (devicePair.second.parentID != subVirtualPlatPair.first) {
+                                continue;
+                            }
+
+                            Json::Value deviceNode;
+                            deviceNode["name"]       = devicePair.second.name;
+                            deviceNode["deviceID"]   = devicePair.second.deviceID;
+                            deviceNode["deviceIp"]   = devicePair.second.deviceIp;
+                            deviceNode["devicePort"] = devicePair.second.devicePort; 
+                            deviceArray["subDevice_" + devicePair.first] = deviceNode;
+                        }
+
+                        if (!deviceArray.empty()) {
+                            subVirtualPlatNode["subDevice"] = deviceArray;
+                        } 
+                    }
+
+                    if (!subVirtualPlatNode.empty()) {
+                        subVirtualPlatArray["subVirtualPlatform_" + subVirtualPlatPair.first] = subVirtualPlatNode;
+                    }
+                }
+
+                if (!subVirtualPlatArray.empty()) {
+                    platNode["subVirtualPlatform"] = subVirtualPlatArray;
+                }
+            }
+            
+            // 平台下挂载设备信息添加
+            if (!deviceInfoPair.second.sipDeviceMap.empty()) {
+                Json::Value deviceArray;
+
+                for (const auto& devicePair : deviceInfoPair.second.sipDeviceMap) {
+                    if (devicePair.second.parentID != platPair.first) {
+                        continue;
+                    }
+    
+                    Json::Value deviceNode;
+                    deviceNode["name"]       = devicePair.second.name;
+                    deviceNode["deviceID"]   = devicePair.second.deviceID;
+                    deviceNode["deviceIp"]   = devicePair.second.deviceIp;
+                    deviceNode["devicePort"] = devicePair.second.devicePort; 
+                    deviceArray["subDevice_" + devicePair.first] = deviceNode;
+                }
+                
+                if (!deviceArray.empty()) {
+                    platNode["subDevice"] = deviceArray;
+                }
+            }
+            
+            if (!platNode.empty()) {
+                root["platform_" + platPair.first] = platNode;
+            }
+        }
+    }
+    
+    // 生成JSON字符串
+    if (!root.empty()) {
+        Json::StreamWriterBuilder builder;
+        deviceInfoStr = Json::writeString(builder, root);
+
+        return MyStatus_t::SUCCESS;
+    }
+    else {
+        return MyStatus_t::FAILED;
+    }
+}
+
+MyStatus_t MyJsonHelper::GenerateDeviceInfo(const MySipCatalogPlatCfg_dt& deviceInfo, std::string& deviceInfoStr)
+{
+    Json::Value root;
+
+    // json数据添加
+    Json::Value deviceNode;
+    deviceNode["name"]          = deviceInfo.name;        
+    deviceNode["status"]        = deviceInfo.status;
+    deviceNode["parental"]      = deviceInfo.parental;         
+    deviceNode["manufacturer"]  = deviceInfo.manufacturer;
+    deviceNode["model"]         = deviceInfo.model;
+    deviceNode["safetyWay"]     = deviceInfo.safetyWay;
+    deviceNode["registerWay"]   = deviceInfo.registerWay;
+    deviceNode["secrecy"]       = deviceInfo.secrecy;
+    deviceNode["deviceID"]      = deviceInfo.deviceID;
+    deviceNode["parentID"]      = deviceInfo.parentID;
+    deviceNode["platformID"]    = deviceInfo.platformID;
+    deviceNode["owner"]         = deviceInfo.owner;
+    deviceNode["deviceIp"]      = deviceInfo.deviceIp;
+    deviceNode["devicePort"]    = deviceInfo.devicePort;
+    root["paltformInfo"]        = deviceNode;
+
+    // 生成JSON字符串
+    Json::StreamWriterBuilder builder;
+    deviceInfoStr = Json::writeString(builder, root);
+
+    return MyStatus_t::SUCCESS;
+}
+
+MyStatus_t MyJsonHelper::GenerateDeviceInfo(const MySipCatalogSubPlatCfg_dt& deviceInfo, std::string& deviceInfoStr)
+{
+    Json::Value root;
+
+    // json数据添加
+    Json::Value deviceNode;
+    deviceNode["name"]          = deviceInfo.name;        
+    deviceNode["status"]        = deviceInfo.status;
+    deviceNode["parental"]      = deviceInfo.parental;         
+    deviceNode["manufacturer"]  = deviceInfo.manufacturer;
+    deviceNode["model"]         = deviceInfo.model;
+    deviceNode["safetyWay"]     = deviceInfo.safetyWay;
+    deviceNode["registerWay"]   = deviceInfo.registerWay;
+    deviceNode["secrecy"]       = deviceInfo.secrecy;
+    deviceNode["deviceID"]      = deviceInfo.deviceID;
+    deviceNode["parentID"]      = deviceInfo.parentID;
+    deviceNode["platformID"]    = deviceInfo.platformID;
+    deviceNode["owner"]         = deviceInfo.owner;
+    deviceNode["deviceIp"]      = deviceInfo.deviceIp;
+    deviceNode["devicePort"]    = deviceInfo.devicePort;
+    root["subPaltformInfo"]     = deviceNode;
+
+    // 生成JSON字符串
+    Json::StreamWriterBuilder builder;
+    deviceInfoStr = Json::writeString(builder, root);
+
+    return MyStatus_t::SUCCESS;
+}
+
+MyStatus_t MyJsonHelper::GenerateDeviceInfo(const MySipCatalogVirtualSubPlatCfg_dt& deviceInfo, std::string& deviceInfoStr)
+{
+    Json::Value root;
+
+    // json数据添加
+    Json::Value deviceNode;
+    deviceNode["name"]              = deviceInfo.name;        
+    deviceNode["status"]            = deviceInfo.status;
+    deviceNode["parental"]          = deviceInfo.parental;         
+    deviceNode["manufacturer"]      = deviceInfo.manufacturer;
+    deviceNode["model"]             = deviceInfo.model;
+    deviceNode["safetyWay"]         = deviceInfo.safetyWay;
+    deviceNode["registerWay"]       = deviceInfo.registerWay;
+    deviceNode["secrecy"]           = deviceInfo.secrecy;
+    deviceNode["deviceID"]          = deviceInfo.deviceID;
+    deviceNode["parentID"]          = deviceInfo.parentID;
+    deviceNode["platformID"]        = deviceInfo.platformID;
+    deviceNode["owner"]             = deviceInfo.owner;
+    deviceNode["deviceIp"]          = deviceInfo.deviceIp;
+    deviceNode["devicePort"]        = deviceInfo.devicePort;
+    root["subVirtualPaltformInfo"]  = deviceNode;
+
+    // 生成JSON字符串
+    Json::StreamWriterBuilder builder;
+    deviceInfoStr = Json::writeString(builder, root);
+
+    return MyStatus_t::SUCCESS;
+}
+
+MyStatus_t MyJsonHelper::GenerateDeviceInfo(const MySipCatalogDeviceCfg_dt& deviceInfo, std::string& deviceInfoStr)
+{
+    Json::Value root;
+
+    // json数据添加
+    Json::Value deviceNode;
+    deviceNode["name"]          = deviceInfo.name;        
+    deviceNode["status"]        = deviceInfo.status;
+    deviceNode["parental"]      = deviceInfo.parental;         
+    deviceNode["manufacturer"]  = deviceInfo.manufacturer;
+    deviceNode["model"]         = deviceInfo.model;
+    deviceNode["safetyWay"]     = deviceInfo.safetyWay;
+    deviceNode["registerWay"]   = deviceInfo.registerWay;
+    deviceNode["secrecy"]       = deviceInfo.secrecy;
+    deviceNode["deviceID"]      = deviceInfo.deviceID;
+    deviceNode["parentID"]      = deviceInfo.parentID;
+    deviceNode["platformID"]    = deviceInfo.platformID;
+    deviceNode["owner"]         = deviceInfo.owner;
+    deviceNode["deviceIp"]      = deviceInfo.deviceIp;
+    deviceNode["devicePort"]    = deviceInfo.devicePort;
+    root["deviceInfo"]          = deviceNode;
+
+    // 生成JSON字符串
+    Json::StreamWriterBuilder builder;
+    deviceInfoStr = Json::writeString(builder, root);
+
     return MyStatus_t::SUCCESS;
 }
 

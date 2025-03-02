@@ -1,6 +1,8 @@
 #include <boost/thread/shared_mutex.hpp>
+#include "utils/myJsonHelper.h"
 #include "manager/mySipCatalogManage.h"
 using namespace MY_COMMON;
+using MY_UTILS::MyJsonHelper;
 
 namespace MY_MANAGER
 {
@@ -10,6 +12,10 @@ namespace MY_MANAGER
  */
 class MySipCatalogManage::MySipCatalogManageObject
 {
+public:
+    // 将视图类声明为友元类，对外部提供设备目录信息获取接口
+    friend class MySipCatalogManageView;
+
 public:
     MyStatus_t add(const std::string& servId, const MySipCatalogInfo_dt& servCatalogInfo) {
         boost::unique_lock<boost::shared_mutex> lock(m_rwMutex);
@@ -32,7 +38,21 @@ public:
         }
 
         iter->second.sn = servCatalogInfo.sn;
-        iter->second.sipPlatMap = servCatalogInfo.sipPlatMap;
+
+        {
+            auto& oldSipPlatMap = iter->second.sipPlatMap;
+            const auto& newSipPlatMap = servCatalogInfo.sipPlatMap;
+            for (const auto newSipPlatPair : newSipPlatMap) {
+                auto oldSipPlatIter = oldSipPlatMap.find(newSipPlatPair.first);
+                if (oldSipPlatMap.end() == oldSipPlatIter) {
+                    oldSipPlatMap.insert(std::make_pair(newSipPlatPair.first, newSipPlatPair.second));
+                    continue;
+                }
+                if (oldSipPlatIter->second != newSipPlatPair.second) {
+                    oldSipPlatIter->second = newSipPlatPair.second;
+                }
+            }
+        }
         
         {
             auto& oldSipSubPlatMap = iter->second.sipSubPlatMap;
@@ -333,6 +353,51 @@ MyStatus_t MySipCatalogManage::HasSipRespInfo(const std::string& lowServId)
 MyStatus_t MySipCatalogManage::GetSipRespInfoMap(MySipRegServAddrMap& servAddrMap)
 {
     return CatalogSipServgManageObject.get(servAddrMap, false);
+}
+
+/**
+ * sip设备目录管理视图类
+ */
+MyStatus_t MySipCatalogManageView::GetDeviceListInfo(std::string& catalogInfo)
+{
+    boost::shared_lock<boost::shared_mutex> lock(CatalogManageObject.m_rwMutex);
+    return MyJsonHelper::GenerateDeviceListInfo(CatalogManageObject.m_sipServCatalogInfoMap, catalogInfo);
+}
+
+MyStatus_t MySipCatalogManageView::GetDeviceInfo(const std::string& deviceId, std::string& deviceInfo)
+{
+    for (const auto& pair : CatalogManageObject.m_sipServCatalogInfoMap) {
+        // 获取设备类型
+        std::string deviceType = deviceId.substr(10, 3);
+
+        // 设备查找
+        if ("200" == deviceType) {
+            const auto& sipPlatIter = pair.second.sipPlatMap.find(deviceId);
+            if (pair.second.sipPlatMap.end() != sipPlatIter) {
+                return MyJsonHelper::GenerateDeviceInfo(sipPlatIter->second, deviceInfo);
+            }
+        }
+        else if ("215" == deviceType) {
+            const auto& sipSubPlatIter = pair.second.sipSubPlatMap.find(deviceId);
+            if (pair.second.sipSubPlatMap.end() != sipSubPlatIter) {
+                return MyJsonHelper::GenerateDeviceInfo(sipSubPlatIter->second, deviceInfo);
+            }
+        }
+        else if ("216" == deviceType) {
+            const auto& sipSubVirtualPlatIter = pair.second.sipSubVirtualPlatMap.find(deviceId);
+            if (pair.second.sipSubVirtualPlatMap.end() != sipSubVirtualPlatIter) {
+                return MyJsonHelper::GenerateDeviceInfo(sipSubVirtualPlatIter->second, deviceInfo);
+            }
+        }
+        else if ("131" == deviceType || "132" == deviceType) {
+            const auto& sipDeviceIter = pair.second.sipDeviceMap.find(deviceId);
+            if (pair.second.sipDeviceMap.end() != sipDeviceIter) {
+                return MyJsonHelper::GenerateDeviceInfo(sipDeviceIter->second, deviceInfo);
+            }
+        }
+    }
+
+    return MyStatus_t::FAILED;
 }
 
 }; // namespace MY_MANAGER

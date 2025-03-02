@@ -19,18 +19,6 @@ For SIP server code practice.
  3. cmake --build build
 ```
 
-# Config
-
-``` command
- template config file in: ./sipServer/conf/servCfg.ini 
-```
-
-# Log
-
-``` command
- log directory in: ./sipServer/log/
-```
-
 # clean
 
 ``` command
@@ -38,8 +26,15 @@ For SIP server code practice.
  2. rm -rf ./sipServer/bin/sipServer
 ```
 
-# Usage
+# run
 
 ``` command
  ./bin/sipServer --cfg ./bin/servCfg.ini
+```
+
+# exit
+
+``` command
+ 1. ctrl + \ (recommand)
+ 2. ctrl + c (not recommand. will cause error "Segmentation fault")
 ```

@@ -1,19 +1,16 @@
 {
-    "registerServer-1": {
-      "id": "11000000002000000001",
-      "upperServer": [
-        {
-          "id": "10000000002000000001",
-          "ipAddr": "192.168.1.10",
-          "port": "5061",
-          "name": "upperSipServer",
-          "domain": "upperSipServer.com",
-          "proto": "udp",
-          "auth": "true",
-          "authName": "admin",
-          "authPwd": "123456",
-          "authRealm": "123456"
-        }
-      ]
+  "upperServer": [
+    {
+      "id": "10000000002000000001",
+      "ipAddr": "192.168.1.10",
+      "port": "5061",
+      "name": "upperSipServer",
+      "domain": "upperSipServer.com",
+      "proto": "udp",
+      "auth": "true",
+      "authName": "admin",
+      "authPwd": "123456",
+      "authRealm": "123456"
     }
-  }
+  ]
+}

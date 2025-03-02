@@ -1,5 +1,4 @@
 #pragma once
-#include <atomic>
 #include <memory>
 #include <cstdbool>
 #include <boost/thread/shared_mutex.hpp>
@@ -23,7 +22,7 @@ public:
      * @return                              回调结果，0-success，-1-failed
      * @param arg                           回调参数
      */
-    static int                              SipServerThdFunc(MY_COMMON::MySipCbParamPtr arg);
+    static int                              ServThdFunc(MY_COMMON::MyFuncCbParamPtr arg);
 
 public:         
     MySipServer();          
@@ -57,28 +56,28 @@ public:
      * @return                              处理结果，0-success，-1-failed
      * @param regReqMsgPtr                  注册请求消息
      */
-    MY_COMMON::MyStatus_t                   onSipServRecvSipRegisterReqMsg(MY_COMMON::MySipRxDataPtr regReqMsgPtr);
+    MY_COMMON::MyStatus_t                   onServRecvSipRegReqMsg(MY_COMMON::MySipRxDataPtr regReqMsgPtr);
 
     /**
      * @brief                               回调函数: sip保活请求消息接收
      * @return                              处理结果，0-success，-1-failed
      * @param keepAliveReqMsgPtr            保活请求消息
      */
-    MY_COMMON::MyStatus_t                   onSipServRecvSipKeepAliveReqMsg(MY_COMMON::MySipRxDataPtr keepAliveReqMsgPtr);
+    MY_COMMON::MyStatus_t                   onServRecvSipKeepAliveReqMsg(MY_COMMON::MySipRxDataPtr keepAliveReqMsgPtr);
 
     /**
      * @brief                               回调函数: sip设备目录查询请求消息接收
      * @return                              处理结果，0-success，-1-failed
      * @param catalogQueryReqMsgPtr         sip设备目录查询请求消息
      */
-    MY_COMMON::MyStatus_t                   onSipServRecvSipCatalogQueryReqMsg(MY_COMMON::MySipRxDataPtr catalogQueryReqMsgPtr);
+    MY_COMMON::MyStatus_t                   onServRecvSipCatalogQueryReqMsg(MY_COMMON::MySipRxDataPtr catalogQueryReqMsgPtr);
 
     /**
      * @brief                               回调函数: sip设备目录响应请求消息接收
      * @return                              处理结果，0-success，-1-failed
      * @param catalogResponseReqMsgPtr      sip设备目录响应请求消息
      */
-    MY_COMMON::MyStatus_t                   onSipServRecvSipCatalogResponseReqMsg(MY_COMMON::MySipRxDataPtr catalogResponseReqMsgPtr);
+    MY_COMMON::MyStatus_t                   onServRecvSipCatalogRespMsg(MY_COMMON::MySipRxDataPtr catalogResponseReqMsgPtr);
 
 public:
     /**
@@ -86,7 +85,7 @@ public:
      * @return                              处理结果，0-success，-1-failed
      * @param lowSipRegServAddrCfg          sip注册服务地址配置
      */
-    MY_COMMON::MyStatus_t                   onReqLowSipServCatalog(const MY_COMMON::MySipRegLowServCfg_dt& lowSipRegServAddrCfg);
+    MY_COMMON::MyStatus_t                   onReqLowServCatalog(const MY_COMMON::MySipRegLowServCfg_dt& lowSipRegServAddrCfg);
 
 public:     
     /**     
@@ -101,28 +100,21 @@ public:
      * @return                              获取结果，0-success，-1-failed
      * @param cfg                           sip服务地址配置
      */
-    MY_COMMON::MyStatus_t                   getSipServAddrCfg(MY_COMMON::MySipServAddrCfg_dt& cfg);
-
-    /**
-     * @brief                               获取sip服务
-     * @return                              获取结果，0-success，-1-failed
-     * @param sipServer                     sip服务
-     */
-    MY_COMMON::MyStatus_t                   getSipServer(MySipServer::SmtWkPtr& sipServer);
+    MY_COMMON::MyStatus_t                   getServAddrCfg(MY_COMMON::MySipServAddrCfg_dt& cfg);
 
     /**
      * @brief                               获取sip服务udp transport
      * @return                              获取结果，0-success，-1-failed
      * @param udpTpPtrAddr                  sip服务udp transport
      */
-    MY_COMMON::MyStatus_t                  getSipServUdpTp(MY_COMMON::MySipTransportPtrAddr udpTpPtrAddr);
+    MY_COMMON::MyStatus_t                   getServUdpTp(MY_COMMON::MySipTransportPtrAddr udpTpPtrAddr);
 
     /**
      * @brief                               获取sip服务注册使用的udp transport
      * @return                              获取结果，0-success，-1-failed
      * @param udpTpPtrAddr                  sip服务udp transport
      */
-    MY_COMMON::MyStatus_t                  getSipServRegUdpTp(MY_COMMON::MySipTransportPtrAddr udpTpPtrAddr);
+    MY_COMMON::MyStatus_t                   getServRegUdpTp(MY_COMMON::MySipTransportPtrAddr udpTpPtrAddr);
 
     /**
      * @brief                               获取sip服务tcp transport
@@ -131,9 +123,9 @@ public:
      * @param remoteIpAddr                  远端ip地址
      * @param remotePort                    远端端口
      */
-    MY_COMMON::MyStatus_t                  getSipServTcpTp(MY_COMMON::MySipTransportPtrAddr tcpTpPtrAddr, 
-                                                           const std::string&               remoteIpAddr, 
-                                                           uint16_t                         remotePort);
+    MY_COMMON::MyStatus_t                   getServTcpTp(MY_COMMON::MySipTransportPtrAddr tcpTpPtrAddr, 
+                                                           const std::string&             remoteIpAddr, 
+                                                           uint16_t                       remotePort);
 
     /**
      * @brief                               获取sip服务注册使用的tcp transport工厂
@@ -142,13 +134,13 @@ public:
      * @param remoteIpAddr                  远端ip地址
      * @param remotePort                    远端端口
      */
-    MY_COMMON::MyStatus_t                  getSipServRegTcpTpFactory(MY_COMMON::MySipTransportPtrAddr tcpTpPtrAddr, 
-                                                                     const std::string&               remoteIpAddr, 
-                                                                     uint16_t                         remotePort);
+    MY_COMMON::MyStatus_t                   getServRegTcpTp(MY_COMMON::MySipTransportPtrAddr tcpTpPtrAddr, 
+                                                                     const std::string&      remoteIpAddr, 
+                                                                     uint16_t                remotePort);
 
 private:
     //                                      启动状态 
-    MY_COMMON::MySipStatusAtomic            m_status; 
+    MY_COMMON::MyAtomicStatus               m_status; 
     
     //                                      sip服务多线程互斥量
     boost::shared_mutex                     m_rwMutex;

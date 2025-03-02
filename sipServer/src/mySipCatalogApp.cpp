@@ -9,7 +9,7 @@
 #include "utils/myXmlHelper.h"
 #include "utils/mySipAppHelper.h"
 #include "utils/mySipMsgHelper.h"
-#include "utils/mySipServerHelper.h"
+#include "utils/myServerHelper.h"
 #include "manager/myServManage.h"
 #include "manager/mySipRegManage.h"
 #include "manager/mySipCatalogManage.h"
@@ -58,7 +58,7 @@ typedef struct {
 typedef MySipCatalogAppPushCatalogThdParam_dt* MySipCatalogAppPushCatalogThdParamPtr;
 typedef MySipCatalogAppUptCatalogThdParam_dt*  MySipCatalogAppUptCatalogThdParamPtr;
 
-int MySipCatalogApp::SipCatalogAppPushCatalogThdFunc(MySipCbParamPtr arg)
+int MySipCatalogApp::SipCatalogAppPushCatalogThdFunc(MyFuncCbParamPtr arg)
 {
     // pjsip要求自定义线程进行注册才能使用
     pj_thread_desc desc;
@@ -82,7 +82,7 @@ int MySipCatalogApp::SipCatalogAppPushCatalogThdFunc(MySipCbParamPtr arg)
     const MySipServAddrCfg_dt&  localServAddrCfg  = thdParamPtr->m_servAddrCfg;
 
     std::string upRegServInfo;
-    MySipServerHelper::PrintSipUpRegServInfo(regUpServCfg, upRegServInfo);
+    MyServerHelper::PrintSipUpRegServInfo(regUpServCfg, upRegServInfo);
 
     // 获取endpoint
     MySipEndptPtr endptPtr = nullptr;
@@ -155,7 +155,7 @@ int MySipCatalogApp::SipCatalogAppPushCatalogThdFunc(MySipCbParamPtr arg)
         }
 
         // 获取设备目录总数
-        std::size_t sumNum = 1 + subPlatCfgMap.size() + subVirtualCfgMap.size() + deviceCfgMap.size();
+        std::size_t sumNum = platCfgMap.size() + subPlatCfgMap.size() + subVirtualCfgMap.size() + deviceCfgMap.size();
 
         // sip catalog消息首部生成
         std::string sURL;
@@ -470,7 +470,7 @@ int MySipCatalogApp::SipCatalogAppPushCatalogThdFunc(MySipCbParamPtr arg)
     return 0;
 }
 
-void MySipCatalogApp::OnSipCatalogAppPushCatalogCb(MY_COMMON::MySipCbParamPtr arg, MY_COMMON::MySipEvPtr ev)
+void MySipCatalogApp::OnSipCatalogAppPushCatalogCb(MY_COMMON::MyFuncCbParamPtr arg, MY_COMMON::MySipEvPtr ev)
 {
     MySipStatusPtr cbStatuePtr =  static_cast<MySipStatusPtr>(arg);
 
@@ -482,7 +482,7 @@ void MySipCatalogApp::OnSipCatalogAppPushCatalogCb(MY_COMMON::MySipCbParamPtr ar
     cbStatuePtr->store(MyStatus_t::SUCCESS);
 }
 
-int MySipCatalogApp::SipCatalogAppUpdateCatalogThdFunc(MySipCbParamPtr arg)
+int MySipCatalogApp::SipCatalogAppUpdateCatalogThdFunc(MyFuncCbParamPtr arg)
 {
     // pjsip要求自定义线程进行注册才能使用
     pj_thread_desc desc;
@@ -510,13 +510,15 @@ int MySipCatalogApp::SipCatalogAppUpdateCatalogThdFunc(MySipCbParamPtr arg)
         MySipCatalogManage::GetSipCatalogPlatCfgMap(catalogRespMsgBody.deviceId, oldLowPlatCfgMap);
 
         const MySipCatalogPlatCfgMap& newLowPlatCfgMap = catalogRespMsgBody.platCfgMap;
-        for (const auto& newLowPlatCfgPair : newLowPlatCfgMap) {
-            auto iter = oldLowPlatCfgMap.find(newLowPlatCfgPair.first);
-            if (oldLowPlatCfgMap.end() == iter) {
-                uptLowPlatCfgMap.insert(newLowPlatCfgPair);
-            }
-            else if (newLowPlatCfgPair.second != iter->second) {
-                uptLowPlatCfgMap.insert(newLowPlatCfgPair);
+        if (!newLowPlatCfgMap.empty()) {
+            for (const auto& newLowPlatCfgPair : newLowPlatCfgMap) {
+                auto iter = oldLowPlatCfgMap.find(newLowPlatCfgPair.first);
+                if (oldLowPlatCfgMap.end() == iter) {
+                    uptLowPlatCfgMap.insert(newLowPlatCfgPair);
+                }
+                else if (newLowPlatCfgPair.second != iter->second) {
+                    uptLowPlatCfgMap.insert(newLowPlatCfgPair);
+                }
             }
         }
     }
@@ -527,14 +529,16 @@ int MySipCatalogApp::SipCatalogAppUpdateCatalogThdFunc(MySipCbParamPtr arg)
         MySipCatalogManage::GetSipCatalogSubPlatCfgMap(catalogRespMsgBody.deviceId, oldLowSubPlatCfgMap);
 
         const MySipCatalogSubPlatCfgMap& newLowSubPlatCfgMap = catalogRespMsgBody.subPlatCfgMap;
-        for (const auto& newLowSubPlatCfgPair : newLowSubPlatCfgMap) {
-            const auto& oldLowSubPlatCfgIter = oldLowSubPlatCfgMap.find(newLowSubPlatCfgPair.first);
-            if (oldLowSubPlatCfgMap.end() != oldLowSubPlatCfgIter) {
-                uptLowSubPlatCfgMap.insert(newLowSubPlatCfgPair);
-                continue;
-            }
-            if (newLowSubPlatCfgPair.second != oldLowSubPlatCfgIter->second) {
-                uptLowSubPlatCfgMap.insert(newLowSubPlatCfgPair);
+        if (!newLowSubPlatCfgMap.empty()) {
+            for (const auto& newLowSubPlatCfgPair : newLowSubPlatCfgMap) {
+                const auto& oldLowSubPlatCfgIter = oldLowSubPlatCfgMap.find(newLowSubPlatCfgPair.first);
+                if (oldLowSubPlatCfgMap.end() != oldLowSubPlatCfgIter) {
+                    uptLowSubPlatCfgMap.insert(newLowSubPlatCfgPair);
+                    continue;
+                }
+                if (newLowSubPlatCfgPair.second != oldLowSubPlatCfgIter->second) {
+                    uptLowSubPlatCfgMap.insert(newLowSubPlatCfgPair);
+                }
             }
         }
     }
@@ -545,14 +549,16 @@ int MySipCatalogApp::SipCatalogAppUpdateCatalogThdFunc(MySipCbParamPtr arg)
         MySipCatalogManage::GetSipCatalogSubVirtualPlatCfgMap(catalogRespMsgBody.deviceId, oldLowSubVirtualPlatCfgMap);
 
         const MySipCatalogSubVirtualPlatCfgMap& newLowSubVirtualPlatCfgMap = catalogRespMsgBody.subVirtualPlatCfgMap;
-        for (const auto& newLowSubVirtualPlatCfgPair : newLowSubVirtualPlatCfgMap) {
-            const auto& oldLowSubVirtualPlatCfgIter = oldLowSubVirtualPlatCfgMap.find(newLowSubVirtualPlatCfgPair.first);
-            if (oldLowSubVirtualPlatCfgMap.end() != oldLowSubVirtualPlatCfgIter) {
-                uptLowSubVirtualPlatCfgMap.insert(newLowSubVirtualPlatCfgPair);
-                continue;
-            }
-            if (newLowSubVirtualPlatCfgPair.second != oldLowSubVirtualPlatCfgIter->second) {
-                uptLowSubVirtualPlatCfgMap.insert(newLowSubVirtualPlatCfgPair);
+        if (!newLowSubVirtualPlatCfgMap.empty()) {
+            for (const auto& newLowSubVirtualPlatCfgPair : newLowSubVirtualPlatCfgMap) {
+                const auto& oldLowSubVirtualPlatCfgIter = oldLowSubVirtualPlatCfgMap.find(newLowSubVirtualPlatCfgPair.first);
+                if (oldLowSubVirtualPlatCfgMap.end() != oldLowSubVirtualPlatCfgIter) {
+                    uptLowSubVirtualPlatCfgMap.insert(newLowSubVirtualPlatCfgPair);
+                    continue;
+                }
+                if (newLowSubVirtualPlatCfgPair.second != oldLowSubVirtualPlatCfgIter->second) {
+                    uptLowSubVirtualPlatCfgMap.insert(newLowSubVirtualPlatCfgPair);
+                }
             }
         }
     }
@@ -563,14 +569,16 @@ int MySipCatalogApp::SipCatalogAppUpdateCatalogThdFunc(MySipCbParamPtr arg)
         MySipCatalogManage::GetSipCatalogDeviceCfgMap(catalogRespMsgBody.deviceId, oldLowDeviceCfgMap);
         
         const MySipCatalogDeviceCfgMap& newLowDeviceCfgMap = catalogRespMsgBody.deviceCfgMap;
-        for (const auto& newLowDeviceCfgPair : newLowDeviceCfgMap) {
-            const auto& oldLowDeviceCfgIter = oldLowDeviceCfgMap.find(newLowDeviceCfgPair.first);
-            if (oldLowDeviceCfgMap.end() != oldLowDeviceCfgIter) {
-                uptLowDeviceCfgMap.insert(newLowDeviceCfgPair);
-                continue;
-            }
-            if (newLowDeviceCfgPair.second != oldLowDeviceCfgIter->second) {
-                uptLowDeviceCfgMap.insert(newLowDeviceCfgPair);
+        if (!newLowDeviceCfgMap.empty()) {
+            for (const auto& newLowDeviceCfgPair : newLowDeviceCfgMap) {
+                const auto& oldLowDeviceCfgIter = oldLowDeviceCfgMap.find(newLowDeviceCfgPair.first);
+                if (oldLowDeviceCfgMap.end() != oldLowDeviceCfgIter) {
+                    uptLowDeviceCfgMap.insert(newLowDeviceCfgPair);
+                    continue;
+                }
+                if (newLowDeviceCfgPair.second != oldLowDeviceCfgIter->second) {
+                    uptLowDeviceCfgMap.insert(newLowDeviceCfgPair);
+                }
             }
         }
     }
@@ -620,7 +628,7 @@ int MySipCatalogApp::SipCatalogAppUpdateCatalogThdFunc(MySipCbParamPtr arg)
         }
 
         std::string upRegServInfo;
-        MySipServerHelper::PrintSipRegServInfo(upServAddrCfgPair.second, upRegServInfo);
+        MyServerHelper::PrintSipRegServInfo(upServAddrCfgPair.second, upRegServInfo);
 
         MyTpProto_t proto = MyTpProto_t::UDP;
         MySipRegManage::GetSipRegUpServProto(upServAddrCfgPair.second.id, proto);
@@ -912,7 +920,7 @@ int MySipCatalogApp::SipCatalogAppUpdateCatalogThdFunc(MySipCbParamPtr arg)
     return 0;
 }
 
-void MySipCatalogApp::OnSipCatalogAppUpdateCatalogCb(MY_COMMON::MySipCbParamPtr arg, MY_COMMON::MySipEvPtr ev)
+void MySipCatalogApp::OnSipCatalogAppUpdateCatalogCb(MY_COMMON::MyFuncCbParamPtr arg, MY_COMMON::MySipEvPtr ev)
 {
     MySipStatusPtr cbStatuePtr =  static_cast<MySipStatusPtr>(arg);
 
@@ -993,7 +1001,7 @@ MyStatus_t MySipCatalogApp::init(const std::string& servId, const std::string& i
 
     // 添加设备目录虚拟子平台信息
     const auto& sipSubPlatMap = catalogInfo.sipSubPlatMap;
-    for (const auto& subVirtualCfgPair : catalogInfo.sipSubVirtualPlatMap) {
+    for (const auto& subVirtualCfgPair : catalogCfg.catalogVirtualSubPlatCfgMap) {
         // 确保虚拟子平台id关联的平台/子平台id存在
         if (sipSubPlatMap.end() == sipSubPlatMap.find(subVirtualCfgPair.second.parentID) &&
             sipPlatMap.end() == sipPlatMap.find(subVirtualCfgPair.second.parentID)) {
@@ -1011,7 +1019,7 @@ MyStatus_t MySipCatalogApp::init(const std::string& servId, const std::string& i
 
     // 添加设备目录设备信息
     const auto& sipSubVirtualPlatMap = catalogInfo.sipSubVirtualPlatMap;
-    for (const auto& deviceCfgPair : catalogInfo.sipDeviceMap) {
+    for (const auto& deviceCfgPair : catalogCfg.catalogDeviceCfgMap) {
         // 确保设备id关联的虚拟子平台/子平台/平台id存在
         if (sipSubVirtualPlatMap.end() == sipSubVirtualPlatMap.find(deviceCfgPair.second.parentID) &&
             sipSubPlatMap.end() == sipSubPlatMap.find(deviceCfgPair.second.parentID) &&
@@ -1224,7 +1232,7 @@ MyStatus_t MySipCatalogApp::getSipCatalogApp(MySipCatalogApp::SmtWkPtr& wkPtr)
 MyStatus_t MySipCatalogApp::onSipCatalogAppReqLowServCatalog(const MySipRegLowServCfg_dt& regLowServCfg, const MySipServAddrCfg_dt& localServCfg)
 {
     std::string lowRegServInfo;
-    MySipServerHelper::PrintSipLowRegServInfo(regLowServCfg, lowRegServInfo);
+    MyServerHelper::PrintSipLowRegServInfo(regLowServCfg, lowRegServInfo);
 
     // 获取endpoint
     MySipEndptPtr endptPtr = nullptr;

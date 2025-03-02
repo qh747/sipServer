@@ -63,11 +63,11 @@ MyStatus_t MySystemConfig::Init(const std::string& path)
     SipServAddrCfg.domain                       = SysCfgIni.GetValue("sipServer", "domain", "mySipServer.com");
 
     // 读取http服务地址配置
-    HttpServAddrCfg.id                          = SysCfgIni.GetValue("sipServer", "id", "10000100001000010000");
-    HttpServAddrCfg.ipAddr                      = SysCfgIni.GetValue("sipServer", "ipAddr", "127.0.0.1");
-    HttpServAddrCfg.port                        = SysCfgIni.GetLongValue("sipServer", "port", 8080);
-    HttpServAddrCfg.name                        = SysCfgIni.GetValue("sipServer", "name", "myHttpServer");
-    HttpServAddrCfg.domain                      = SysCfgIni.GetValue("sipServer", "domain", "myHttpServer.com");
+    HttpServAddrCfg.id                          = SysCfgIni.GetValue("httpServer", "id", "10000100001000010000");
+    HttpServAddrCfg.ipAddr                      = SysCfgIni.GetValue("httpServer", "ipAddr", "127.0.0.1");
+    HttpServAddrCfg.port                        = SysCfgIni.GetLongValue("httpServer", "port", 8080);
+    HttpServAddrCfg.name                        = SysCfgIni.GetValue("httpServer", "name", "myHttpServer");
+    HttpServAddrCfg.domain                      = SysCfgIni.GetValue("httpServer", "domain", "myHttpServer.com");
 
     // 读取sip服务注册文件配置
     std::string sipRegfilePath                  = SysCfgIni.GetValue("sipReg", "sipRegFilePath", ".");
@@ -151,6 +151,14 @@ MyStatus_t MySystemConfig::GetSipServAddrCfg(MySipServAddrCfg_dt& cfg)
     boost::shared_lock<boost::shared_mutex> lock(CfgMutex);
 
     cfg = SipServAddrCfg;
+    return MyStatus_t::SUCCESS;
+}
+
+MyStatus_t MySystemConfig::GetHttpServAddrCfg(MyHttpServAddrCfg_dt& cfg)
+{
+    boost::shared_lock<boost::shared_mutex> lock(CfgMutex);
+
+    cfg = HttpServAddrCfg;
     return MyStatus_t::SUCCESS;
 }
 

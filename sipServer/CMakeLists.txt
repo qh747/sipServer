@@ -60,13 +60,6 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../thirdP
 target_link_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../thirdParty/ZLToolKit/lib)
 target_link_libraries(${PROJECT_NAME} PRIVATE ZLToolKit)
 
-# 链接libevent依赖库
-target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../thirdParty/libevent/include)
-target_link_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../thirdParty/libevent/lib)
-target_link_libraries(${PROJECT_NAME} PRIVATE event)
-target_link_libraries(${PROJECT_NAME} PRIVATE event_core)
-target_link_libraries(${PROJECT_NAME} PRIVATE event_extra)
-
 # 链接pthread库
 target_link_libraries(${PROJECT_NAME} PRIVATE pthread)
 

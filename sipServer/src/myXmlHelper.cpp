@@ -305,11 +305,11 @@ MyStatus_t MyXmlHelper::GenerateSipCatalogPlatCfgMsgBody(const MY_COMMON::MySipC
 
     // 创建子节点item的子节点Parental
     tinyxml2::XMLElement* itemParentalElem = doc.NewElement("Parental");
-    itemParentalElem->SetText(std::to_string(platCfg.parental).c_str());
+    itemParentalElem->SetText(platCfg.parental.c_str());
     itemElem->InsertEndChild(itemParentalElem);
 
     // 创建子节点item的子节点ParentID
-    if (0 != platCfg.parental) {     
+    if ("0" != platCfg.parental) {     
         tinyxml2::XMLElement* itemParentIdElem = doc.NewElement("ParentID");
         itemParentIdElem->SetText(platCfg.parentID.c_str());
         itemElem->InsertEndChild(itemParentIdElem);
@@ -322,23 +322,33 @@ MyStatus_t MyXmlHelper::GenerateSipCatalogPlatCfgMsgBody(const MY_COMMON::MySipC
 
     // 创建子节点item的子节点SafetyWay
     tinyxml2::XMLElement* itemSafetyWayElem = doc.NewElement("SafetyWay");
-    itemSafetyWayElem->SetText(std::to_string(platCfg.safetyWay).c_str());
+    itemSafetyWayElem->SetText(platCfg.safetyWay.c_str());
     itemElem->InsertEndChild(itemSafetyWayElem);
 
     // 创建子节点item的子节点RegisterWay
     tinyxml2::XMLElement* itemRegisterWayElem = doc.NewElement("RegisterWay");
-    itemRegisterWayElem->SetText(std::to_string(platCfg.registerWay).c_str());
+    itemRegisterWayElem->SetText(platCfg.registerWay.c_str());
     itemElem->InsertEndChild(itemRegisterWayElem);
 
     // 创建子节点item的子节点Secrecy
     tinyxml2::XMLElement* itemSecrecyElem = doc.NewElement("Secrecy");
-    itemSecrecyElem->SetText(std::to_string(platCfg.secrecy).c_str());
+    itemSecrecyElem->SetText(platCfg.secrecy.c_str());
     itemElem->InsertEndChild(itemSecrecyElem);
 
     // 创建子节点item的子节点Status
     tinyxml2::XMLElement* itemStatusElem = doc.NewElement("Status");
     itemStatusElem->SetText(platCfg.status.c_str());
     itemElem->InsertEndChild(itemStatusElem);
+
+    // 创建子节点item的子节点DeviceIp
+    tinyxml2::XMLElement* itemDeviceIpElem = doc.NewElement("DeviceIp");
+    itemDeviceIpElem->SetText(platCfg.deviceIp.c_str());
+    itemElem->InsertEndChild(itemDeviceIpElem);
+
+    // 创建子节点item的子节点DevicePort
+    tinyxml2::XMLElement* itemDevicePortElem = doc.NewElement("DevicePort");
+    itemDevicePortElem->SetText(platCfg.devicePort.c_str());
+    itemElem->InsertEndChild(itemDevicePortElem);
 
     // 将 XML 文档转换为字符串
     tinyxml2::XMLPrinter printer;
@@ -426,11 +436,11 @@ MyStatus_t MyXmlHelper::GenerateSipCatalogSubPlatCfgMsgBody(const MySipCatalogSu
 
     // 创建子节点item的子节点Parental
     tinyxml2::XMLElement* itemParentalElem = doc.NewElement("Parental");
-    itemParentalElem->SetText(std::to_string(subPlatCfg.parental).c_str());
+    itemParentalElem->SetText(subPlatCfg.parental.c_str());
     itemElem->InsertEndChild(itemParentalElem);
 
     // 创建子节点item的子节点ParentID
-    if (0 != subPlatCfg.parental) {     
+    if ("0" != subPlatCfg.parental) {     
         tinyxml2::XMLElement* itemParentIdElem = doc.NewElement("ParentID");
         itemParentIdElem->SetText(subPlatCfg.parentID.c_str());
         itemElem->InsertEndChild(itemParentIdElem);
@@ -443,23 +453,33 @@ MyStatus_t MyXmlHelper::GenerateSipCatalogSubPlatCfgMsgBody(const MySipCatalogSu
 
     // 创建子节点item的子节点SafetyWay
     tinyxml2::XMLElement* itemSafetyWayElem = doc.NewElement("SafetyWay");
-    itemSafetyWayElem->SetText(std::to_string(subPlatCfg.safetyWay).c_str());
+    itemSafetyWayElem->SetText(subPlatCfg.safetyWay.c_str());
     itemElem->InsertEndChild(itemSafetyWayElem);
 
     // 创建子节点item的子节点RegisterWay
     tinyxml2::XMLElement* itemRegisterWayElem = doc.NewElement("RegisterWay");
-    itemRegisterWayElem->SetText(std::to_string(subPlatCfg.registerWay).c_str());
+    itemRegisterWayElem->SetText(subPlatCfg.registerWay.c_str());
     itemElem->InsertEndChild(itemRegisterWayElem);
 
     // 创建子节点item的子节点Secrecy
     tinyxml2::XMLElement* itemSecrecyElem = doc.NewElement("Secrecy");
-    itemSecrecyElem->SetText(std::to_string(subPlatCfg.secrecy).c_str());
+    itemSecrecyElem->SetText(subPlatCfg.secrecy.c_str());
     itemElem->InsertEndChild(itemSecrecyElem);
 
     // 创建子节点item的子节点Status
     tinyxml2::XMLElement* itemStatusElem = doc.NewElement("Status");
     itemStatusElem->SetText(subPlatCfg.status.c_str());
     itemElem->InsertEndChild(itemStatusElem);
+
+    // 创建子节点item的子节点DeviceIp
+    tinyxml2::XMLElement* itemDeviceIpElem = doc.NewElement("DeviceIp");
+    itemDeviceIpElem->SetText(subPlatCfg.deviceIp.c_str());
+    itemElem->InsertEndChild(itemDeviceIpElem);
+
+    // 创建子节点item的子节点DevicePort
+    tinyxml2::XMLElement* itemDevicePortElem = doc.NewElement("DevicePort");
+    itemDevicePortElem->SetText(subPlatCfg.devicePort.c_str());
+    itemElem->InsertEndChild(itemDevicePortElem);
 
     // 将 XML 文档转换为字符串
     tinyxml2::XMLPrinter printer;
@@ -547,11 +567,11 @@ MyStatus_t MyXmlHelper::GenerateSipCatalogSubVirtualPlatCfgMsgBody(const MySipCa
 
     // 创建子节点item的子节点Parental
     tinyxml2::XMLElement* itemParentalElem = doc.NewElement("Parental");
-    itemParentalElem->SetText(std::to_string(subVirtualPlatCfg.parental).c_str());
+    itemParentalElem->SetText(subVirtualPlatCfg.parental.c_str());
     itemElem->InsertEndChild(itemParentalElem);
 
     // 创建子节点item的子节点ParentID
-    if (0 != subVirtualPlatCfg.parental) {     
+    if ("0" != subVirtualPlatCfg.parental) {     
         tinyxml2::XMLElement* itemParentIdElem = doc.NewElement("ParentID");
         itemParentIdElem->SetText(subVirtualPlatCfg.parentID.c_str());
         itemElem->InsertEndChild(itemParentIdElem);
@@ -564,23 +584,33 @@ MyStatus_t MyXmlHelper::GenerateSipCatalogSubVirtualPlatCfgMsgBody(const MySipCa
 
     // 创建子节点item的子节点SafetyWay
     tinyxml2::XMLElement* itemSafetyWayElem = doc.NewElement("SafetyWay");
-    itemSafetyWayElem->SetText(std::to_string(subVirtualPlatCfg.safetyWay).c_str());
+    itemSafetyWayElem->SetText(subVirtualPlatCfg.safetyWay.c_str());
     itemElem->InsertEndChild(itemSafetyWayElem);
 
     // 创建子节点item的子节点RegisterWay
     tinyxml2::XMLElement* itemRegisterWayElem = doc.NewElement("RegisterWay");
-    itemRegisterWayElem->SetText(std::to_string(subVirtualPlatCfg.registerWay).c_str());
+    itemRegisterWayElem->SetText(subVirtualPlatCfg.registerWay.c_str());
     itemElem->InsertEndChild(itemRegisterWayElem);
 
     // 创建子节点item的子节点Secrecy
     tinyxml2::XMLElement* itemSecrecyElem = doc.NewElement("Secrecy");
-    itemSecrecyElem->SetText(std::to_string(subVirtualPlatCfg.secrecy).c_str());
+    itemSecrecyElem->SetText(subVirtualPlatCfg.secrecy.c_str());
     itemElem->InsertEndChild(itemSecrecyElem);
 
     // 创建子节点item的子节点Status
     tinyxml2::XMLElement* itemStatusElem = doc.NewElement("Status");
     itemStatusElem->SetText(subVirtualPlatCfg.status.c_str());
     itemElem->InsertEndChild(itemStatusElem);
+
+    // 创建子节点item的子节点DeviceIp
+    tinyxml2::XMLElement* itemDeviceIpElem = doc.NewElement("DeviceIp");
+    itemDeviceIpElem->SetText(subVirtualPlatCfg.deviceIp.c_str());
+    itemElem->InsertEndChild(itemDeviceIpElem);
+
+    // 创建子节点item的子节点DevicePort
+    tinyxml2::XMLElement* itemDevicePortElem = doc.NewElement("DevicePort");
+    itemDevicePortElem->SetText(subVirtualPlatCfg.devicePort.c_str());
+    itemElem->InsertEndChild(itemDevicePortElem);
 
     // 将 XML 文档转换为字符串
     tinyxml2::XMLPrinter printer;
@@ -668,11 +698,11 @@ MyStatus_t MyXmlHelper::GenerateSipCatalogDeviceCfgMsgBody(const MySipCatalogDev
 
     // 创建子节点item的子节点Parental
     tinyxml2::XMLElement* itemParentalElem = doc.NewElement("Parental");
-    itemParentalElem->SetText(std::to_string(deviceCfg.parental).c_str());
+    itemParentalElem->SetText(deviceCfg.parental.c_str());
     itemElem->InsertEndChild(itemParentalElem);
 
     // 创建子节点item的子节点ParentID
-    if (0 != deviceCfg.parental) {     
+    if ("0" != deviceCfg.parental) {     
         tinyxml2::XMLElement* itemParentIdElem = doc.NewElement("ParentID");
         itemParentIdElem->SetText(deviceCfg.parentID.c_str());
         itemElem->InsertEndChild(itemParentIdElem);
@@ -685,23 +715,33 @@ MyStatus_t MyXmlHelper::GenerateSipCatalogDeviceCfgMsgBody(const MySipCatalogDev
 
     // 创建子节点item的子节点SafetyWay
     tinyxml2::XMLElement* itemSafetyWayElem = doc.NewElement("SafetyWay");
-    itemSafetyWayElem->SetText(std::to_string(deviceCfg.safetyWay).c_str());
+    itemSafetyWayElem->SetText(deviceCfg.safetyWay.c_str());
     itemElem->InsertEndChild(itemSafetyWayElem);
 
     // 创建子节点item的子节点RegisterWay
     tinyxml2::XMLElement* itemRegisterWayElem = doc.NewElement("RegisterWay");
-    itemRegisterWayElem->SetText(std::to_string(deviceCfg.registerWay).c_str());
+    itemRegisterWayElem->SetText(deviceCfg.registerWay.c_str());
     itemElem->InsertEndChild(itemRegisterWayElem);
 
     // 创建子节点item的子节点Secrecy
     tinyxml2::XMLElement* itemSecrecyElem = doc.NewElement("Secrecy");
-    itemSecrecyElem->SetText(std::to_string(deviceCfg.secrecy).c_str());
+    itemSecrecyElem->SetText(deviceCfg.secrecy.c_str());
     itemElem->InsertEndChild(itemSecrecyElem);
 
     // 创建子节点item的子节点Status
     tinyxml2::XMLElement* itemStatusElem = doc.NewElement("Status");
     itemStatusElem->SetText(deviceCfg.status.c_str());
     itemElem->InsertEndChild(itemStatusElem);
+
+    // 创建子节点item的子节点DeviceIp
+    tinyxml2::XMLElement* itemDeviceIpElem = doc.NewElement("DeviceIp");
+    itemDeviceIpElem->SetText(deviceCfg.deviceIp.c_str());
+    itemElem->InsertEndChild(itemDeviceIpElem);
+
+    // 创建子节点item的子节点DevicePort
+    tinyxml2::XMLElement* itemDevicePortElem = doc.NewElement("DevicePort");
+    itemDevicePortElem->SetText(deviceCfg.devicePort.c_str());
+    itemElem->InsertEndChild(itemDevicePortElem);
 
     // 将 XML 文档转换为字符串
     tinyxml2::XMLPrinter printer;
@@ -752,7 +792,7 @@ MyStatus_t MyXmlHelper::ParseSipCatalogRespMsgBody(const std::string& xmlStr, My
     }
 
     // 获取子元素item
-    tinyxml2::XMLElement* itemElement = root->FirstChildElement("Item");
+    tinyxml2::XMLElement* itemElement = deviceListElement->FirstChildElement("Item");
     while (nullptr != itemElement) {
         std::string deviceID;
         tinyxml2::XMLElement* itemDeviceIdElement = itemElement->FirstChildElement("DeviceID");
@@ -790,10 +830,10 @@ MyStatus_t MyXmlHelper::ParseSipCatalogRespMsgBody(const std::string& xmlStr, My
             address = itemAddressElement->GetText();
         }
 
-        unsigned int parental = 0;
+        std::string parental;
         tinyxml2::XMLElement* itemParentalElement = itemElement->FirstChildElement("Parental");
         if (nullptr != itemParentalElement) {
-            parental = std::stoi(itemParentalElement->GetText());
+            parental = itemParentalElement->GetText();
         }
 
         std::string parentID;
@@ -808,28 +848,40 @@ MyStatus_t MyXmlHelper::ParseSipCatalogRespMsgBody(const std::string& xmlStr, My
             platformID = itemPlatformIDElement->GetText();
         }
 
-        unsigned int safetyWay = 0;
+        std::string safetyWay;
         tinyxml2::XMLElement* itemSafetyWayElement = itemElement->FirstChildElement("SafetyWay");
         if (nullptr != itemSafetyWayElement) {
-            safetyWay = std::stoi(itemSafetyWayElement->GetText());
+            safetyWay = itemSafetyWayElement->GetText();
         }
 
-        unsigned int registerWay = 0;
+        std::string registerWay;
         tinyxml2::XMLElement* itemRegisterWayElement = itemElement->FirstChildElement("RegisterWay");
         if (nullptr != itemRegisterWayElement) {
-            registerWay = std::stoi(itemRegisterWayElement->GetText());
+            registerWay = itemRegisterWayElement->GetText();
         }
 
-        unsigned int secrecy = 0;
+        std::string secrecy;
         tinyxml2::XMLElement* itemSecrecyElement = itemElement->FirstChildElement("Secrecy");
         if (nullptr != itemSecrecyElement) {
-            secrecy = std::stoi(itemSecrecyElement->GetText());
+            secrecy = itemSecrecyElement->GetText();
         }
 
         std::string status;
         tinyxml2::XMLElement* itemStatusElement = itemElement->FirstChildElement("Status");
         if (nullptr != itemStatusElement) {
             status = itemStatusElement->GetText();
+        }
+
+        std::string deviceIp;
+        tinyxml2::XMLElement* itemDeviceIpElement = itemElement->FirstChildElement("DeviceIp");
+        if (nullptr != itemDeviceIpElement) {
+            deviceIp = itemDeviceIpElement->GetText();
+        }
+
+        std::string devicePort;
+        tinyxml2::XMLElement* itemDevicePortElement = itemElement->FirstChildElement("DevicePort");
+        if (nullptr != itemDevicePortElement) {
+            devicePort = itemDevicePortElement->GetText();
         }
 
         std::string deviceType = deviceID.substr(10, 3);
@@ -848,6 +900,8 @@ MyStatus_t MyXmlHelper::ParseSipCatalogRespMsgBody(const std::string& xmlStr, My
             platCfg.registerWay  = registerWay;
             platCfg.secrecy      = secrecy;
             platCfg.status       = status;
+            platCfg.deviceIp     = deviceIp;
+            platCfg.devicePort   = devicePort;
 
             if (catalogRespMsgBody.platCfgMap.end() == catalogRespMsgBody.platCfgMap.find(deviceID)) {
                 catalogRespMsgBody.platCfgMap.insert(std::make_pair(deviceID, platCfg));
@@ -868,6 +922,8 @@ MyStatus_t MyXmlHelper::ParseSipCatalogRespMsgBody(const std::string& xmlStr, My
             subPlatCfg.registerWay  = registerWay;
             subPlatCfg.secrecy      = secrecy;
             subPlatCfg.status       = status;
+            subPlatCfg.deviceIp     = deviceIp;
+            subPlatCfg.devicePort   = devicePort;
 
             if (catalogRespMsgBody.subPlatCfgMap.end() == catalogRespMsgBody.subPlatCfgMap.find(deviceID)) {
                 catalogRespMsgBody.subPlatCfgMap.insert(std::make_pair(deviceID, subPlatCfg));
@@ -888,6 +944,8 @@ MyStatus_t MyXmlHelper::ParseSipCatalogRespMsgBody(const std::string& xmlStr, My
             virtualSubPlatCfg.registerWay  = registerWay;
             virtualSubPlatCfg.secrecy      = secrecy;
             virtualSubPlatCfg.status       = status;
+            virtualSubPlatCfg.deviceIp     = deviceIp;
+            virtualSubPlatCfg.devicePort   = devicePort;
 
             if (catalogRespMsgBody.subVirtualPlatCfgMap.end() == catalogRespMsgBody.subVirtualPlatCfgMap.find(deviceID)) {
                 catalogRespMsgBody.subVirtualPlatCfgMap.insert(std::make_pair(deviceID, virtualSubPlatCfg));
@@ -908,6 +966,8 @@ MyStatus_t MyXmlHelper::ParseSipCatalogRespMsgBody(const std::string& xmlStr, My
             deviceCfg.registerWay  = registerWay;
             deviceCfg.secrecy      = secrecy;
             deviceCfg.status       = status;
+            deviceCfg.deviceIp     = deviceIp;
+            deviceCfg.devicePort   = devicePort;
 
             if (catalogRespMsgBody.deviceCfgMap.end() == catalogRespMsgBody.deviceCfgMap.find(deviceID)) {
                 catalogRespMsgBody.deviceCfgMap.insert(std::make_pair(deviceID, deviceCfg));

@@ -99,7 +99,7 @@ private:
     MY_COMMON::MySipAppIdCfg_dt                 m_appIdCfg;
 
     //                                          启动状态 
-    MY_COMMON::MySipStatusAtomic                m_status; 
+    MY_COMMON::MyAtomicStatus                   m_status; 
 
     //                                          invite回调函数地址
     MY_COMMON::MySipInvCbSmtPtr                 m_invCbPtr;

@@ -13,7 +13,7 @@
 #include "utils/mySipAppHelper.h"
 #include "utils/mySipMsgHelper.h"
 #include "utils/myRandomHelper.h"
-#include "utils/mySipServerHelper.h"
+#include "utils/myServerHelper.h"
 #include "server/mySipServer.h"
 #include "app/mySipRegApp.h"
 using namespace toolkit;
@@ -65,7 +65,7 @@ pj_status_t MySipRegApp::OnRegFillAuthInfoCb(MySipPoolPtr poolPtr, MySipStrCstPt
     return PJ_SUCCESS;
 }
 
-void MySipRegApp::OnKeepAliveRespCb(MySipCbParamPtr evParamPtr, MySipEvPtr evPtr)
+void MySipRegApp::OnKeepAliveRespCb(MyFuncCbParamPtr evParamPtr, MySipEvPtr evPtr)
 {
     MySipRegUpServCfgPtr sipRegUpServCfgPtr = static_cast<MySipRegUpServCfgPtr>(evParamPtr); 
 
@@ -223,7 +223,7 @@ MyStatus_t MySipRegApp::shutdown()
 MyStatus_t MySipRegApp::regUpServ(const MySipRegUpServCfg_dt& regUpServCfg, const MySipServAddrCfg_dt& localServCfg)
 {
     std::string upRegServInfoStr;
-    MySipServerHelper::PrintSipUpRegServInfo(regUpServCfg, upRegServInfoStr);
+    MyServerHelper::PrintSipUpRegServInfo(regUpServCfg, upRegServInfoStr);
 
     // 获取endpoint
     MySipEndptPtr endptPtr = nullptr;
@@ -351,7 +351,7 @@ MyStatus_t MySipRegApp::regUpServ(const MySipRegUpServCfg_dt& regUpServCfg, cons
 MyStatus_t MySipRegApp::keepAliveUpServ(const MySipRegUpServCfg_dt& regUpServCfg, const MySipServAddrCfg_dt& localServCfg)
 {
     std::string upRegServInfoStr;
-    MySipServerHelper::PrintSipUpRegServInfo(regUpServCfg, upRegServInfoStr);
+    MyServerHelper::PrintSipUpRegServInfo(regUpServCfg, upRegServInfoStr);
 
     // 获取endpoint
     MySipEndptPtr endptPtr = nullptr;
@@ -454,7 +454,7 @@ bool MySipRegApp::onTimer()
     
     for (const auto& pair : regUpServMap) {
         std::string upRegServInfoStr;
-        MySipServerHelper::PrintSipUpRegServInfo(pair.second, upRegServInfoStr);
+        MyServerHelper::PrintSipUpRegServInfo(pair.second, upRegServInfoStr);
 
         int timeDiff = 0;
         unsigned int curRegUpServExpired = 0;
@@ -499,7 +499,7 @@ bool MySipRegApp::onTimer()
     
     for (const auto& pair : regLowServMap) {
         std::string lowRegServInfoStr;
-        MySipServerHelper::PrintSipLowRegServInfo(pair.second, lowRegServInfoStr);
+        MyServerHelper::PrintSipLowRegServInfo(pair.second, lowRegServInfoStr);
 
         int timeDiff = 0;
         unsigned int curRegLowServExpired = 0;
@@ -537,7 +537,7 @@ bool MySipRegApp::onTimer()
 MyStatus_t MySipRegApp::onLowSipServRegSuccess(const MySipRegLowServCfg_dt& sipRegLowServCfg)
 {
     std::string lowRegServInfoStr;
-    MySipServerHelper::PrintSipLowRegServInfo(sipRegLowServCfg, lowRegServInfoStr);
+    MyServerHelper::PrintSipLowRegServInfo(sipRegLowServCfg, lowRegServInfoStr);
 
     // 下级sip服务注册成功，触发向下级sip服务发送catalog请求
     MySipServer::SmtWkPtr sipServWkPtr;
@@ -547,8 +547,8 @@ MyStatus_t MySipRegApp::onLowSipServRegSuccess(const MySipRegLowServCfg_dt& sipR
     }
 
     MySipServer::SmtPtr sipServPtr = sipServWkPtr.lock();
-    if (MyStatus_t::SUCCESS != sipServPtr->onReqLowSipServCatalog(sipRegLowServCfg)) {
-        LOG(WARNING) << "Sip reg app trigger req low sip serv catalog failed. MySipServer::onReqLowSipServCatalog() failed. " << lowRegServInfoStr << ".";
+    if (MyStatus_t::SUCCESS != sipServPtr->onReqLowServCatalog(sipRegLowServCfg)) {
+        LOG(WARNING) << "Sip reg app trigger req low sip serv catalog failed. MySipServer::onReqLowServCatalog() failed. " << lowRegServInfoStr << ".";
         return MyStatus_t::FAILED;
     }
     return MyStatus_t::SUCCESS;

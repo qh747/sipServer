@@ -168,7 +168,7 @@ MyStatus_t MySipMsgProcApp::onProcSipRegisterReqMsg(MY_COMMON::MySipRxDataPtr rd
     }
 
     // 处理sip注册请求
-    return sipServWkPtr.lock()->onSipServRecvSipRegisterReqMsg(rdataPtr);
+    return sipServWkPtr.lock()->onServRecvSipRegReqMsg(rdataPtr);
 }
 
 MyStatus_t MySipMsgProcApp::onProcSipKeepAliveReqMsg(MY_COMMON::MySipRxDataPtr rdataPtr)
@@ -202,7 +202,7 @@ MyStatus_t MySipMsgProcApp::onProcSipKeepAliveReqMsg(MY_COMMON::MySipRxDataPtr r
     }
 
     // 处理sip保活请求
-    return sipServWkPtr.lock()->onSipServRecvSipKeepAliveReqMsg(rdataPtr);
+    return sipServWkPtr.lock()->onServRecvSipKeepAliveReqMsg(rdataPtr);
 }
 
 MyStatus_t MySipMsgProcApp::onProcSipCatalogQueryReqMsg(MY_COMMON::MySipRxDataPtr rdataPtr)
@@ -239,7 +239,7 @@ MyStatus_t MySipMsgProcApp::onProcSipCatalogQueryReqMsg(MY_COMMON::MySipRxDataPt
     }
 
     // 处理sip设备目录查询请求
-    return sipServWkPtr.lock()->onSipServRecvSipCatalogQueryReqMsg(rdataPtr);
+    return sipServWkPtr.lock()->onServRecvSipCatalogQueryReqMsg(rdataPtr);
 }
 
 MyStatus_t MySipMsgProcApp::onProcSipCatalogResponseReqMsg(MY_COMMON::MySipRxDataPtr rdataPtr)
@@ -271,7 +271,7 @@ MyStatus_t MySipMsgProcApp::onProcSipCatalogResponseReqMsg(MY_COMMON::MySipRxDat
     }
 
     // 处理sip设备目录响应请求
-    return sipServWkPtr.lock()->onSipServRecvSipCatalogResponseReqMsg(rdataPtr);
+    return sipServWkPtr.lock()->onServRecvSipCatalogRespMsg(rdataPtr);
 }
 
 pj_status_t MySipMsgProcApp::OnAppModuleLoadCb(MySipEndptPtr endpt)

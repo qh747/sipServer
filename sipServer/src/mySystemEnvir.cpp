@@ -109,18 +109,24 @@ MyStatus_t MySystemEnvir::Shutdown()
 {
     // 应用管理关闭
     MyAppManage::Shutdown();
+    LOG(INFO) << "Server envirment shutdown. MyAppManage::Shutdown() success";
 
     // 服务管理关闭
     MyServManage::Shutdown();
-
-    // pjsip环境关闭
-    MySystemPjsip::Shutdown();
+    LOG(INFO) << "Server envirment shutdown. MyServManage::Shutdown() success";
 
     // 线程池关闭
     MySystemThdPool::Shutdown();
+    LOG(INFO) << "Server envirment shutdown. MySystemThdPool::Shutdown() success";
+
+    // pjsip环境关闭
+    MySystemPjsip::Shutdown();
+    LOG(INFO) << "Server envirment shutdown. MySystemThdPool::Shutdown() success";
 
     // glog环境关闭
     google::ShutdownGoogleLogging();
+    LOG(INFO) << "Server envirment shutdown. google::ShutdownGoogleLogging() success";
+
     return MyStatus_t::SUCCESS;
 }
 

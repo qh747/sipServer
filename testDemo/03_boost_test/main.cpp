@@ -1,64 +1,84 @@
-#include <thread>
-#include <chrono>
+#include <boost/asio.hpp>
+#include <boost/beast.hpp>
 #include <iostream>
-#include <boost/core/noncopyable.hpp>
-#include <boost/thread/detail/singleton.hpp>
+#include <string>
+#include <chrono>
 
-class MySingleton : public boost::noncopyable
-{
-private:
-  friend class boost::detail::thread::singleton<MySingleton>;
+namespace beast = boost::beast;
+namespace http = beast::http;
+namespace net = boost::asio;
+using tcp = net::ip::tcp;
 
-private:
-    // 私有构造函数和析构函数
-    MySingleton() { m_val = 0; }
-    ~MySingleton() {}
+void run_http_server(net::io_context& ioc, const std::string& address, unsigned short port) {
+    tcp::acceptor acceptor(ioc, tcp::endpoint(net::ip::make_address(address), port));
+    acceptor.set_option(net::socket_base::reuse_address(true));
 
-    // 其他私有成员
-public:
-    // 禁止复制构造函数和赋值操作符
-    MySingleton(const MySingleton&) = delete;
-    MySingleton& operator=(const MySingleton&) = delete;
+    while (true) {
+        tcp::socket socket(ioc);
+        beast::error_code ec;
 
-    // 获取单例实例的静态方法
-    static MySingleton& getInstance() {
-        return boost::detail::thread::singleton<MySingleton>::instance();
-    }
+        // 设置 accept 的超时时间为 3 秒
+        net::steady_timer timer(ioc, std::chrono::seconds(3));
+        timer.async_wait([&](beast::error_code ec) {
+            if (!ec) {
+                std::cout << "Accept timed out. Waiting again...\n";
+            }
+        });
 
-    // 公共接口
-    void doSomething() {
-        m_val = m_val + 10;
-        std::cout << "Doing something with value: " << m_val  << " thread id: " << std::this_thread::get_id() << std::endl;
-    }
+        // 等待客户端连接，超时后继续等待
+        acceptor.async_accept(socket, [&](beast::error_code ec) {
+            if (!ec) {
+                std::cout << "Client connected.\n";
+            } else {
+                std::cout << "Accept failed: " << ec.message() << "\n";
+            }
+        });
 
-private:
-    int m_val;
-};
+        // 等待 accept 完成或超时
+        ioc.run_one();
 
-void threadFunc()
-{
-    for (int i = 0; i < 100; i++)
-    {
-        // 获取单例实例
-        MySingleton& singletonInstance = MySingleton::getInstance();
+        if (socket.is_open()) {
+            // 获取客户端信息
+            auto endpoint = socket.remote_endpoint(ec);
+            if (!ec) {
+                std::string client_ip = endpoint.address().to_string();
+                unsigned short client_port = endpoint.port();
+                std::cout << "Client IP: " << client_ip << ", Port: " << client_port << "\n";
 
-        // 使用单例实例
-        singletonInstance.doSomething();
+                // 读取请求
+                beast::flat_buffer buffer;
+                http::request<http::dynamic_body> request;
+                http::read(socket, buffer, request, ec);
 
-        // 休眠100毫秒
-        // std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                if (!ec) {
+                    std::string method = http::to_string(request.method()).to_string();
+                    std::string url = request.target().to_string();
+                    std::cout << "Request Method: " << method << ", URL: " << url << "\n";
+
+                    // 创建响应
+                    http::response<http::string_body> response(http::status::ok, request.version());
+                    response.set(http::field::content_type, "text/plain");
+                    response.body() = "Hello, " + method + " request received!";
+                    response.prepare_payload();
+
+                    // 发送响应
+                    http::write(socket, response, ec);
+                } 
+                else {
+                    std::cout << "Failed to read request: " << ec.message() << "\n";
+                }
+            }
+        }
+
+        // 重置 socket 和 timer
+        socket.close();
+        timer.cancel();
     }
 }
 
-int main() 
-{
-    std::thread t1(threadFunc);
-    std::thread t2(threadFunc);
-    std::thread t3(threadFunc);
-
-    t1.join();
-    t2.join();
-    t3.join();
-
+int main() {
+    net::io_context ioc;
+    std::cout << "Starting HTTP server on port 8080...\n";
+    run_http_server(ioc, "0.0.0.0", 8080);
     return 0;
 }

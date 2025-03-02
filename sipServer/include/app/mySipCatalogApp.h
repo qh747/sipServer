@@ -21,28 +21,28 @@ public:
      * @return                              回调结果，0-success，-1-failed
      * @param arg                           回调参数
      */
-    static int                              SipCatalogAppPushCatalogThdFunc(MY_COMMON::MySipCbParamPtr arg);
+    static int                              SipCatalogAppPushCatalogThdFunc(MY_COMMON::MyFuncCbParamPtr arg);
 
     /**
      * @brief                               sip catalog应用推送设备目录回调函数
      * @param arg                           回调参数
      * @param ev                            回调事件
      */
-    static void                             OnSipCatalogAppPushCatalogCb(MY_COMMON::MySipCbParamPtr arg, MY_COMMON::MySipEvPtr ev);
+    static void                             OnSipCatalogAppPushCatalogCb(MY_COMMON::MyFuncCbParamPtr arg, MY_COMMON::MySipEvPtr ev);
 
     /**
      * @brief                               sip catalog应用更新设备目录线程回调函数
      * @return                              回调结果，0-success，-1-failed
      * @param arg                           回调参数
      */
-    static int                              SipCatalogAppUpdateCatalogThdFunc(MY_COMMON::MySipCbParamPtr arg);
+    static int                              SipCatalogAppUpdateCatalogThdFunc(MY_COMMON::MyFuncCbParamPtr arg);
 
     /**
      * @brief                               sip catalog应用更新设备目录回调函数
      * @param arg                           回调参数
      * @param ev                            回调事件
      */
-    static void                             OnSipCatalogAppUpdateCatalogCb(MY_COMMON::MySipCbParamPtr arg, MY_COMMON::MySipEvPtr ev);
+    static void                             OnSipCatalogAppUpdateCatalogCb(MY_COMMON::MyFuncCbParamPtr arg, MY_COMMON::MySipEvPtr ev);
 
 public:
     MySipCatalogApp();
@@ -139,7 +139,7 @@ private:
     MY_COMMON::MySipAppIdCfg_dt             m_appIdCfg;
 
     //                                      启动状态 
-    MY_COMMON::MySipStatusAtomic            m_status; 
+    MY_COMMON::MyAtomicStatus               m_status; 
 };
 
 }; // namespace MY_APP

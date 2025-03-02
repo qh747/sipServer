@@ -53,7 +53,7 @@ public:
 
 private:    
     //                                              启动状态 
-    static MY_COMMON::MySipStatusAtomic             SysThdPoolState;
+    static MY_COMMON::MyAtomicStatus                SysThdPoolState;
 
     //                                              系统线程池
     static ThreadPoolPtr                            SysThdPool;

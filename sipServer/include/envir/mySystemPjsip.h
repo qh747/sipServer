@@ -59,7 +59,7 @@ private:
 
 private:
     //                                          启动状态 
-    static MY_COMMON::MySipStatusAtomic         SysPjsipState;
+    static MY_COMMON::MyAtomicStatus            SysPjsipState;
 
     //                                          pjsip内存池
     static pj_caching_pool                      SysPjsipCachingPool;

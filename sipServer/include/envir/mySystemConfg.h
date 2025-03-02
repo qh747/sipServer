@@ -40,6 +40,9 @@ public:
 
     //                                                      获取sip服务地址配置
     static MY_COMMON::MyStatus_t                            GetSipServAddrCfg(MY_COMMON::MySipServAddrCfg_dt& cfg);
+
+    //                                                      获取http服务地址配置
+    static MY_COMMON::MyStatus_t                            GetHttpServAddrCfg(MY_COMMON::MyHttpServAddrCfg_dt& cfg);
                         
     //                                                      获取SIP上级注册服务配置                 
     static MY_COMMON::MyStatus_t                            GetSipUpRegServCfgMap(MY_COMMON::MySipRegUpServCfgMap& cfg);

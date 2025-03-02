@@ -161,7 +161,7 @@ private:
     MY_COMMON::MySipAppIdCfg_dt                 m_appIdCfg;
 
     //                                          启动状态 
-    MY_COMMON::MySipStatusAtomic                m_status; 
+    MY_COMMON::MyAtomicStatus                   m_status; 
 
     //                                          应用模块指针
     MY_COMMON::MySipModSmtPtr                   m_appModPtr;

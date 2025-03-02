@@ -46,9 +46,10 @@ MyStatus_t MySystemThdPool::Shutdown()
         LOG(WARNING) << "System thread pool environment is not init.";
         return MyStatus_t::SUCCESS;
     }
-    SysThdPoolState.store(MyStatus_t::FAILED);
 
+    SysThdPoolState.store(MyStatus_t::FAILED);
     SysThdPool.reset();
+
     return MyStatus_t::SUCCESS;
 }
 

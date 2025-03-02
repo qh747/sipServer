@@ -7,6 +7,13 @@
 
 namespace MY_COMMON {
 
+// http url - 获取设备列表
+const std::string HTTP_URL_GET_DEVICE_LIST              = "/index/getDeviceList";
+// http url - 获取设备详细信息，完整url：/index/getDeviceInfo/deviceId
+const std::string HTTP_URL_GET_DEVICE_INFO              = "/index/getDeviceInfo/";
+// http url - 获取设备媒体流，完整url：/index/reqDeviceMedia/(video/audio)/deviceId
+const std::string HTTP_URL_REQ_DEVICE_MEDIA             = "/index/reqDeviceMedia/";
+
 /**
  * @brief 传输层协议枚举类型
  */
@@ -128,20 +135,20 @@ typedef struct MyHttpServerAddressConfigDataType
 /** 
  * @brief sip服务端注册地址配置 
  */ 
- typedef struct MySipServerRegisterAddressConfigDataType     
- {   
-     //                                                  注册服务端ID
-     std::string                                         id;
-     //                                                  注册服务端IP地址
-     std::string                                         ipAddr;    
-     //                                                  注册服务端端口号
-     uint16_t                                            port; 
-     //                                                  注册服务端名称
-     std::string                                         name;  
-     //                                                  注册服务端域名
-     std::string                                         domain;      
- 
- } MySipServRegAddrCfg_dt;  
+typedef struct MySipServerRegisterAddressConfigDataType     
+{   
+    //                                                  注册服务端ID
+    std::string                                         id;
+    //                                                  注册服务端IP地址
+    std::string                                         ipAddr;    
+    //                                                  注册服务端端口号
+    uint16_t                                            port; 
+    //                                                  注册服务端名称
+    std::string                                         name;  
+    //                                                  注册服务端域名
+    std::string                                         domain;      
+
+} MySipServRegAddrCfg_dt;  
 
 /** 
  * @brief SIP服务鉴权配置   
@@ -210,7 +217,7 @@ typedef struct MySipDeviceConfigDataType
     //                                                  设备状态（ON/OFF）
     std::string                                         status; 
     //                                                  父设备标识（0表示没有父设备，1表示有父设备）
-    int                                                 parental;      
+    std::string                                         parental;      
     //                                                  设备制造商        
     std::string                                         manufacturer;  
     //                                                  设备型号
@@ -218,11 +225,11 @@ typedef struct MySipDeviceConfigDataType
     //                                                  设备所属模块（如video）
     std::string                                         block;      
     //                                                  安全方式（0表示无安全认证，1表示有安全认证）
-    int                                                 safetyWay;            
+    std::string                                         safetyWay;            
     //                                                  注册方式（1表示SIP注册）
-    int                                                 registerWay;       
+    std::string                                         registerWay;       
     //                                                  保密属性（0表示不保密，1表示保密）
-    int                                                 secrecy;      
+    std::string                                         secrecy;      
     //                                                  设备唯一标识符
     std::string                                         deviceID;      
     //                                                  父设备ID
@@ -234,9 +241,9 @@ typedef struct MySipDeviceConfigDataType
     //                                                  设备IP地址
     std::string                                         deviceIp;  
     //                                                  设备端口号
-    int                                                 devicePort;
+    std::string                                         devicePort;
     //                                                  设备通道号
-    int                                                 deviceChannel; 
+    std::string                                         deviceChannel; 
     //                                                  设备流类型（如main）
     std::string                                         deviceStream; 
     //                                                  设备经度
@@ -293,7 +300,7 @@ typedef struct MySipVirtualSubPlatformConfigDataType
     //                                                  设备状态（ON/OFF）
     std::string                                         status; 
     //                                                  父设备标识（0表示没有父设备，1表示有父设备）
-    int                                                 parental;      
+    std::string                                         parental;      
     //                                                  设备制造商        
     std::string                                         manufacturer;  
     //                                                  设备型号
@@ -301,11 +308,11 @@ typedef struct MySipVirtualSubPlatformConfigDataType
     //                                                  设备所属模块（如video）
     std::string                                         block;      
     //                                                  安全方式（0表示无安全认证，1表示有安全认证）
-    int                                                 safetyWay;            
+    std::string                                         safetyWay;            
     //                                                  注册方式（1表示SIP注册）
-    int                                                 registerWay;       
+    std::string                                         registerWay;       
     //                                                  保密属性（0表示不保密，1表示保密）
-    int                                                 secrecy;
+    std::string                                         secrecy;
     //                                                  设备唯一标识符
     std::string                                         deviceID;      
     //                                                  父设备ID
@@ -315,15 +322,15 @@ typedef struct MySipVirtualSubPlatformConfigDataType
     //                                                  平台IP地址
     std::string                                         platformIp;    
     //                                                  平台端口号
-    int                                                 platformPort;
+    std::string                                         platformPort;
     //                                                  所属者
     std::string                                         owner;
     //                                                  设备IP地址
     std::string                                         deviceIp;  
     //                                                  设备端口号
-    int                                                 devicePort;
+    std::string                                         devicePort;
     //                                                  设备通道号
-    int                                                 deviceChannel; 
+    std::string                                         deviceChannel; 
     //                                                  设备流类型（如main）
     std::string                                         deviceStream; 
     //                                                  认证信息列表
@@ -374,7 +381,7 @@ typedef struct MySipSubPlatformConfigDataType
     //                                                  设备状态（ON/OFF）
     std::string                                         status; 
     //                                                  父设备标识（0表示没有父设备，1表示有父设备）
-    int                                                 parental;      
+    std::string                                         parental;      
     //                                                  设备制造商        
     std::string                                         manufacturer;  
     //                                                  设备型号
@@ -382,11 +389,11 @@ typedef struct MySipSubPlatformConfigDataType
     //                                                  设备所属模块（如video）
     std::string                                         block;      
     //                                                  安全方式（0表示无安全认证，1表示有安全认证）
-    int                                                 safetyWay;            
+    std::string                                         safetyWay;            
     //                                                  注册方式（1表示SIP注册）
-    int                                                 registerWay;       
+    std::string                                         registerWay;       
     //                                                  保密属性（0表示不保密，1表示保密）
-    int                                                 secrecy;
+    std::string                                         secrecy;
     //                                                  设备ID
     std::string                                         deviceID;   
     //                                                  父设备ID
@@ -396,15 +403,15 @@ typedef struct MySipSubPlatformConfigDataType
     //                                                  平台IP地址
     std::string                                         platformIp;  
     //                                                  平台端口号
-    int                                                 platformPort;
+    std::string                                         platformPort;
     //                                                  所属者
     std::string                                         owner;
     //                                                  设备IP地址
     std::string                                         deviceIp;  
     //                                                  设备端口号
-    int                                                 devicePort;
+    std::string                                         devicePort;
     //                                                  设备通道号
-    int                                                 deviceChannel; 
+    std::string                                         deviceChannel; 
     //                                                  设备流类型（如main）
     std::string                                         deviceStream; 
     //                                                  设备经度
@@ -453,7 +460,7 @@ typedef struct MySipPlatformConfigDataType
     //                                                  设备状态（ON/OFF）
     std::string                                         status; 
     //                                                  父设备标识（0表示没有父设备，1表示有父设备）
-    int                                                 parental;      
+    std::string                                         parental;      
     //                                                  设备制造商        
     std::string                                         manufacturer;  
     //                                                  设备型号
@@ -461,11 +468,11 @@ typedef struct MySipPlatformConfigDataType
     //                                                  设备所属模块（如video）
     std::string                                         block;      
     //                                                  安全方式（0表示无安全认证，1表示有安全认证）
-    int                                                 safetyWay;            
+    std::string                                         safetyWay;            
     //                                                  注册方式（1表示SIP注册）
-    int                                                 registerWay;       
+    std::string                                         registerWay;       
     //                                                  保密属性（0表示不保密，1表示保密）
-    int                                                 secrecy;
+    std::string                                         secrecy;
     //                                                  设备ID
     std::string                                         deviceID;   
     //                                                  父设备ID
@@ -475,15 +482,15 @@ typedef struct MySipPlatformConfigDataType
     //                                                  平台IP地址
     std::string                                         platformIp;  
     //                                                  平台端口号
-    int                                                 platformPort;
+    std::string                                         platformPort;
     //                                                  所属者
     std::string                                         owner;
     //                                                  设备IP地址
     std::string                                         deviceIp;  
     //                                                  设备端口号
-    int                                                 devicePort;
+    std::string                                         devicePort;
     //                                                  设备通道号
-    int                                                 deviceChannel; 
+    std::string                                         deviceChannel; 
     //                                                  设备流类型（如main）
     std::string                                         deviceStream; 
     //                                                  设备经度

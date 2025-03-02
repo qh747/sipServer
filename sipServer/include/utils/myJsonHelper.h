@@ -26,6 +26,55 @@ public:
      * @param catalogCfg            设备目录配置
      */
     static MY_COMMON::MyStatus_t    ParseSipCatalogJsonFile(const std::string& filePath, MY_COMMON::MySipCatalogCfg_dt& catalogCfg);
+
+public:
+    /**
+     * @brief                       生成http错误信息
+     * @return                      生成结果，0-success, -1-failed
+     * @param errInfo               错误信息
+     * @param msgBody               错误消息内容
+     */
+    static MY_COMMON::MyStatus_t    GenerateHttpErrMsgBody(const std::string& errInfo, std::string& msgBody);
+
+    /**
+     * @brief                       生成sip目录信息列表
+     * @return                      生成结果，0-success, -1-failed
+     * @param deviceInfoMap         sip目录信息map
+     * @param deviceInfoStr         sip目录信息字符串
+     */
+    static MY_COMMON::MyStatus_t    GenerateDeviceListInfo(const std::map<std::string, MY_COMMON::MySipCatalogInfo_dt>& deviceInfoMap, std::string& deviceInfoStr);
+
+    /**
+     * @brief                       生成sip设备信息
+     * @return                      生成结果，0-success, -1-failed
+     * @param deviceInfoMap         sip设备信息
+     * @param deviceInfoStr         sip设备信息字符串
+     */
+    static MY_COMMON::MyStatus_t    GenerateDeviceInfo(const MY_COMMON::MySipCatalogPlatCfg_dt& deviceInfo, std::string& deviceInfoStr);
+
+    /**
+     * @brief                       生成sip设备信息
+     * @return                      生成结果，0-success, -1-failed
+     * @param deviceInfoMap         sip设备信息
+     * @param deviceInfoStr         sip设备信息字符串
+     */
+    static MY_COMMON::MyStatus_t    GenerateDeviceInfo(const MY_COMMON::MySipCatalogSubPlatCfg_dt& deviceInfo, std::string& deviceInfoStr);
+
+    /**
+     * @brief                       生成sip设备信息
+     * @return                      生成结果，0-success, -1-failed
+     * @param deviceInfoMap         sip设备信息
+     * @param deviceInfoStr         sip设备信息字符串
+     */
+    static MY_COMMON::MyStatus_t    GenerateDeviceInfo(const MY_COMMON::MySipCatalogVirtualSubPlatCfg_dt& deviceInfo, std::string& deviceInfoStr);
+
+    /**
+     * @brief                       生成sip设备信息
+     * @return                      生成结果，0-success, -1-failed
+     * @param deviceInfoMap         sip设备信息
+     * @param deviceInfoStr         sip设备信息字符串
+     */
+    static MY_COMMON::MyStatus_t    GenerateDeviceInfo(const MY_COMMON::MySipCatalogDeviceCfg_dt& deviceInfo, std::string& deviceInfoStr);
 };
 
 }; // namespace MY_UTILS

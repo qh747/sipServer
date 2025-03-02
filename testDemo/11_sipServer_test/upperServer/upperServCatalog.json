@@ -1,30 +1,25 @@
 {
-    "catalog-1": {
-        "id": "10000000002000000001",
-        "platInfo": {
-            "plat-1": {
-                "name": "upperSipServer",
-                "status": "ON",
-                "parental": 1,
-                "manufacturer": "",
-                "model": "",
-                "block": "block",
-                "safetyWay": 0,
-                "registerWay": 1,
-                "secrecy": 0,
-                "deviceID": "10000000002000000001",
-                "parentID": "10000000002000000001",
-                "platformID": "10000000002000000001",
-                "platformIp": "192.168.1.10",
-                "platformPort": 5060,
-                "owner": "upperSipServer",
-                "deviceIp": "",
-                "devicePort": 0,
-                "deviceChannel": 0,
-                "deviceStream": "main",
-                "longitude": "117.96647071838379",
-                "latitude": "28.444311616185587"
-            }
-        }
+    "platInfo": {
+        "name": "upperSipServer",
+        "status": "ON",
+        "parental": "1",
+        "manufacturer": "",
+        "model": "",
+        "block": "block",
+        "safetyWay": "0",
+        "registerWay": "1",
+        "secrecy": "0",
+        "deviceID": "10000000002000000001",
+        "parentID": "10000000002000000001",
+        "platformID": "10000000002000000001",
+        "platformIp": "192.168.1.10",
+        "platformPort": "5060",
+        "owner": "upperSipServer",
+        "deviceIp": "",
+        "devicePort": "0",
+        "deviceChannel": "0",
+        "deviceStream": "main",
+        "longitude": "117.96647071838379",
+        "latitude": "28.444311616185587"
     }
 }

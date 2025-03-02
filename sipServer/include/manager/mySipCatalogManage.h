@@ -166,4 +166,27 @@ public:
     static MY_COMMON::MyStatus_t                        GetSipRespInfoMap(MY_COMMON::MySipRegServAddrMap& servAddrMap);
 };
 
+/**
+ * sip设备目录管理视图类
+ */
+class MySipCatalogManageView : public MY_UTILS::MyNonConstructableAndNonCopyable
+{
+public:
+    /**
+     * @brief                                           获取sip设备列表信息
+     * @return                                          获取结果，success-0, failed-非0
+     * @param deviceListInfo                            sip设备列表信息
+    
+     */
+    static MY_COMMON::MyStatus_t                        GetDeviceListInfo(std::string& deviceListInfo);
+
+    /**
+     * @brief                                           获取sip设备信息
+     * @return                                          获取结果，success-0, failed-非0
+     * @param deviceId                                  sip设备id
+     * @param deviceInfo                                sip设备信息
+     */
+    static MY_COMMON::MyStatus_t                        GetDeviceInfo(const std::string& deviceId, std::string& deviceInfo);
+};
+
 }; // namespace MY_MANAGER

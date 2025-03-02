@@ -3,7 +3,9 @@
 #include "common/myDataDef.h"
 #include "utils/myBaseHelper.h"
 #include "server/mySipServer.h"
+#include "server/myHttpServer.h"
 using MY_SERVER::MySipServer;
+using MY_SERVER::MyHttpServer;
 
 namespace MY_MANAGER {
 
@@ -40,31 +42,31 @@ public:
 
 public:
     /**
-     * @brief                                       SipServer对象是否有效
+     * @brief                                       sip server是否有效
      * @return                                      MyStatus_t状态码
      */
     static MY_COMMON::MyStatus_t                    IsSipServValid();
     
     /**
-     * @brief                                       获取SipServer对象
+     * @brief                                       获取sip server
      * @return                                      获取结果，0-success，-1-failed
-     * @param sipServWkPtr                          sip服务弱引用指针
+     * @param servWkPtr                             sip server弱引用
      */
-    static MY_COMMON::MyStatus_t                    GetSipServer(MySipServer::SmtWkPtr& sipServWkPtr);
+    static MY_COMMON::MyStatus_t                    GetSipServer(MySipServer::SmtWkPtr& servWkPtr);
 
     /**
-     * @brief                                       获取SipServer ID
+     * @brief                                       获取sip server id
      * @return                                      获取结果，0-success，-1-failed
-     * @param id                                    SipServer ID
+     * @param id                                    sip server id
      */
     static MY_COMMON::MyStatus_t                    GetSipServId(std::string& id);
 
     /**
-     * @brief                                       获取SipServer地址配置
+     * @brief                                       获取sip server地址
      * @return                                      获取结果，0-success，-1-failed
-     * @param sipServAddrCfg                        sip服务地址配置
+     * @param servAddrCfg                           sip server地址
      */
-    static MY_COMMON::MyStatus_t                    GetSipServAddrCfg(MY_COMMON::MySipServAddrCfg_dt& sipServAddrCfg);
+    static MY_COMMON::MyStatus_t                    GetSipServAddrCfg(MY_COMMON::MySipServAddrCfg_dt& servAddrCfg);
 
     /**
      * @brief                                       获取sip服务udp transport
@@ -97,6 +99,35 @@ public:
      * @param remotePort                            远端端口
      */
     static MY_COMMON::MyStatus_t                    GetSipServRegTcpTp(MY_COMMON::MySipTransportPtrAddr tcpTpPtrAddr, const std::string& remoteIp, uint16_t remotePort);
+
+public:
+    public:
+    /**
+     * @brief                                       http server是否有效
+     * @return                                      MyStatus_t状态码
+     */
+    static MY_COMMON::MyStatus_t                    IsHttpServValid();
+    
+    /**
+     * @brief                                       获取http server
+     * @return                                      获取结果，0-success，-1-failed
+     * @param servWkPtr                             http server弱引用
+     */
+    static MY_COMMON::MyStatus_t                    GetHttpServer(MyHttpServer::SmtWkPtr& servWkPtr);
+
+    /**
+     * @brief                                       获取http server id
+     * @return                                      获取结果，0-success，-1-failed
+     * @param id                                    http server id
+     */
+    static MY_COMMON::MyStatus_t                    GetHttpServId(std::string& id);
+
+    /**
+     * @brief                                       获取http server地址
+     * @return                                      获取结果，0-success，-1-failed
+     * @param servAddrCfg                           http server地址
+     */
+    static MY_COMMON::MyStatus_t                    GetHttpServAddrCfg(MY_COMMON::MyHttpServAddrCfg_dt& servAddrCfg);
 };
 
 }; // namespace MY_MANAGER

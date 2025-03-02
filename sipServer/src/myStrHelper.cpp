@@ -8,20 +8,23 @@ namespace MY_UTILS {
 
 MyStatus_t MyStrHelper::ConvertToLowStr(const std::string& strToLow, std::string& lowStr)
 {
-    lowStr = strToLow;
-    std::transform(lowStr.begin(), lowStr.end(), lowStr.begin(), [](unsigned char c) {
+    std::string tmpStr = strToLow;
+    std::transform(tmpStr.begin(), tmpStr.end(), tmpStr.begin(), [](unsigned char c) {
         return std::tolower(c);
     });
 
+    lowStr = tmpStr;
     return MyStatus_t::SUCCESS;
 }
     
 MyStatus_t MyStrHelper::ConvertToUpStr(const std::string& strToUp, std::string& upStr)
 {
-    upStr = strToUp;
-    std::transform(upStr.begin(), upStr.end(), upStr.begin(), [](unsigned char c) {
+    std::string tmpStr = strToUp;
+    std::transform(tmpStr.begin(), tmpStr.end(), tmpStr.begin(), [](unsigned char c) {
         return std::toupper(c);
     });
+
+    upStr = tmpStr;
     return MyStatus_t::SUCCESS;
 }
     
