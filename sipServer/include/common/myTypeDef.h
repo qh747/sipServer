@@ -11,6 +11,7 @@
 #include <pjsip/sip_uri.h>
 #include <pjsip/sip_msg.h>
 #include <pjsip/sip_auth.h>
+#include <pjsip/sip_dialog.h>
 #include "common/myDataDef.h"
 #include "common/myConfigDef.h"
 
@@ -39,6 +40,7 @@ typedef         pjsip_regc_cbparam*                                         MySi
 typedef         pjsip_inv_session*                                          MySipInvSessionPtr;
 typedef         pjsip_transaction*                                          MySipTsxPtr;
 typedef         pj_thread_t*                                                MySipThdPtr; 
+typedef         pjsip_dialog*                                               MySipDialogPtr;
 typedef         pjsip_module*                                               MySipModPtr;
 typedef         std::shared_ptr<pjsip_module>                               MySipModSmtPtr;
 typedef         std::shared_ptr<pjsip_inv_callback>                         MySipInvCbSmtPtr;

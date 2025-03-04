@@ -70,7 +70,7 @@ int MySipServer::ServThdFunc(MyFuncCbParamPtr arg)
         }
 
         // 事件处理
-        pj_time_val timeout = {0, 500};
+        pj_time_val timeout = {0, 50};
         if(PJ_SUCCESS != pjsip_endpt_handle_events(endptPtr, &timeout)) {
             LOG(ERROR) << "ServThdFunc() exit. pjsip_endpt_handle_events failed.";
             break;
@@ -108,14 +108,12 @@ void MySipServer::ServMediaReqEvFunc(MY_MEDIA_REQ_EV_ARGS)
     }
 
     // 请求处理
-    if (MyStatus_t::SUCCESS != servPtr->onReqDeviceMedia(deviceId)) {
+    if (MyStatus_t::SUCCESS != servPtr->onReqDeviceMedia(deviceId, info)) {
         status = MyStatus_t::FAILED;
-        info = "sip server process media request failed.";
         return;
     }
     else {
         status = MyStatus_t::SUCCESS;
-        info = "sip server process media request success.";
     }
     
     LOG(INFO) << "ServMediaReqEvFunc() success. request media device id: " << deviceId << ".";
@@ -319,14 +317,14 @@ MyStatus_t MySipServer::onReqLowServCatalog(const MySipRegLowServCfg_dt& lowSipR
     return sipCatalogAppWkPtr.lock()->onSipCatalogAppReqLowServCatalog(lowSipRegServAddrCfg, m_servAddrCfg);
 }
 
-MyStatus_t MySipServer::onReqDeviceMedia(const std::string& deviceId)
+MyStatus_t MySipServer::onReqDeviceMedia(const std::string& deviceId, std::string& respInfo)
 {
     MySipInviteApp::SmtWkPtr sipInviteAppWkPtr;
     if (MyStatus_t::SUCCESS != MyAppManage::GetSipInviteApp(sipInviteAppWkPtr)) {
         LOG(ERROR) << "SipServer onReqDeviceMedia() failed. sipInviteApp invalid.";
         return MyStatus_t::FAILED;
     }
-    return sipInviteAppWkPtr.lock()->onSipInviteAppReqDeviceMedia(deviceId);
+    return sipInviteAppWkPtr.lock()->onSipInviteAppReqDeviceMedia(deviceId, respInfo);
 }
 
 MyStatus_t MySipServer::getState(MyStatus_t& status) const

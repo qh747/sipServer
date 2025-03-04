@@ -217,7 +217,6 @@ MyStatus_t MySipMsgProcApp::onProcSipCatalogQueryReqMsg(MY_COMMON::MySipRxDataPt
 
     std::string msgInfo;
     MySipMsgHelper::PrintSipCatalogMsgBody(catalogMsgBody, msgInfo);
-    LOG(INFO) << "Sip app module recv catalog query message. " << msgInfo << ".";
 
     std::string cmdTypeStr;
     MyStrHelper::ConvertToLowStr(catalogMsgBody.cmdType, cmdTypeStr);

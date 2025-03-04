@@ -9,6 +9,17 @@
 
 namespace MY_COMMON {
 
+// 平台类型
+const std::string DEVICE_TYPE_PLATFORM                      = "200";
+// 子平台类型
+const std::string DEVICE_TYPE_SUB_PLATFORM                  = "215";
+// 虚拟子平台类型
+const std::string DEVICE_TYPE_VIRTUAL_SUB_PLATFORM          = "216";
+// 网络摄像机类型
+const std::string DEVICE_TYPE_IP_CAMERA                     = "131";
+// 网络硬盘录像机
+const std::string DEVICE_TYPE_NETWORK_VIDEO_RECORDER        = "132";
+
 /**
  * @brief 自定义返回值枚举类型
  */

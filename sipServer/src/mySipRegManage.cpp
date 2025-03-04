@@ -183,6 +183,18 @@ public:
         return MyStatus_t::SUCCESS;
     }
 
+    MyStatus_t getLowRegProto(const std::string& lowRegServId, MyTpProto_t& proto) {
+        boost::shared_lock<boost::shared_mutex> lock(m_rwMutex);
+
+        auto iter = m_sipLowRegServInfoMap.find(lowRegServId);
+        if (m_sipLowRegServInfoMap.end() == iter) {
+            return MyStatus_t::FAILED;
+        }
+
+        proto = iter->second.sipRegLowServCfg.proto;
+        return MyStatus_t::SUCCESS;
+    }
+
     MyStatus_t getLowRegInfoMap(MySipRegManage::MySipLowRegServInfoMap& lowRegServInfoMap) {
         boost::shared_lock<boost::shared_mutex> lock(m_rwMutex);
 
@@ -386,6 +398,11 @@ MyStatus_t MySipRegManage::GetSipRegLowAuthCfg(const std::string& name, const st
         }
     }
     return MyStatus_t::FAILED;
+}
+
+MyStatus_t MySipRegManage::GetSipRegLowServProto(const std::string& lowRegServId, MyTpProto_t& proto)
+{
+    return ManageObject.getLowRegProto(lowRegServId, proto);
 }
 
 MyStatus_t MySipRegManage::UpdateSipRegLowServLastRegTime(const std::string& lowRegServId, const std::string& time)

@@ -34,6 +34,31 @@ void MySipRegApp::OnRegRespCb(MySipRegCbParamPtr regParamPtr)
         LOG(ERROR) << "Sip reg app reg module register response callback failed. invalid param.";
         return;
     }
+
+    MySipRegUpServCfgPtr sipRegUpServCfgPtr = (MySipRegUpServCfgPtr)(regParamPtr->token);
+    std::unique_ptr<MySipRegUpServCfg_dt> thdMemManagePtr(sipRegUpServCfgPtr);
+
+    if (200 == regParamPtr->code) {
+        // 注册成功，保存sip reg上下文
+        MySipUpRegServInfo_dt upRegServInfo;
+        upRegServInfo.sipRegUpServCfg = *sipRegUpServCfgPtr;
+        upRegServInfo.sipRegUpServKeepAliveIdx  = 0;
+
+        MyTimeHelper::GetCurrentFormatTime(upRegServInfo.sipRegUpServLastRegTime);
+        MySystemConfig::GetSipServRegExpiredTimeInterval(upRegServInfo.sipRegUpServExpired);
+
+        if (MyStatus_t::SUCCESS != MySipRegManage::AddSipRegUpServInfo(upRegServInfo)) {
+            LOG(ERROR) << "Sip reg app reg module register response callback failed. save reg info failed.";
+        }
+        else {
+            std::string upRegServInfoStr;
+            MyServerHelper::PrintSipRegServInfo(sipRegUpServCfgPtr->upSipServRegAddrCfg, upRegServInfoStr);
+
+            LOG(INFO) << "Sip reg app reg module register response callback success. reg info: " << upRegServInfoStr;
+        }
+    }   
+    
+    regParamPtr->token = nullptr;
 }
 
 pj_status_t MySipRegApp::OnRegFillAuthInfoCb(MySipPoolPtr poolPtr, MySipStrCstPtr realmPtr, 
@@ -251,11 +276,12 @@ MyStatus_t MySipRegApp::regUpServ(const MySipRegUpServCfg_dt& regUpServCfg, cons
     pj_str_t sipMsgToHdr   = pj_str(const_cast<char*>(sToHdr.c_str()));
     pj_str_t sipMsgContact = pj_str(const_cast<char*>(sContact.c_str()));
 
-    MySipRegcPtr         regcPtr        = nullptr;
-    MySipRegUpServCfg_dt cpRegUpServCfg = regUpServCfg;
+    // free in func: MySipRegApp::OnRegRespCb()
+    MySipRegUpServCfgPtr cpRegUpServCfgPtr = new MySipRegUpServCfg_dt(regUpServCfg);
     
     // sip register上下文创建
-    if(PJ_SUCCESS != pjsip_regc_create(endptPtr, &cpRegUpServCfg, &MySipRegApp::OnRegRespCb, &regcPtr)) {
+    MySipRegcPtr regcPtr = nullptr;
+    if(PJ_SUCCESS != pjsip_regc_create(endptPtr, cpRegUpServCfgPtr, &MySipRegApp::OnRegRespCb, &regcPtr)) {
         LOG(ERROR) << "Sip reg app register up server failed. pjsip_regc_create() error. " << upRegServInfoStr << ".";
         return MyStatus_t::FAILED;
     }
@@ -300,14 +326,14 @@ MyStatus_t MySipRegApp::regUpServ(const MySipRegUpServCfg_dt& regUpServCfg, cons
     }
 
     // sip register授权
-    if (cpRegUpServCfg.upSipServRegAuthCfg.enableAuth) {
+    if (regUpServCfg.upSipServRegAuthCfg.enableAuth) {
         pjsip_cred_info cred;
         pj_bzero(&cred, sizeof(pjsip_cred_info));
 
         cred.scheme    = pj_str(const_cast<char*>("digest"));
-        cred.realm     = pj_str(const_cast<char*>(cpRegUpServCfg.upSipServRegAuthCfg.authRealm.c_str()));
-        cred.username  = pj_str(const_cast<char*>(cpRegUpServCfg.upSipServRegAuthCfg.authName.c_str()));
-        cred.data      = pj_str(const_cast<char*>(cpRegUpServCfg.upSipServRegAuthCfg.authPwd.c_str()));
+        cred.realm     = pj_str(const_cast<char*>(regUpServCfg.upSipServRegAuthCfg.authRealm.c_str()));
+        cred.username  = pj_str(const_cast<char*>(regUpServCfg.upSipServRegAuthCfg.authName.c_str()));
+        cred.data      = pj_str(const_cast<char*>(regUpServCfg.upSipServRegAuthCfg.authPwd.c_str()));
         cred.data_type = PJSIP_CRED_DATA_PLAIN_PASSWD;
 
         if(PJ_SUCCESS != pjsip_regc_set_credentials(regcPtr, 1, &cred)) {
@@ -326,8 +352,6 @@ MyStatus_t MySipRegApp::regUpServ(const MySipRegUpServCfg_dt& regUpServCfg, cons
         return MyStatus_t::FAILED;
     }
 
-    // txDataPtr->tp_info.transport = transport2;
-
     // sip register消息发送
     if(PJ_SUCCESS != pjsip_regc_send(regcPtr, txDataPtr)) {
         pjsip_regc_destroy(regcPtr);
@@ -336,16 +360,7 @@ MyStatus_t MySipRegApp::regUpServ(const MySipRegUpServCfg_dt& regUpServCfg, cons
         return MyStatus_t::FAILED;
     }
 
-    std::string lastRegTime;
-    MyTimeHelper::GetCurrentFormatTime(lastRegTime);
-
-    // 保存sip reg上下文
-    MySipUpRegServInfo_dt upRegServInfo;
-    upRegServInfo.sipRegUpServCfg           = cpRegUpServCfg;
-    upRegServInfo.sipRegUpServLastRegTime   = lastRegTime;
-    upRegServInfo.sipRegUpServKeepAliveIdx  = 0;
-    upRegServInfo.sipRegUpServExpired       = expired;
-    return MySipRegManage::AddSipRegUpServInfo(upRegServInfo);
+    return MyStatus_t::SUCCESS;
 }
 
 MyStatus_t MySipRegApp::keepAliveUpServ(const MySipRegUpServCfg_dt& regUpServCfg, const MySipServAddrCfg_dt& localServCfg)

@@ -885,7 +885,7 @@ MyStatus_t MyXmlHelper::ParseSipCatalogRespMsgBody(const std::string& xmlStr, My
         }
 
         std::string deviceType = deviceID.substr(10, 3);
-        if ("200" == deviceType) {
+        if (DEVICE_TYPE_PLATFORM == deviceType) {
             MySipCatalogPlatCfg_dt platCfg;
             platCfg.deviceID     = deviceID;
             platCfg.manufacturer = manufacturer;
@@ -907,7 +907,7 @@ MyStatus_t MyXmlHelper::ParseSipCatalogRespMsgBody(const std::string& xmlStr, My
                 catalogRespMsgBody.platCfgMap.insert(std::make_pair(deviceID, platCfg));
             }
         }
-        else if ("215" == deviceType) {
+        else if (DEVICE_TYPE_SUB_PLATFORM == deviceType) {
             MySipCatalogSubPlatCfg_dt subPlatCfg;
             subPlatCfg.deviceID     = deviceID;
             subPlatCfg.manufacturer = manufacturer;
@@ -929,7 +929,7 @@ MyStatus_t MyXmlHelper::ParseSipCatalogRespMsgBody(const std::string& xmlStr, My
                 catalogRespMsgBody.subPlatCfgMap.insert(std::make_pair(deviceID, subPlatCfg));
             }
         }
-        else if ("216" == deviceType) {
+        else if (DEVICE_TYPE_VIRTUAL_SUB_PLATFORM == deviceType) {
             MySipCatalogVirtualSubPlatCfg_dt virtualSubPlatCfg;
             virtualSubPlatCfg.deviceID     = deviceID;
             virtualSubPlatCfg.manufacturer = manufacturer;
@@ -951,7 +951,7 @@ MyStatus_t MyXmlHelper::ParseSipCatalogRespMsgBody(const std::string& xmlStr, My
                 catalogRespMsgBody.subVirtualPlatCfgMap.insert(std::make_pair(deviceID, virtualSubPlatCfg));
             }
         }
-        else if ("131" == deviceType || "132" == deviceType) {
+        else if (DEVICE_TYPE_IP_CAMERA == deviceType || DEVICE_TYPE_NETWORK_VIDEO_RECORDER == deviceType) {
             MySipCatalogDeviceCfg_dt deviceCfg;
             deviceCfg.deviceID     = deviceID;
             deviceCfg.manufacturer = manufacturer;

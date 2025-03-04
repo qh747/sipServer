@@ -163,6 +163,23 @@ public:
         return MyStatus_t::SUCCESS;
     }
 
+    MyStatus_t getDeviceCfg(const std::string& servId, const std::string& deviceId, MySipCatalogDeviceCfg_dt& deviceCfg) {
+        boost::shared_lock<boost::shared_mutex> lock(m_rwMutex);
+
+        const auto& catalogInfoIter = m_sipServCatalogInfoMap.find(servId);
+        if (m_sipServCatalogInfoMap.end() == catalogInfoIter) {
+            return MyStatus_t::FAILED;
+        }
+
+        const auto& deviceCfgIter = catalogInfoIter->second.sipDeviceMap.find(deviceId);
+        if (catalogInfoIter->second.sipDeviceMap.end() == deviceCfgIter) {
+            return MyStatus_t::FAILED;
+        }
+
+        deviceCfg = deviceCfgIter->second;
+        return MyStatus_t::SUCCESS;
+    }
+
     MyStatus_t getServSN(const std::string& servId, std::string& sn) {
         boost::unique_lock<boost::shared_mutex> lock(m_rwMutex);
         
@@ -280,36 +297,6 @@ MyStatus_t MySipCatalogManage::DelSipCatalogInfo(const std::string& servId)
     return CatalogManageObject.del(servId);
 }
 
-MyStatus_t MySipCatalogManage::HasSipCatalogInfo(const std::string& servId)
-{
-    return CatalogManageObject.has(servId);
-}
-
-MyStatus_t MySipCatalogManage::GetSipCatalogPlatCfgMap(const std::string& servId, MySipCatalogPlatCfgMap& platCfgMap)
-{
-    return CatalogManageObject.getPlatCfgMap(servId, platCfgMap);
-}
-
-MyStatus_t MySipCatalogManage::GetSipCatalogSubPlatCfgMap(const std::string& servId, MySipCatalogSubPlatCfgMap& subPlatCfgMap)
-{
-    return CatalogManageObject.getSubPlatCfgMap(servId, subPlatCfgMap);
-}
-
-MyStatus_t MySipCatalogManage::GetSipCatalogSubVirtualPlatCfgMap(const std::string& servId, MySipCatalogSubVirtualPlatCfgMap& subVirtualPlatCfgMap)
-{
-    return CatalogManageObject.getSubVirtualPlatCfgMap(servId, subVirtualPlatCfgMap);
-}
-
-MyStatus_t MySipCatalogManage::GetSipCatalogDeviceCfgMap(const std::string& servId, MySipCatalogDeviceCfgMap& deviceCfgMap)
-{
-    return CatalogManageObject.getDeviceCfgMap(servId, deviceCfgMap);
-}
-
-MyStatus_t MySipCatalogManage::GetSipCatalogSN(const std::string& servId, std::string& sn)
-{
-    return CatalogManageObject.getServSN(servId, sn);
-}
-
 MyStatus_t MySipCatalogManage::UpdateSipCatalogSN(const std::string& servId, const std::string& sn)
 {
     return CatalogManageObject.uptServSN(servId, sn);
@@ -324,16 +311,6 @@ MyStatus_t MySipCatalogManage::DelSipQueryInfo(const std::string& upServId)
 {
     return CatalogSipServgManageObject.del(upServId, true);
 }
-          
-MyStatus_t MySipCatalogManage::HasSipQueryInfo(const std::string& upServId)
-{
-    return CatalogSipServgManageObject.has(upServId, true);
-}
-          
-MyStatus_t MySipCatalogManage::GetSipQueryInfo(MySipRegServAddrMap& servAddrMap)
-{
-    return CatalogSipServgManageObject.get(servAddrMap, true);
-}
 
 MyStatus_t MySipCatalogManage::AddSipRespInfo(const MY_COMMON::MySipServRegAddrCfg_dt& servAddr)
 {
@@ -343,16 +320,6 @@ MyStatus_t MySipCatalogManage::AddSipRespInfo(const MY_COMMON::MySipServRegAddrC
 MyStatus_t MySipCatalogManage::DelSipRespInfo(const std::string& lowServId)
 {
     return CatalogSipServgManageObject.del(lowServId, false);
-}
-          
-MyStatus_t MySipCatalogManage::HasSipRespInfo(const std::string& lowServId)
-{
-    return CatalogSipServgManageObject.has(lowServId, false);
-}
-          
-MyStatus_t MySipCatalogManage::GetSipRespInfoMap(MySipRegServAddrMap& servAddrMap)
-{
-    return CatalogSipServgManageObject.get(servAddrMap, false);
 }
 
 /**
@@ -371,25 +338,25 @@ MyStatus_t MySipCatalogManageView::GetDeviceInfo(const std::string& deviceId, st
         std::string deviceType = deviceId.substr(10, 3);
 
         // 设备查找
-        if ("200" == deviceType) {
+        if (DEVICE_TYPE_PLATFORM == deviceType) {
             const auto& sipPlatIter = pair.second.sipPlatMap.find(deviceId);
             if (pair.second.sipPlatMap.end() != sipPlatIter) {
                 return MyJsonHelper::GenerateDeviceInfo(sipPlatIter->second, deviceInfo);
             }
         }
-        else if ("215" == deviceType) {
+        else if (DEVICE_TYPE_SUB_PLATFORM == deviceType) {
             const auto& sipSubPlatIter = pair.second.sipSubPlatMap.find(deviceId);
             if (pair.second.sipSubPlatMap.end() != sipSubPlatIter) {
                 return MyJsonHelper::GenerateDeviceInfo(sipSubPlatIter->second, deviceInfo);
             }
         }
-        else if ("216" == deviceType) {
+        else if (DEVICE_TYPE_VIRTUAL_SUB_PLATFORM == deviceType) {
             const auto& sipSubVirtualPlatIter = pair.second.sipSubVirtualPlatMap.find(deviceId);
             if (pair.second.sipSubVirtualPlatMap.end() != sipSubVirtualPlatIter) {
                 return MyJsonHelper::GenerateDeviceInfo(sipSubVirtualPlatIter->second, deviceInfo);
             }
         }
-        else if ("131" == deviceType || "132" == deviceType) {
+        else if (DEVICE_TYPE_IP_CAMERA == deviceType || DEVICE_TYPE_NETWORK_VIDEO_RECORDER == deviceType) {
             const auto& sipDeviceIter = pair.second.sipDeviceMap.find(deviceId);
             if (pair.second.sipDeviceMap.end() != sipDeviceIter) {
                 return MyJsonHelper::GenerateDeviceInfo(sipDeviceIter->second, deviceInfo);
@@ -398,6 +365,61 @@ MyStatus_t MySipCatalogManageView::GetDeviceInfo(const std::string& deviceId, st
     }
 
     return MyStatus_t::FAILED;
+}
+
+MyStatus_t MySipCatalogManageView::GetSipRespInfoMap(MySipRegServAddrMap& servAddrMap)
+{
+    return CatalogSipServgManageObject.get(servAddrMap, false);
+}
+
+MyStatus_t MySipCatalogManageView::HasSipRespInfo(const std::string& lowServId)
+{
+    return CatalogSipServgManageObject.has(lowServId, false);
+}
+
+MyStatus_t MySipCatalogManageView::GetSipQueryInfo(MySipRegServAddrMap& servAddrMap)
+{
+    return CatalogSipServgManageObject.get(servAddrMap, true);
+}
+
+MyStatus_t MySipCatalogManageView::HasSipQueryInfo(const std::string& upServId)
+{
+    return CatalogSipServgManageObject.has(upServId, true);
+}
+
+MyStatus_t MySipCatalogManageView::GetSipCatalogSN(const std::string& servId, std::string& sn)
+{
+    return CatalogManageObject.getServSN(servId, sn);
+}
+
+MyStatus_t MySipCatalogManageView::GetSipCatalogDeviceCfgMap(const std::string& servId, MySipCatalogDeviceCfgMap& deviceCfgMap)
+{
+    return CatalogManageObject.getDeviceCfgMap(servId, deviceCfgMap);
+}
+
+MyStatus_t MySipCatalogManageView::GetSipCatalogDeviceCfg(const std::string& servId, const std::string& deviceId, MySipCatalogDeviceCfg_dt& deviceCfg)
+{
+    return CatalogManageObject.getDeviceCfg(servId, deviceId, deviceCfg);
+}
+
+MyStatus_t MySipCatalogManageView::GetSipCatalogSubVirtualPlatCfgMap(const std::string& servId, MySipCatalogSubVirtualPlatCfgMap& subVirtualPlatCfgMap)
+{
+    return CatalogManageObject.getSubVirtualPlatCfgMap(servId, subVirtualPlatCfgMap);
+}
+
+MyStatus_t MySipCatalogManageView::GetSipCatalogSubPlatCfgMap(const std::string& servId, MySipCatalogSubPlatCfgMap& subPlatCfgMap)
+{
+    return CatalogManageObject.getSubPlatCfgMap(servId, subPlatCfgMap);
+}
+
+MyStatus_t MySipCatalogManageView::GetSipCatalogPlatCfgMap(const std::string& servId, MySipCatalogPlatCfgMap& platCfgMap)
+{
+    return CatalogManageObject.getPlatCfgMap(servId, platCfgMap);
+}
+
+MyStatus_t MySipCatalogManageView::HasSipCatalogInfo(const std::string& servId)
+{
+    return CatalogManageObject.has(servId);
 }
 
 }; // namespace MY_MANAGER

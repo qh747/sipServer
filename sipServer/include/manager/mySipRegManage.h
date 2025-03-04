@@ -172,6 +172,14 @@ public:
      */     
     static MY_COMMON::MyStatus_t            GetSipRegLowAuthCfg(const std::string& name, const std::string& realm, MY_COMMON::MySipServAuthCfg_dt& authCfg);
 
+    /**     
+     * @brief                               获取上级服务注册配置
+     * @return                              获取结果，success-0, failed-非0
+     * @param upRegServId                   上级服务注册id
+     * @param proto                         上级服务协议类型
+     */ 
+    static MY_COMMON::MyStatus_t            GetSipRegLowServProto(const std::string& lowRegServId, MY_COMMON::MyTpProto_t& proto);
+
     /**
      * @brief                               更新下级服务注册最后注册时间
      * @return                              更新结果，success-0, failed-非0
