@@ -138,4 +138,4 @@ MyStatus_t MySipMsgHelper::PrintSipCatalogMsgBody(const MySipCatalogReqMsgBody_d
     return MyStatus_t::SUCCESS;
 }
     
-}; // namespace MY_UTILS
+} // namespace MY_UTILS

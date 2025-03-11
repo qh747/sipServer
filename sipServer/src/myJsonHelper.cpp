@@ -1,7 +1,7 @@
 #include <map>
+#include <iostream>
 #include <fstream>
 #include <cstdint>
-#include <cstdbool>
 #include <json/json.h>
 #include "utils/myJsonHelper.h"
 using namespace MY_COMMON;
@@ -318,6 +318,40 @@ MyStatus_t MyJsonHelper::ParseSipCatalogJsonFile(const std::string& filePath, My
         }
     }
     
+    return MyStatus_t::SUCCESS;
+}
+
+MyStatus_t MyJsonHelper::ParseHttpReqMediaInfo(const std::string& buf, MyHttpReqMediaInfo_dt& reqInfo)
+{
+    Json::Value rootNode;
+    Json::CharReaderBuilder reader;
+    std::string errs;
+
+    // 解析字符串
+    std::istringstream bufStream(buf);
+    if (!Json::parseFromStream(reader, bufStream, &rootNode, &errs)) {
+        return MyStatus_t::FAILED;
+    }
+
+    // JSON数据校验
+    if (!rootNode.isMember("deviceId") || !rootNode.isMember("playType") || !rootNode.isMember("protoType")) {
+        return MyStatus_t::FAILED;
+    }
+
+    std::string playType = rootNode["playType"].asString();
+    if ("play" != playType && "playback" != playType) {
+        return MyStatus_t::FAILED;
+    }
+
+    std::string protoType = rootNode["protoType"].asString();
+    if ("tcp" != protoType && "udp" != protoType) {
+        return MyStatus_t::FAILED;
+    }
+
+    // 解析JSON数据
+    reqInfo.deviceId  = rootNode["deviceId"].asString();
+    reqInfo.playType  = ("play" == playType ? MyMedaPlayWay_t::PLAY : MyMedaPlayWay_t::PLAYBACK);
+    reqInfo.protoType = ("udp" == protoType ? MyTpProto_t::UDP : MyTpProto_t::TCP);
     return MyStatus_t::SUCCESS;
 }
 

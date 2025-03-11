@@ -27,6 +27,14 @@ public:
      */
     static MY_COMMON::MyStatus_t    ParseSipCatalogJsonFile(const std::string& filePath, MY_COMMON::MySipCatalogCfg_dt& catalogCfg);
 
+    /**
+     * @brief                       请求播放媒体解析
+     * @return                      解析结果，0-success, -1-failed
+     * @param buf                   请求数据
+     * @param reqInfo               解析内容
+     */
+    static MY_COMMON::MyStatus_t    ParseHttpReqMediaInfo(const std::string& buf, MY_COMMON::MyHttpReqMediaInfo_dt& reqInfo);
+
 public:
     /**
      * @brief                       生成http错误信息

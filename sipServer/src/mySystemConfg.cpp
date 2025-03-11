@@ -186,4 +186,4 @@ MyStatus_t MySystemConfig::GetSipCatalogCfg(MySipCatalogCfg_dt& cfg)
     return MyStatus_t::SUCCESS;
 }
 
-}; // namespace MY_ENVIR
+} // namespace MY_ENVIR

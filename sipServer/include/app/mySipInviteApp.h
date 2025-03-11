@@ -15,6 +15,10 @@ public:
     typedef std::weak_ptr<MySipInviteApp>       SmtWkPtr;
 
 public:
+    MySipInviteApp();
+    ~MySipInviteApp();
+
+public:
     /**
      * @brief                                   邀请会话状态改变回调
      * @param invSessPtr                        邀请会话对象
@@ -44,10 +48,6 @@ public:
     static void                                 OnInviteSendAck(MY_COMMON::MySipInvSessionPtr invSessPtr, MY_COMMON::MySipRxDataPtr rxDataPtr);
 
 public:
-    MySipInviteApp();
-    ~MySipInviteApp();
-
-public:
     /**
      * @brief                                   应用初始化
      * @return                                  初始化结果，0-success，-1-failed
@@ -74,9 +74,11 @@ public:
      * @brief                                   请求设备媒体流
      * @return                                  请求结果，0-success，-1-failed
      * @param deviceId                          设备ID
+     * @param reqInfo                           请求信息
      * @param respInfo                          响应信息
      */ 
-    MY_COMMON::MyStatus_t                       onSipInviteAppReqDeviceMedia(const std::string deviceId, std::string& respInfo);
+    MY_COMMON::MyStatus_t                       onSipInviteAppReqDeviceMedia(const std::string& deviceId, const MY_COMMON::MyHttpReqMediaInfo_dt& reqInfo,
+                                                                             std::string& respInfo);
 
 public:     
     /**     

@@ -108,7 +108,7 @@ void MySipServer::ServMediaReqEvFunc(MY_MEDIA_REQ_EV_ARGS)
     }
 
     // 请求处理
-    if (MyStatus_t::SUCCESS != servPtr->onReqDeviceMedia(deviceId, info)) {
+    if (MyStatus_t::SUCCESS != servPtr->onReqDeviceMedia(deviceId, reqInfo, respInfo)) {
         status = MyStatus_t::FAILED;
         return;
     }
@@ -226,7 +226,7 @@ MyStatus_t MySipServer::run()
     }
 
     // delete in: MySipServer::ServThdFunc()
-    MySipServAddrCfgPtr servAddrCfgPtr = new MySipServAddrCfg_dt(m_servAddrCfg);
+    auto servAddrCfgPtr = new MySipServAddrCfg_dt(m_servAddrCfg);
 
     // 服务需要事件循环触发消息发送和接收回调
     if (PJ_SUCCESS != pj_thread_create(m_servThdPoolPtr, nullptr, &MySipServer::ServThdFunc, servAddrCfgPtr, 0, 0, &m_servEvThdPtr)) {
@@ -317,14 +317,14 @@ MyStatus_t MySipServer::onReqLowServCatalog(const MySipRegLowServCfg_dt& lowSipR
     return sipCatalogAppWkPtr.lock()->onSipCatalogAppReqLowServCatalog(lowSipRegServAddrCfg, m_servAddrCfg);
 }
 
-MyStatus_t MySipServer::onReqDeviceMedia(const std::string& deviceId, std::string& respInfo)
+MyStatus_t MySipServer::onReqDeviceMedia(const std::string& deviceId, const MY_COMMON::MyHttpReqMediaInfo_dt& reqInfo, std::string& respInfo)
 {
     MySipInviteApp::SmtWkPtr sipInviteAppWkPtr;
     if (MyStatus_t::SUCCESS != MyAppManage::GetSipInviteApp(sipInviteAppWkPtr)) {
         LOG(ERROR) << "SipServer onReqDeviceMedia() failed. sipInviteApp invalid.";
         return MyStatus_t::FAILED;
     }
-    return sipInviteAppWkPtr.lock()->onSipInviteAppReqDeviceMedia(deviceId, respInfo);
+    return sipInviteAppWkPtr.lock()->onSipInviteAppReqDeviceMedia(deviceId, reqInfo, respInfo);
 }
 
 MyStatus_t MySipServer::getState(MyStatus_t& status) const

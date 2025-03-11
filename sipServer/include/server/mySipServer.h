@@ -100,9 +100,11 @@ public:
      * @brief                               请求设备媒体流
      * @return                              请求结果，0-success，-1-failed
      * @param deviceId                      设备id
+     * @param reqInfo                       请求信息
      * @param respInfo                      响应信息
      */
-    MY_COMMON::MyStatus_t                   onReqDeviceMedia(const std::string& deviceId, std::string& respInfo);
+    MY_COMMON::MyStatus_t                   onReqDeviceMedia(const std::string& deviceId, const MY_COMMON::MyHttpReqMediaInfo_dt& reqInfo,
+                                                             std::string& respInfo);
 
 public:     
     /**     

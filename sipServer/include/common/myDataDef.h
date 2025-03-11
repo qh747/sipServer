@@ -33,6 +33,18 @@ typedef enum class MyStatusType : int
 } MyStatus_t;
 
 /**
+ * @brief 媒体播放方式枚举类型
+ */
+typedef enum class MyMediaPlayWayType : int
+{
+    //                                                      播放媒体
+    PLAY                                                    = 0,
+    //                                                      回放媒体
+    PLAYBACK                                                = 1,
+
+} MyMedaPlayWay_t;
+
+/**
  * @brief sip消息uri
  */
 typedef struct MySipMessageUriDataType 
@@ -122,6 +134,20 @@ typedef struct MySipCatalogInfoDataType
     //                                                      本级设备设备目录信息，key = device id, value = device info
     std::map<std::string, MySipCatalogDeviceCfg_dt>         sipDeviceMap;
 
-} MySipCatalogInfo_dt; 
+} MySipCatalogInfo_dt;
+
+/**
+ * @brief http请求媒体信息
+ */
+typedef struct MyHttpReqMediaInfoDataType
+{
+    //                                                      设备id
+    std::string                                             deviceId;
+    //                                                      播放方式
+    MyMedaPlayWay_t                                         playType;
+    //                                                      协议类型
+    MyTpProto_t                                             protoType;
+
+} MyHttpReqMediaInfo_dt;
 
 }; // MY_COMMON

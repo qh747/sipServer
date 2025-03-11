@@ -107,7 +107,10 @@ MyStatus_t MyHttpServer::ServThdFunc(MyFuncCbParamPtr arg)
             }
         }
         else if (http::verb::post == request.method()) {
-            if (MyStatus_t::SUCCESS != servSmtPtr->onRecvHttpPostReq(url, respState, respBody)) {
+            // 获取http请求数据内容
+            std::string reqBody = boost::beast::buffers_to_string(request.body().data());
+
+            if (MyStatus_t::SUCCESS != servSmtPtr->onRecvHttpPostReq(url, reqBody, respState, respBody)) {
                 LOG(WARNING) << "HttpServer execute thread function failed. onRecvHttpPostReq failed.";
             } 
             else {
@@ -248,45 +251,52 @@ MyStatus_t MyHttpServer::onRecvHttpGetReq(const std::string& url, http::status& 
     return MyStatus_t::FAILED;
 }
 
-MyStatus_t MyHttpServer::onRecvHttpPostReq(const std::string& url, http::status& statusCode, std::string& respBody)
+MyStatus_t MyHttpServer::onRecvHttpPostReq(const std::string& url, const std::string& reqBody, http::status& statusCode, std::string& respBody)
 {
-    if (std::string::npos != url.find(HTTP_URL_REQ_DEVICE_MEDIA)) {
-        // 解析设备id
-        size_t lastSlashPos = url.find_last_of('/');
-        
-        if (std::string::npos != lastSlashPos && url.length() - 1 != lastSlashPos) {
-            // 获取设备信息
-            std::string deviceId = url.substr(lastSlashPos + 1);
-            
-            // 请求设备媒体流
-            std::string procInfo;
-            MyStatus_t procStatus = MyStatus_t::FAILED;
-            
-            // 触发事件通知，外部请求设备媒体流
-            NOTICE_EMIT(MY_MEDIA_REQ_EV_ARGS, MY_EVENT::kMyMediaRequestEvent, deviceId, procStatus, procInfo);
+    // 验证http post请求
+    MyHttpReqMediaInfo_dt reqInfo;
+    if (MyStatus_t::SUCCESS != MyJsonHelper::ParseHttpReqMediaInfo(reqBody, reqInfo)) {
+        statusCode = http::status::bad_request;
 
-            if (MyStatus_t::SUCCESS == procStatus) {
-                statusCode = http::status::ok;
-                return MyStatus_t::SUCCESS;
-            }
-            else {
-                statusCode = http::status::internal_server_error;
-                MyJsonHelper::GenerateHttpErrMsgBody(procInfo, respBody);
-            }
-        }
-        else {
-            statusCode = http::status::not_found;
-            MyJsonHelper::GenerateHttpErrMsgBody(std::string("request device media failed. device not exists. url: " + url), respBody);
-        }
+        MyJsonHelper::GenerateHttpErrMsgBody("parse http request media info failed: ", respBody);
+        return MyStatus_t::FAILED;
     }
-    else {
-        statusCode = http::status::not_found;
+
+    if (std::string::npos == url.find(HTTP_URL_REQ_DEVICE_MEDIA)) {
+        statusCode = http::status::bad_request;
 
         std::string errInfo = "invalid url: " + url;
         MyJsonHelper::GenerateHttpErrMsgBody(errInfo, respBody);
     }
 
-    return MyStatus_t::FAILED;
+    size_t lastSlashPos = url.find_last_of('/');
+    if (std::string::npos == lastSlashPos || url.length() - 1 == lastSlashPos) {
+        statusCode = http::status::bad_request;
+
+        std::string errInfo = "parse http url failed: " + url;
+        MyJsonHelper::GenerateHttpErrMsgBody(errInfo, respBody);
+        return MyStatus_t::FAILED;
+    }
+
+    // 获取设备信息
+    std::string deviceId = url.substr(lastSlashPos + 1);
+
+    // 请求设备媒体流
+    std::string procInfo;
+    MyStatus_t procStatus = MyStatus_t::FAILED;
+
+    // 触发事件通知，外部请求设备媒体流
+    NOTICE_EMIT(MY_MEDIA_REQ_EV_ARGS, MY_EVENT::kMyMediaRequestEvent, deviceId, reqInfo, procStatus, procInfo);
+
+    if (MyStatus_t::SUCCESS == procStatus) {
+        statusCode = http::status::ok;
+        return MyStatus_t::SUCCESS;
+    }
+    else {
+        statusCode = http::status::internal_server_error;
+        MyJsonHelper::GenerateHttpErrMsgBody(procInfo, respBody);
+        return MyStatus_t::FAILED;
+    }
 }
     
 MyStatus_t MyHttpServer::getState(MyStatus_t& status) const

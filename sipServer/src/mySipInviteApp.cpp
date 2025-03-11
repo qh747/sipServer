@@ -108,7 +108,7 @@ MyStatus_t MySipInviteApp::shutdown()
     // 状态检查
     if (MyStatus_t::SUCCESS != m_status.load()) {
         LOG(WARNING) << "Sip app module shutdown failed. MySipInviteApp is not init.";
-        return MyStatus_t::SUCCESS;
+        return MyStatus_t::FAILED;
     }
 
     m_invCbPtr.reset();
@@ -122,11 +122,11 @@ MyStatus_t MySipInviteApp::shutdown()
     return MyStatus_t::SUCCESS;
 }
 
-MyStatus_t MySipInviteApp::onSipInviteAppReqDeviceMedia(const std::string deviceId, std::string& respInfo)
+MyStatus_t MySipInviteApp::onSipInviteAppReqDeviceMedia(const std::string& deviceId, const MY_COMMON::MyHttpReqMediaInfo_dt& reqInfo, std::string& respInfo)
 {
     // 设备类型校验
     std::string deviceType = deviceId.substr(10, 3);
-    if (DEVICE_TYPE_IP_CAMERA != deviceType || DEVICE_TYPE_NETWORK_VIDEO_RECORDER != deviceType) {
+    if (DEVICE_TYPE_IP_CAMERA != deviceType && DEVICE_TYPE_NETWORK_VIDEO_RECORDER != deviceType) {
         respInfo = "invalid device type.";
         LOG(ERROR) << "Sip app module onSipInviteAppReqDeviceMedia failed. device type is invalid. type: " << deviceType;
         return MyStatus_t::FAILED;
@@ -145,12 +145,20 @@ MyStatus_t MySipInviteApp::onSipInviteAppReqDeviceMedia(const std::string device
             return MyStatus_t::FAILED;
         }
 
+        if (lowRegSipServAddrMap.empty()) {
+            respInfo = "device not exists.";
+            LOG(ERROR) << "Sip app module onSipInviteAppReqDeviceMedia failed. empty low reg sip server. device id: " << deviceId;
+            return MyStatus_t::FAILED;
+        }
+
         // 查询设备所属下级平台
         auto iter = lowRegSipServAddrMap.begin();
-        while (lowRegSipServAddrMap.end() != iter++) {
+        while (lowRegSipServAddrMap.end() != iter) {
             if (MyStatus_t::SUCCESS == MySipCatalogManageView::GetSipCatalogDeviceCfg(iter->first, deviceId, deviceCfg)) {
                 break;
             }
+
+            ++iter;
         }
 
         if (lowRegSipServAddrMap.end() == iter) {
@@ -186,7 +194,6 @@ MyStatus_t MySipInviteApp::onSipInviteAppReqDeviceMedia(const std::string device
 
     // 获取本级平台信息
     MySipServAddrCfg_dt servAddr;
-    MyStatus_t state = MyStatus_t::FAILED;
     if (MyStatus_t::SUCCESS != MyServManage::GetSipServAddrCfg(servAddr)) {
         respInfo = "sip server addr invalid.";
         LOG(ERROR) << "Sip app module onSipInviteAppReqDeviceMedia failed. get current sip server addr failed. device id: " << deviceId;
@@ -200,12 +207,14 @@ MyStatus_t MySipInviteApp::onSipInviteAppReqDeviceMedia(const std::string device
     std::string sContact;
 
     if (servAddr.id == platCfg.deviceID) {
+        // 本级平台向本级设备请求
         MySipMsgHelper::GenerateSipMsgURL(deviceCfg.deviceID, deviceCfg.deviceIp, std::stoul(deviceCfg.devicePort), proto, sURL);
         MySipMsgHelper::GenerateSipMsgFromHeader(servAddr.id, servAddr.ipAddr, sFromHdr);
         MySipMsgHelper::GenerateSipMsgToHeader(deviceCfg.deviceID, deviceCfg.deviceIp, sToHdr);
         MySipMsgHelper::GenerateSipMsgContactHeader(servAddr.id, servAddr.ipAddr, servAddr.regPort, sContact);
     }
     else {
+        // 本级平台向下级平台请求
         MySipMsgHelper::GenerateSipMsgURL(deviceCfg.deviceID, platCfg.deviceIp, std::stoul(platCfg.devicePort), proto, sURL);
         MySipMsgHelper::GenerateSipMsgFromHeader(servAddr.id, servAddr.ipAddr, sFromHdr);
         MySipMsgHelper::GenerateSipMsgToHeader(deviceCfg.deviceID, platCfg.deviceIp, sToHdr);
@@ -261,4 +270,4 @@ MyStatus_t MySipInviteApp::getSipInviteApp(MySipInviteApp::SmtWkPtr& wkPtr)
     return MyStatus_t::SUCCESS;
 }
 
-}; // namespace MY_APP
+} // namespace MY_APP

@@ -68,10 +68,12 @@ public:
      * @brief                               处理http post请求
      * @return                              处理结果，0-success，-1-failed
      * @param url                           请求url
+     * @param reqBody                       http请求信息
      * @param statusCode                    http响应状态码
      * @param respBody                      http响应信息
      */
-    MY_COMMON::MyStatus_t                   onRecvHttpPostReq(const std::string& url, http::status& statusCode, std::string& respBody);
+    MY_COMMON::MyStatus_t                   onRecvHttpPostReq(const std::string& url, const std::string& reqBody,
+                                                              http::status& statusCode, std::string& respBody);
 
 public:     
     /**     

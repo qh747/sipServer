@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.22)
 project(sipServer)
 
 # 设置编译器
-set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # 关闭三方库警告
 add_definitions(-w)
