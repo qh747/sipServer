@@ -6,7 +6,7 @@ import requests
 # 发送 HTTP GET 请求
 try:  
     # 获取设备详细信息
-    url_get_device_info = "http://192.168.1.10:8080/index/getDeviceInfo/11000000001310000059"
+    url_get_device_info = "http://192.168.3.234:8080/index/getDeviceInfo/11000000001310000059"
     
     response_get_device_info = requests.get(url_get_device_info, timeout=5)
 

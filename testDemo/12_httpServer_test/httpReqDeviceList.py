@@ -6,7 +6,7 @@ import requests
 # 发送 HTTP GET 请求
 try:
     # 获取设备列表
-    url_get_device_list = "http://192.168.1.10:8080/index/getDeviceList"
+    url_get_device_list = "http://192.168.3.234:8080/index/getDeviceList"
     
     response_get_device_list = requests.get(url_get_device_list, timeout=5)
     

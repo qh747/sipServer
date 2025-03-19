@@ -1,8 +1,6 @@
 #pragma once
 #include <map>
 #include <string>
-#include <cstdint>
-#include <cstdbool>
 #include <pjsip.h>
 #include <pjsip_ua.h>
 #include "common/myConfigDef.h"

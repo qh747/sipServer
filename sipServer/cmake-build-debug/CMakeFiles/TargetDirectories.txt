@@ -1,3 +1,0 @@
-/home/quhan/extend/04_myCode/sipServer/sipServer/cmake-build-debug/CMakeFiles/sipServer.dir
-/home/quhan/extend/04_myCode/sipServer/sipServer/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/quhan/extend/04_myCode/sipServer/sipServer/cmake-build-debug/CMakeFiles/rebuild_cache.dir

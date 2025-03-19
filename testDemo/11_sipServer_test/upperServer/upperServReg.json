@@ -2,7 +2,7 @@
   "lowerServer": [
     {
       "id": "11000000002000000001",
-      "ipAddr": "192.168.1.10",
+      "ipAddr": "192.168.3.234",
       "port": "15060",
       "name": "lowerSipServer",
       "domain": "lowerSipServer.com",

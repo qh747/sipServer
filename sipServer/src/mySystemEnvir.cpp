@@ -22,14 +22,14 @@ MyStatus_t MySystemEnvir::Init(int argc, char** argv)
     // --------------------------------------------------- 命令行参数解析 -------------------------------------------------------
     gflags::ParseCommandLineFlags(&argc, &argv, true);
     if (FLAGS_cfg.empty()) {
-        LOG(ERROR) << "Server envirment init failed. servCfgPath is empty";
+        LOG(ERROR) << "Server environment init failed. servCfgPath is empty";
         return MyStatus_t::FAILED;
     }
 
     // --------------------------------------------------- 加载配置 ------------------------------------------------------------
     MyStatus_t status = MySystemConfig::Init(FLAGS_cfg);
     if (MyStatus_t::SUCCESS != status) {
-        LOG(ERROR) << "Server envirment init failed. load config file failed. config path: " << FLAGS_cfg;
+        LOG(ERROR) << "Server environment init failed. load config file failed. config path: " << FLAGS_cfg;
         return MyStatus_t::FAILED;
     }
  
@@ -53,33 +53,34 @@ MyStatus_t MySystemEnvir::Init(int argc, char** argv)
 
     // --------------------------------------------------- 信号处理 ------------------------------------------------------------
     if (MyStatus_t::SUCCESS != MySystemSigCatch::Init()) {
-        LOG(ERROR) << "Server envirment init failed. signal catcher init failed";
+        LOG(ERROR) << "Server environment init failed. signal catcher init failed";
         return MyStatus_t::FAILED;
     }
 
     // --------------------------------------------------- 线程池初始化 ------------------------------------------------------
     if (MyStatus_t::SUCCESS != MySystemThdPool::Init()) {
-        LOG(ERROR) << "Server envirment init failed. thread pool system environment init failed";
+        LOG(ERROR) << "Server environment init failed. thread pool system environment init failed";
         return MyStatus_t::FAILED;
     }
 
     // --------------------------------------------------- pjsip环境初始化 ------------------------------------------------------
     if (MyStatus_t::SUCCESS != MySystemPjsip::Init()) {
-        LOG(ERROR) << "Server envirment init failed. pjsip system environment init failed";
+        LOG(ERROR) << "Server environment init failed. pjsip system environment init failed";
         return MyStatus_t::FAILED;
     }
 
     // --------------------------------------------------- 服务管理初始化 ------------------------------------------------------
     if (MyStatus_t::SUCCESS != MyServManage::Init()) {
-        LOG(ERROR) << "Server envirment init failed. system server init failed";
+        LOG(ERROR) << "Server environment init failed. system server init failed";
         return MyStatus_t::FAILED;
     }
 
     // --------------------------------------------------- 应用管理初始化 ------------------------------------------------------
     if (MyStatus_t::SUCCESS != MyAppManage::Init()) {
-        LOG(ERROR) << "Server envirment init failed. system app init failed";
+        LOG(ERROR) << "Server environment init failed. system app init failed";
         return MyStatus_t::FAILED;
     }
+
     return MyStatus_t::SUCCESS;
 }
 
@@ -109,23 +110,23 @@ MyStatus_t MySystemEnvir::Shutdown()
 {
     // 应用管理关闭
     MyAppManage::Shutdown();
-    LOG(INFO) << "Server envirment shutdown. MyAppManage::Shutdown() success";
+    LOG(INFO) << "Server environment shutdown. MyAppManage::Shutdown() success";
 
     // 服务管理关闭
     MyServManage::Shutdown();
-    LOG(INFO) << "Server envirment shutdown. MyServManage::Shutdown() success";
+    LOG(INFO) << "Server environment shutdown. MyServManage::Shutdown() success";
 
     // 线程池关闭
     MySystemThdPool::Shutdown();
-    LOG(INFO) << "Server envirment shutdown. MySystemThdPool::Shutdown() success";
+    LOG(INFO) << "Server environment shutdown. MySystemThdPool::Shutdown() success";
 
     // pjsip环境关闭
     MySystemPjsip::Shutdown();
-    LOG(INFO) << "Server envirment shutdown. MySystemThdPool::Shutdown() success";
+    LOG(INFO) << "Server environment shutdown. MySystemThdPool::Shutdown() success";
 
     // glog环境关闭
     google::ShutdownGoogleLogging();
-    LOG(INFO) << "Server envirment shutdown. google::ShutdownGoogleLogging() success";
+    LOG(INFO) << "Server environment shutdown. google::ShutdownGoogleLogging() success";
 
     return MyStatus_t::SUCCESS;
 }

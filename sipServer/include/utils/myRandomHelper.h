@@ -1,13 +1,12 @@
 #pragma once
 #include <string>
-#include <uuid/uuid.h>
 #include "common/myDataDef.h"
 #include "utils/myBaseHelper.h"
 
 namespace MY_UTILS {
 
 /**
- * 随机数帮助类
+ * @brief 随机数帮助类
  */
 class MyRandomHelper : public MyNonConstructableAndNonCopyable
 {
