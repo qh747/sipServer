@@ -4,5 +4,6 @@ sipServer/.cache/
 sipServer/log/
 sipServer/bin/
 sipServer/build/
+sipServer/cmake-build-debug/
 testDemo/**/bin/
 testDemo/**/build/
