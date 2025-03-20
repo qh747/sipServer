@@ -152,6 +152,7 @@ public:
 class MySdpMediaLine : public MySdpItem
 {
 public:
+    MySdpMediaLine() = default;
     ~MySdpMediaLine() override = default;
 
 public:

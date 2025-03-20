@@ -2,8 +2,9 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include "sdp/mySdpAttr.h"
+#include "common/myDataDef.h"
 #include "common/mySdpDef.h"
+#include "sdp/mySdpAttr.h"
 
 namespace MY_SDP {
 
@@ -107,9 +108,6 @@ private:
 class MySdpSessionParse : public MySdpParse
 {
 public:
-    using Ptr = std::shared_ptr<MySdpSessionParse>;
-
-public:
     ~MySdpSessionParse() override = default;
 
 public:
@@ -122,9 +120,10 @@ public:
 public:
     /**
      * @brief                       解析sdp
+     * @return                      有效值
      * @param str                   sdp字符串
      */
-    void                            parse(const std::string& str);
+    MY_COMMON::MyStatus_t           parse(const std::string& str);
 
 public:
     /**

@@ -1,5 +1,5 @@
 #include <set>
-#include<cstdlib>
+#include <cstdlib>
 #include <Util/util.h>
 #include "sdp/mySdpReg.h"
 #include "sdp/mySdpParse.h"
@@ -89,11 +89,11 @@ std::string MySdpSessionParse::toString() const
     return std::move(printer.data());
 }
 
-void MySdpSessionParse::parse(const std::string& str)
+MyStatus_t MySdpSessionParse::parse(const std::string& str)
 {
     static auto flag = MySdpReg::RegisterAllIterm();
     if (!flag) {
-        throw std::runtime_error("sdp register error");
+        return MyStatus_t::FAILED;
     }
 
     MySdpParse* media = nullptr;
@@ -134,6 +134,7 @@ void MySdpSessionParse::parse(const std::string& str)
             addItem(std::move(item));
         }
     }
+    return MyStatus_t::SUCCESS;
 }
 
 int MySdpSessionParse::getVersion() const
