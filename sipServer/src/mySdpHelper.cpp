@@ -21,7 +21,6 @@ MyStatus_t MySdpHelper::ConvertToSdpDirection(const std::string& str, MySdpDirec
         direction = MySdpDirection_t::SDP_DIRECTION_INACTIVE;
         return MyStatus_t::SUCCESS;
     }
-
     return MyStatus_t::FAILED;
 }
 
@@ -43,8 +42,43 @@ MyStatus_t MySdpHelper::ConvertToSdpDirectionStr(MySdpDirection_t direction, std
         str = "sendrecv";
         return MyStatus_t::SUCCESS;
     }
-
     return MyStatus_t::FAILED;
+}
+
+MyStatus_t MySdpHelper::MatchSdpDirection(MySdpDirection_t remoteDirection, MySdpDirection_t localDirection,
+    MySdpDirection_t &matchDirection)
+{
+    switch (remoteDirection) {
+        case MySdpDirection_t::SDP_DIRECTION_SENDONLY: {
+            if (MySdpDirection_t::SDP_DIRECTION_RECVONLY == localDirection ||
+                MySdpDirection_t::SDP_DIRECTION_SENDRECV == localDirection) {
+                matchDirection = MySdpDirection_t::SDP_DIRECTION_RECVONLY;
+                return MyStatus_t::SUCCESS;
+            }
+        }
+        case MySdpDirection_t::SDP_DIRECTION_RECVONLY: {
+            if (MySdpDirection_t::SDP_DIRECTION_SENDONLY ==  localDirection ||
+                MySdpDirection_t::SDP_DIRECTION_SENDRECV == localDirection) {
+                matchDirection = MySdpDirection_t::SDP_DIRECTION_SENDONLY;
+                return MyStatus_t::SUCCESS;
+            }
+        }
+        case MySdpDirection_t::SDP_DIRECTION_SENDRECV: {
+            if (MySdpDirection_t::SDP_DIRECTION_RECVONLY == localDirection ||
+                MySdpDirection_t::SDP_DIRECTION_SENDONLY == localDirection ||
+                MySdpDirection_t::SDP_DIRECTION_SENDRECV == localDirection) {
+                matchDirection = localDirection;
+                return MyStatus_t::SUCCESS;
+            }
+        }
+        case MySdpDirection_t::SDP_DIRECTION_INACTIVE: {
+            matchDirection = MySdpDirection_t::SDP_DIRECTION_INACTIVE;
+            return MyStatus_t::SUCCESS;
+        }
+        default: {
+            return MyStatus_t::FAILED;
+        }
+    }
 }
 
 MyStatus_t MySdpHelper::ConvertToSdpRole(const std::string& str, MySdpRole_t& role)
@@ -57,7 +91,6 @@ MyStatus_t MySdpHelper::ConvertToSdpRole(const std::string& str, MySdpRole_t& ro
         role = MySdpRole_t::SDP_ROLE_PASSIVE;
         return MyStatus_t::SUCCESS;
     }
-
     return MyStatus_t::FAILED;
 }
 
@@ -71,7 +104,6 @@ MyStatus_t MySdpHelper::ConvertToSdpRoleStr(MySdpRole_t role, std::string& str)
         str = "passive";
         return MyStatus_t::SUCCESS;
     }
-
     return MyStatus_t::FAILED;
 }
 
@@ -85,7 +117,6 @@ MyStatus_t MySdpHelper::ConvertToSdpType(const std::string& str, MySdpType_t& ty
         type = MySdpType_t::SDP_TYPE_ANSWER;
         return MyStatus_t::SUCCESS;
     }
-
     return MyStatus_t::FAILED;
 }
 
@@ -99,7 +130,6 @@ MyStatus_t MySdpHelper::ConvertToSdpTypeStr(MySdpType_t type, std::string& str)
         str = "answer";
         return MyStatus_t::SUCCESS;
     }
-
     return MyStatus_t::FAILED;
 }
 
@@ -121,7 +151,6 @@ MyStatus_t MySdpHelper::ConvertToSdpTrackType(const std::string& str, MySdpTrack
         type = MySdpTrackType_t::SDP_TRACK_TYPE_APPLICATION;
         return MyStatus_t::SUCCESS;
     }
-
     return MyStatus_t::FAILED;
 }
 
@@ -143,7 +172,6 @@ MyStatus_t MySdpHelper::ConvertToSdpTrackTypeStr(MySdpTrackType_t type, std::str
         str = "application";
         return MyStatus_t::SUCCESS;
     }
-
     return MyStatus_t::FAILED;
 }
 

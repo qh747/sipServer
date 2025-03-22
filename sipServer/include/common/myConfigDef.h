@@ -78,7 +78,7 @@ typedef struct MySipStackConfigDataType
     //                                                  sip服务注册有效时间（秒） 
     unsigned int                                        sipServRegExpiredTimeInterval;  
     //                                                  sip本级服务判断上下级服务超时时间间隔（秒）   
-    float                                               sipServRegistJugdeTimeInterval;   
+    float                                               sipServRegistJudgeTimeInterval;
  
  } MySipTimerCfg_dt;
 
@@ -175,7 +175,7 @@ typedef struct MySipRegisterUpperServerConfigDataType
     //                                                  SIP上级注册服务鉴权配置
     MySipServAuthCfg_dt                                 upSipServRegAuthCfg;
     //                                                  传输层协议类型
-    MyTpProto_t                                         proto;
+    MyTpProto_t                                         proto {MyTpProto_t::UDP};
 
 } MySipRegUpServCfg_dt;     
 
@@ -189,7 +189,7 @@ typedef struct MySipRegisterLowerServerConfigDataType
     //                                                  SIP下级注册服务鉴权配置
     MySipServAuthCfg_dt                                 lowSipServRegAuthCfg;
     //                                                  传输层协议类型
-    MyTpProto_t                                         proto;
+    MyTpProto_t                                         proto {MyTpProto_t::UDP};
 
 } MySipRegLowServCfg_dt;    
 
@@ -252,26 +252,26 @@ typedef struct MySipDeviceConfigDataType
     std::string                                         latitude; 
 
     bool operator==(const MySipDeviceConfigDataType& other) const {
-        if      (status         != other.status)         return false;
-        else if (name           != other.name)           return false;
-        else if (deviceID       != other.deviceID)       return false;
-        else if (parental       != other.parental)       return false;
-        else if (manufacturer   != other.manufacturer)   return false;
-        else if (model          != other.model)          return false;
-        else if (block          != other.block)          return false;
-        else if (safetyWay      != other.safetyWay)      return false;
-        else if (registerWay    != other.registerWay)    return false;
-        else if (secrecy        != other.secrecy)        return false;
-        else if (parentID       != other.parentID)       return false;
-        else if (platformID     != other.platformID)     return false;
-        else if (owner          != other.owner)          return false;
-        else if (deviceIp       != other.deviceIp)       return false;
-        else if (devicePort     != other.devicePort)     return false;
-        else if (deviceChannel  != other.deviceChannel)  return false;
-        else if (deviceStream   != other.deviceStream)   return false;
-        else if (longitude      != other.longitude)      return false; 
-        else if (latitude       != other.latitude)       return false;     
-        else                                             return true;    
+        if (status         != other.status)         return false;
+        if (name           != other.name)           return false;
+        if (deviceID       != other.deviceID)       return false;
+        if (parental       != other.parental)       return false;
+        if (manufacturer   != other.manufacturer)   return false;
+        if (model          != other.model)          return false;
+        if (block          != other.block)          return false;
+        if (safetyWay      != other.safetyWay)      return false;
+        if (registerWay    != other.registerWay)    return false;
+        if (secrecy        != other.secrecy)        return false;
+        if (parentID       != other.parentID)       return false;
+        if (platformID     != other.platformID)     return false;
+        if (owner          != other.owner)          return false;
+        if (deviceIp       != other.deviceIp)       return false;
+        if (devicePort     != other.devicePort)     return false;
+        if (deviceChannel  != other.deviceChannel)  return false;
+        if (deviceStream   != other.deviceStream)   return false;
+        if (longitude      != other.longitude)      return false;
+        if (latitude       != other.latitude)       return false;
+        return true;
     }
 
     bool operator!=(const MySipDeviceConfigDataType& other) const {
@@ -341,28 +341,28 @@ typedef struct MySipVirtualSubPlatformConfigDataType
     std::string                                         latitude;
 
     bool operator==(const MySipVirtualSubPlatformConfigDataType& other) const {
-        if      (status         != other.status)         return false;
-        else if (name           != other.name)           return false;
-        else if (deviceID       != other.deviceID)       return false;
-        else if (parental       != other.parental)       return false;
-        else if (manufacturer   != other.manufacturer)   return false;
-        else if (model          != other.model)          return false;
-        else if (block          != other.block)          return false;
-        else if (safetyWay      != other.safetyWay)      return false;
-        else if (registerWay    != other.registerWay)    return false;
-        else if (secrecy        != other.secrecy)        return false;
-        else if (parentID       != other.parentID)       return false;
-        else if (platformID     != other.platformID)     return false;
-        else if (platformIp     != other.platformIp)     return false;
-        else if (platformPort   != other.platformPort)   return false;
-        else if (owner          != other.owner)          return false;
-        else if (deviceIp       != other.deviceIp)       return false;
-        else if (devicePort     != other.devicePort)     return false;
-        else if (deviceChannel  != other.deviceChannel)  return false;
-        else if (deviceStream   != other.deviceStream)   return false;
-        else if (longitude      != other.longitude)      return false; 
-        else if (latitude       != other.latitude)       return false;     
-        else                                             return true;    
+        if (status         != other.status)         return false;
+        if (name           != other.name)           return false;
+        if (deviceID       != other.deviceID)       return false;
+        if (parental       != other.parental)       return false;
+        if (manufacturer   != other.manufacturer)   return false;
+        if (model          != other.model)          return false;
+        if (block          != other.block)          return false;
+        if (safetyWay      != other.safetyWay)      return false;
+        if (registerWay    != other.registerWay)    return false;
+        if (secrecy        != other.secrecy)        return false;
+        if (parentID       != other.parentID)       return false;
+        if (platformID     != other.platformID)     return false;
+        if (platformIp     != other.platformIp)     return false;
+        if (platformPort   != other.platformPort)   return false;
+        if (owner          != other.owner)          return false;
+        if (deviceIp       != other.deviceIp)       return false;
+        if (devicePort     != other.devicePort)     return false;
+        if (deviceChannel  != other.deviceChannel)  return false;
+        if (deviceStream   != other.deviceStream)   return false;
+        if (longitude      != other.longitude)      return false;
+        if (latitude       != other.latitude)       return false;
+        return true;
     }
 
     bool operator!=(const MySipVirtualSubPlatformConfigDataType& other) const {
@@ -420,28 +420,28 @@ typedef struct MySipSubPlatformConfigDataType
     std::string                                         latitude;
 
     bool operator==(const MySipSubPlatformConfigDataType& other) const {
-        if      (status         != other.status)         return false;
-        else if (name           != other.name)           return false;
-        else if (deviceID       != other.deviceID)       return false;
-        else if (parental       != other.parental)       return false;
-        else if (manufacturer   != other.manufacturer)   return false;
-        else if (model          != other.model)          return false;
-        else if (block          != other.block)          return false;
-        else if (safetyWay      != other.safetyWay)      return false;
-        else if (registerWay    != other.registerWay)    return false;
-        else if (secrecy        != other.secrecy)        return false;
-        else if (parentID       != other.parentID)       return false;
-        else if (platformID     != other.platformID)     return false;
-        else if (platformIp     != other.platformIp)     return false;
-        else if (platformPort   != other.platformPort)   return false;
-        else if (owner          != other.owner)          return false;
-        else if (deviceIp       != other.deviceIp)       return false;
-        else if (devicePort     != other.devicePort)     return false;
-        else if (deviceChannel  != other.deviceChannel)  return false;
-        else if (deviceStream   != other.deviceStream)   return false;
-        else if (longitude      != other.longitude)      return false; 
-        else if (latitude       != other.latitude)       return false;     
-        else                                             return true;    
+        if (status         != other.status)         return false;
+        if (name           != other.name)           return false;
+        if (deviceID       != other.deviceID)       return false;
+        if (parental       != other.parental)       return false;
+        if (manufacturer   != other.manufacturer)   return false;
+        if (model          != other.model)          return false;
+        if (block          != other.block)          return false;
+        if (safetyWay      != other.safetyWay)      return false;
+        if (registerWay    != other.registerWay)    return false;
+        if (secrecy        != other.secrecy)        return false;
+        if (parentID       != other.parentID)       return false;
+        if (platformID     != other.platformID)     return false;
+        if (platformIp     != other.platformIp)     return false;
+        if (platformPort   != other.platformPort)   return false;
+        if (owner          != other.owner)          return false;
+        if (deviceIp       != other.deviceIp)       return false;
+        if (devicePort     != other.devicePort)     return false;
+        if (deviceChannel  != other.deviceChannel)  return false;
+        if (deviceStream   != other.deviceStream)   return false;
+        if (longitude      != other.longitude)      return false;
+        if (latitude       != other.latitude)       return false;
+        return true;
     }
 
     bool operator!=(const MySipSubPlatformConfigDataType& other) const {
@@ -499,28 +499,28 @@ typedef struct MySipPlatformConfigDataType
     std::string                                         latitude;
 
     bool operator==(const MySipPlatformConfigDataType& other) const {
-        if      (status         != other.status)         return false;
-        else if (name           != other.name)           return false;
-        else if (deviceID       != other.deviceID)       return false;
-        else if (parental       != other.parental)       return false;
-        else if (manufacturer   != other.manufacturer)   return false;
-        else if (model          != other.model)          return false;
-        else if (block          != other.block)          return false;
-        else if (safetyWay      != other.safetyWay)      return false;
-        else if (registerWay    != other.registerWay)    return false;
-        else if (secrecy        != other.secrecy)        return false;
-        else if (parentID       != other.parentID)       return false;
-        else if (platformID     != other.platformID)     return false;
-        else if (platformIp     != other.platformIp)     return false;
-        else if (platformPort   != other.platformPort)   return false;
-        else if (owner          != other.owner)          return false;
-        else if (deviceIp       != other.deviceIp)       return false;
-        else if (devicePort     != other.devicePort)     return false;
-        else if (deviceChannel  != other.deviceChannel)  return false;
-        else if (deviceStream   != other.deviceStream)   return false;
-        else if (longitude      != other.longitude)      return false; 
-        else if (latitude       != other.latitude)       return false;     
-        else                                             return true;    
+        if (status         != other.status)         return false;
+        if (name           != other.name)           return false;
+        if (deviceID       != other.deviceID)       return false;
+        if (parental       != other.parental)       return false;
+        if (manufacturer   != other.manufacturer)   return false;
+        if (model          != other.model)          return false;
+        if (block          != other.block)          return false;
+        if (safetyWay      != other.safetyWay)      return false;
+        if (registerWay    != other.registerWay)    return false;
+        if (secrecy        != other.secrecy)        return false;
+        if (parentID       != other.parentID)       return false;
+        if (platformID     != other.platformID)     return false;
+        if (platformIp     != other.platformIp)     return false;
+        if (platformPort   != other.platformPort)   return false;
+        if (owner          != other.owner)          return false;
+        if (deviceIp       != other.deviceIp)       return false;
+        if (devicePort     != other.devicePort)     return false;
+        if (deviceChannel  != other.deviceChannel)  return false;
+        if (deviceStream   != other.deviceStream)   return false;
+        if (longitude      != other.longitude)      return false;
+        if (latitude       != other.latitude)       return false;
+        return true;
     }
 
     bool operator!=(const MySipPlatformConfigDataType& other) const {
@@ -543,7 +543,16 @@ typedef struct MySipCatalogConfigDataType
     //                                                          SIP设备目录设备配置map，key = 设备ID, value = 设备配置
     std::map<std::string, MySipCatalogDeviceCfg_dt>             catalogDeviceCfgMap;
 
-} MySipCatalogCfg_dt;   
+} MySipCatalogCfg_dt;
 
+/**
+ * @brief SIP SDP配置
+ */
+typedef struct MySipSdpConfigDataType
+{
+    //                                                          SIP SDP Play配置
+    std::string                                                 sipSdpPlayFileNameCfg;
+
+} MySipSdpCfg_dt;
 
 }; // MY_COMMON

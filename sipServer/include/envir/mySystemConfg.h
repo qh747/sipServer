@@ -33,7 +33,7 @@ public:
     static MY_COMMON::MyStatus_t                            GetSipServRegExpiredTimeInterval(unsigned int& timeInterval);
 
     //                                                      sip本级服务判断上下级服务超时时间间隔（秒）
-    static MY_COMMON::MyStatus_t                            GetSipServRegistJugdeTimeInterval(float& timeInterval);
+    static MY_COMMON::MyStatus_t                            GetSipServRegistJudgeTimeInterval(float& timeInterval);
 
     //                                                      获取sip事件线程内存配置
     static MY_COMMON::MyStatus_t                            GetSipEvThdMemCfg(MY_COMMON::MySipEvThdMemCfg_dt& cfg);
@@ -52,6 +52,9 @@ public:
 
     //                                                      获取SIP设备目录配置
     static MY_COMMON::MyStatus_t                            GetSipCatalogCfg(MY_COMMON::MySipCatalogCfg_dt& cfg);
+
+    //                                                      获取SIP SDP配置
+    static MY_COMMON::MyStatus_t                            GetSipSdpCfg(MY_COMMON::MySipSdpCfg_dt& cfg);
 
 private:
     //                                                      配置文件读写锁
@@ -83,6 +86,9 @@ private:
 
     //                                                      sip设备目录配置
     static MY_COMMON::MySipCatalogCfg_dt                    SipCatalogCfg;
+
+    //                                                      sip sdp配置
+    static MY_COMMON::MySipSdpCfg_dt                        SipSdpCfg;
 };
 
 }; // namespace MY_ENVIR

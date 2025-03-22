@@ -2,6 +2,7 @@
 #include <string>
 #include <memory>
 #include "common/myTypeDef.h"
+#include "sdp/mySdpSession.h"
 
 namespace MY_APP {
 
@@ -24,28 +25,32 @@ public:
      * @param invSessPtr                        邀请会话对象
      * @param evPtr                             事件对象
      */
-    static void                                 OnInviteStateChanged(MY_COMMON::MySipInvSessionPtr invSessPtr, MY_COMMON::MySipEvPtr evPtr);
+    static void                                 OnInviteStateChanged(MY_COMMON::MySipInvSessionPtr invSessPtr,
+                                                    MY_COMMON::MySipEvPtr evPtr);
 
     /**
      * @brief                                   邀请会话创建回调
      * @param invSessPtr                        邀请会话对象
      * @param evPtr                             事件对象
      */
-    static void                                 OnNewInviteSession(MY_COMMON::MySipInvSessionPtr invSessPtr, MY_COMMON::MySipEvPtr evPtr);
+    static void                                 OnNewInviteSession(MY_COMMON::MySipInvSessionPtr invSessPtr,
+                                                    MY_COMMON::MySipEvPtr evPtr);
 
     /**
      * @brief                                   邀请会话媒体更新回调
      * @param invSessPtr                        邀请会话对象
      * @param status                            状态
      */
-    static void                                 OnInviteMediaUpdate(MY_COMMON::MySipInvSessionPtr invSessPtr, pj_status_t status);
+    static void                                 OnInviteMediaUpdate(MY_COMMON::MySipInvSessionPtr invSessPtr,
+                                                    pj_status_t status);
 
     /**
      * @brief                                   邀请会话响应Ack回调
      * @param invSessPtr                        邀请会话对象
      * @param rxDataPtr                         接收数据
      */
-    static void                                 OnInviteSendAck(MY_COMMON::MySipInvSessionPtr invSessPtr, MY_COMMON::MySipRxDataPtr rxDataPtr);
+    static void                                 OnInviteSendAck(MY_COMMON::MySipInvSessionPtr invSessPtr,
+                                                    MY_COMMON::MySipRxDataPtr rxDataPtr);
 
 public:
     /**
@@ -55,7 +60,8 @@ public:
      * @param name                              应用名称
      * @param priority                          应用优先级
      */ 
-    MY_COMMON::MyStatus_t                       init(const std::string& servId, const std::string& name, pjsip_module_priority priority);
+    MY_COMMON::MyStatus_t                       init(const std::string& servId, const std::string& name,
+                                                    pjsip_module_priority priority);
 
     /** 
      * @brief                                   应用启动
@@ -71,14 +77,15 @@ public:
 
 public:
     /** 
-     * @brief                                   请求设备媒体流
+     * @brief                                   请求设备播放媒体流
      * @return                                  请求结果，0-success，-1-failed
      * @param deviceId                          设备ID
      * @param reqInfo                           请求信息
      * @param respInfo                          响应信息
      */ 
-    MY_COMMON::MyStatus_t                       onSipInviteAppReqDeviceMedia(const std::string& deviceId, const MY_COMMON::MyHttpReqMediaInfo_dt& reqInfo,
-                                                                             std::string& respInfo);
+    MY_COMMON::MyStatus_t                       onSipInviteAppReqDevicePlayMedia(const std::string& deviceId,
+                                                    const MY_COMMON::MyHttpReqMediaInfo_dt& reqInfo,
+                                                    std::string& respInfo);
 
 public:     
     /**     
@@ -102,6 +109,55 @@ public:
      */
      MY_COMMON::MyStatus_t                      getSipInviteApp(SmtWkPtr& wkPtr);
 
+private:
+    /**
+     * @brief                                   检查请求设备播放媒体流是否有效
+     * @return                                  检查结果，0-success，-1-failed
+     * @param deviceId                          设备ID
+     * @param reqInfo                           请求信息
+     */
+    MY_COMMON::MyStatus_t                       reqDevicePlayMediaCheck(const std::string& deviceId,
+                                                    const MY_COMMON::MyHttpReqMediaInfo_dt& reqInfo);
+
+    /**
+     * @brief                                   获取请求设备播放媒体流的相关参数
+     * @return                                  检查结果，0-success，-1-failed
+     * @param deviceId                          设备ID
+     * @param deviceCfg                         设备信息
+     * @param deviceOwnerCfg                    设备所属平台信息
+     */
+    MY_COMMON::MyStatus_t                       reqDevicePlayMediaGetInfo(const std::string& deviceId,
+                                                    MY_COMMON::MySipCatalogDeviceCfg_dt& deviceCfg,
+                                                    MY_COMMON::MySipCatalogPlatCfg_dt& deviceOwnerCfg);
+
+    /**
+     * @brief                                   获取请求设备播放媒体流的相关参数
+     * @return                                  检查结果，0-success，-1-failed
+     * @param deviceId                          设备ID
+     * @param poolPtr                           内存池地址
+     * @param reqProtoType                      请求协议类型
+     * @param sdpSessionPtrAddr                 sdp会话地址
+     */
+    MY_COMMON::MyStatus_t                       reqDevicePlayMediaPrepareSdp(const std::string& deviceId,
+                                                    MY_COMMON::MySipPoolPtr poolPtr,
+                                                    MY_COMMON::MyTpProto_t reqProtoType,
+                                                    MY_COMMON::MySipSdpSessionPtrAddr sdpSessionPtrAddr);
+
+    /**
+     * @brief                                   获取请求设备播放媒体流的相关参数
+     * @return                                  检查结果，0-success，-1-failed
+     * @param deviceId                          设备ID
+     * @param deviceCfg                         设备信息
+     * @param deviceOwnerCfg                    设备所属平台信息
+     * @param protoType                         协议类型
+     * @param dlgPtrAddr                        会话地址
+     */
+    MY_COMMON::MyStatus_t                       reqDevicePlayMediaConstructDialog(const std::string& deviceId,
+                                                    MY_COMMON::MySipCatalogDeviceCfg_dt& deviceCfg,
+                                                    MY_COMMON::MySipCatalogPlatCfg_dt& deviceOwnerCfg,
+                                                    MY_COMMON::MyTpProto_t protoType,
+                                                    MY_COMMON::MySipDialogPtrAddr dlgPtrAddr);
+
 private:    
     //                                          sip服务ID
     std::string                                 m_servId;
@@ -114,6 +170,9 @@ private:
 
     //                                          invite回调函数地址
     MY_COMMON::MySipInvCbSmtPtr                 m_invCbPtr;
+
+    //                                          本端sdp - 用于请求媒体流播放
+    MY_SDP::MySdpSession::Ptr                   m_localSdpPlayPtr;
 };
 
 }; // namespace MY_APP

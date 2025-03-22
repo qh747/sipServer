@@ -26,11 +26,7 @@ int MySipServer::ServThdFunc(MyFuncCbParamPtr arg)
     }
 
     // 获取sip服务地址
-    MySipServAddrCfgPtr servAddrCfgPtr = static_cast<MySipServAddrCfgPtr>(arg);
-    if (nullptr == servAddrCfgPtr) {
-        LOG(ERROR) << "ServThdFunc() error. servAddrCfg is invalid.";
-        return -1;
-    }
+    auto servAddrCfgPtr = static_cast<MySipServAddrCfgPtr>(arg);
 
     // new in: MySipServer::run()
     std::unique_ptr<MySipServAddrCfg_dt> memManagePtr(servAddrCfgPtr);
@@ -58,10 +54,7 @@ int MySipServer::ServThdFunc(MyFuncCbParamPtr arg)
 
         // 获取sip服务状态成功
         MyStatus_t status = MyStatus_t::FAILED;
-        if (MyStatus_t::FAILED == servWkPtr.lock()->getState(status)) {
-            LOG(INFO) << "ServThdFunc() exit. sip server is shutdown.";
-            break;
-        }
+        servWkPtr.lock()->getState(status);
 
         // sip服务状态有效
         if (MyStatus_t::SUCCESS != status) {
@@ -97,10 +90,7 @@ void MySipServer::ServMediaReqEvFunc(MY_MEDIA_REQ_EV_ARGS)
     MySipServer::SmtPtr servPtr = servWkPtr.lock();
 
     MyStatus_t servState = MyStatus_t::FAILED;
-    if (MyStatus_t::SUCCESS != servPtr->getState(servState)) {
-        LOG(ERROR) << "ServMediaReqEvFunc() error. get server state error.";
-        return;
-    }
+    servPtr->getState(servState);
 
     if (MyStatus_t::SUCCESS != servState) {
         LOG(ERROR) << "ServMediaReqEvFunc() error. server state invalid.";
@@ -120,10 +110,10 @@ void MySipServer::ServMediaReqEvFunc(MY_MEDIA_REQ_EV_ARGS)
 }
 
 MySipServer::MySipServer() : m_status(MyStatus_t::FAILED), m_servThdPoolPtr(nullptr),
-                             m_servEvThdPtr(nullptr), m_servEndptPtr(nullptr), m_servUdpTpPtr(nullptr), m_servTcpTpFactoryPtr(nullptr),
-                             m_servUdpRegTpPtr(nullptr), m_servTcpRegTpFactoryPtr(nullptr)
+    m_servEvThdPtr(nullptr), m_servEndptPtr(nullptr), m_servUdpTpPtr(nullptr), m_servTcpTpFactoryPtr(nullptr),
+    m_servUdpRegTpPtr(nullptr), m_servTcpRegTpFactoryPtr(nullptr)
 {
-    
+
 }
 
 MySipServer::~MySipServer()
@@ -229,7 +219,8 @@ MyStatus_t MySipServer::run()
     auto servAddrCfgPtr = new MySipServAddrCfg_dt(m_servAddrCfg);
 
     // 服务需要事件循环触发消息发送和接收回调
-    if (PJ_SUCCESS != pj_thread_create(m_servThdPoolPtr, nullptr, &MySipServer::ServThdFunc, servAddrCfgPtr, 0, 0, &m_servEvThdPtr)) {
+    if (PJ_SUCCESS != pj_thread_create(m_servThdPoolPtr, nullptr, &MySipServer::ServThdFunc,
+        servAddrCfgPtr, 0, 0, &m_servEvThdPtr)) {
         LOG(ERROR) << "SipServer run failed. pj_thread_create() error. " << sipServInfo << ".";
         return MyStatus_t::FAILED;
     }
@@ -317,14 +308,22 @@ MyStatus_t MySipServer::onReqLowServCatalog(const MySipRegLowServCfg_dt& lowSipR
     return sipCatalogAppWkPtr.lock()->onSipCatalogAppReqLowServCatalog(lowSipRegServAddrCfg, m_servAddrCfg);
 }
 
-MyStatus_t MySipServer::onReqDeviceMedia(const std::string& deviceId, const MY_COMMON::MyHttpReqMediaInfo_dt& reqInfo, std::string& respInfo)
+MyStatus_t MySipServer::onReqDeviceMedia(const std::string& deviceId, const MY_COMMON::MyHttpReqMediaInfo_dt& reqInfo,
+    std::string& respInfo)
 {
     MySipInviteApp::SmtWkPtr sipInviteAppWkPtr;
     if (MyStatus_t::SUCCESS != MyAppManage::GetSipInviteApp(sipInviteAppWkPtr)) {
         LOG(ERROR) << "SipServer onReqDeviceMedia() failed. sipInviteApp invalid.";
         return MyStatus_t::FAILED;
     }
-    return sipInviteAppWkPtr.lock()->onSipInviteAppReqDeviceMedia(deviceId, reqInfo, respInfo);
+
+    if (MyMedaPlayWay_t::PLAY == reqInfo.playType) {
+        return sipInviteAppWkPtr.lock()->onSipInviteAppReqDevicePlayMedia(deviceId, reqInfo, respInfo);
+    }
+    else {
+        LOG(ERROR) << "SipServer onReqDeviceMedia() failed. current not support play type.";
+        return MyStatus_t::FAILED;
+    }
 }
 
 MyStatus_t MySipServer::getState(MyStatus_t& status) const
@@ -346,7 +345,20 @@ MyStatus_t MySipServer::getServAddrCfg(MY_COMMON::MySipServAddrCfg_dt& cfg)
     return MyStatus_t::SUCCESS;
 }
 
-MyStatus_t MySipServer::getServUdpTp(MY_COMMON::MySipTransportPtrAddr udpTpPtrAddr)
+MyStatus_t MySipServer::getServPool(MySipPoolPtrAddr poolAddr)
+{
+    if (MyStatus_t::FAILED == m_status.load()) {
+        LOG(ERROR) << "SipServer is not init.";
+        return MyStatus_t::FAILED;
+    }
+
+    boost::shared_lock<boost::shared_mutex> lock(m_rwMutex);
+
+    *poolAddr = m_servThdPoolPtr;
+    return MyStatus_t::SUCCESS;
+}
+
+MyStatus_t MySipServer::getServUdpTp(MySipTransportPtrAddr udpTpPtrAddr)
 {
     if (MyStatus_t::FAILED == m_status.load()) {
         LOG(ERROR) << "SipServer is not init.";
@@ -372,7 +384,8 @@ MyStatus_t MySipServer::getServRegUdpTp(MY_COMMON::MySipTransportPtrAddr udpTpPt
     return MyStatus_t::SUCCESS;
 }
 
-MyStatus_t MySipServer::getServTcpTp(MySipTransportPtrAddr tcpTpPtrAddr, const std::string& remoteIpAddr, uint16_t remotePort)
+MyStatus_t MySipServer::getServTcpTp(MySipTransportPtrAddr tcpTpPtrAddr, const std::string& remoteIpAddr,
+    uint16_t remotePort)
 {
     if (MyStatus_t::FAILED == m_status.load()) {
         LOG(ERROR) << "SipServer is not init.";
@@ -396,7 +409,8 @@ MyStatus_t MySipServer::getServTcpTp(MySipTransportPtrAddr tcpTpPtrAddr, const s
         MySipTpmgrPtr tmpgrPtr = pjsip_endpt_get_tpmgr(m_servEndptPtr);
 
         MySipTransportPtr tpPtr = nullptr;
-        m_servTcpTpFactoryPtr->create_transport(m_servTcpTpFactoryPtr, tmpgrPtr, m_servEndptPtr, &remoteAddr, sizeof(remoteAddr), &tpPtr);
+        m_servTcpTpFactoryPtr->create_transport(m_servTcpTpFactoryPtr, tmpgrPtr, m_servEndptPtr, &remoteAddr,
+            sizeof(remoteAddr), &tpPtr);
 
         *tcpTpPtrAddr = tpPtr;
         m_servTcpTpMap.insert(std::make_pair(key, tpPtr));
@@ -407,7 +421,8 @@ MyStatus_t MySipServer::getServTcpTp(MySipTransportPtrAddr tcpTpPtrAddr, const s
     return MyStatus_t::SUCCESS;
 }
 
-MyStatus_t MySipServer::getServRegTcpTp(MySipTransportPtrAddr tcpTpPtrAddr, const std::string& remoteIpAddr, uint16_t remotePort)
+MyStatus_t MySipServer::getServRegTcpTp(MySipTransportPtrAddr tcpTpPtrAddr, const std::string& remoteIpAddr,
+    uint16_t remotePort)
 {
     if (MyStatus_t::FAILED == m_status.load()) {
         LOG(ERROR) << "SipServer is not init.";
@@ -431,7 +446,8 @@ MyStatus_t MySipServer::getServRegTcpTp(MySipTransportPtrAddr tcpTpPtrAddr, cons
         MySipTpmgrPtr tmpgrPtr = pjsip_endpt_get_tpmgr(m_servEndptPtr);
 
         MySipTransportPtr tpPtr = nullptr;
-        m_servTcpTpFactoryPtr->create_transport(m_servTcpRegTpFactoryPtr, tmpgrPtr, m_servEndptPtr, &remoteAddr, sizeof(remoteAddr), &tpPtr);
+        m_servTcpTpFactoryPtr->create_transport(m_servTcpRegTpFactoryPtr, tmpgrPtr, m_servEndptPtr, &remoteAddr,
+            sizeof(remoteAddr), &tpPtr);
 
         *tcpTpPtrAddr = tpPtr;
         m_servTcpRegTpMap.insert(std::make_pair(key, tpPtr));

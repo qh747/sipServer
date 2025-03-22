@@ -205,6 +205,19 @@ MyStatus_t MyServManage::GetSipServAddrCfg(MySipServAddrCfg_dt& servAddrCfg)
     return MyStatus_t::SUCCESS;
 }
 
+MyStatus_t MyServManage::GetSipServPool(MY_COMMON::MySipPoolPtrAddr poolAddr)
+{
+    MySipServer::SmtWkPtr sipServWkPtr;
+    if (MyStatus_t::SUCCESS != ManageObject.getSipServ(sipServWkPtr)) {
+        return MyStatus_t::FAILED;
+    }
+
+    if (MyStatus_t::SUCCESS != sipServWkPtr.lock()->getServPool(poolAddr)) {
+        return MyStatus_t::FAILED;
+    }
+    return MyStatus_t::SUCCESS;
+}
+
 MyStatus_t MyServManage::GetSipServUdpTp(MySipTransportPtrAddr udpTpPtrAddr)
 {
     MySipServer::SmtWkPtr sipServWkPtr;

@@ -29,6 +29,17 @@ public:
     static MY_COMMON::MyStatus_t    ConvertToSdpDirectionStr(MY_COMMON::MySdpDirection_t direction, std::string& str);
 
     /**
+     * @brief                       sdp传输方向匹配
+     * @return                      匹配结果
+     * @param remoteDirection       对端sdp传输方向
+     * @param localDirection        本端sdp传输方向
+     * @param matchDirection        匹配结果
+     */
+    static MY_COMMON::MyStatus_t    MatchSdpDirection(MY_COMMON::MySdpDirection_t remoteDirection,
+                                        MY_COMMON::MySdpDirection_t localDirection,
+                                        MY_COMMON::MySdpDirection_t &matchDirection);
+
+    /**
      * @brief                       转换sdp角色
      * @return                      转换结果
      * @param str                   sdp角色字符串

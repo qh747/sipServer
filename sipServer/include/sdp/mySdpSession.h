@@ -13,12 +13,33 @@ namespace MY_SDP {
 class MySdpSession
 {
 public:
+    using Ptr = std::shared_ptr<MySdpSession>;
+
+public:
+    /**
+     * @brief                       创建sdp answer
+     * @return                      有效值
+     * @param remoteSdp             对端sdp
+     * @param localSdp              本端sdp
+     * @param answerSdp             应答sdp
+     */
+    static MY_COMMON::MyStatus_t    CreateAnswer(const MySdpSession& remoteSdp, const MySdpSession& localSdp,
+                                                 MySdpSession& answerSdp);
+
+public:
     /**
      * @brief                       从sdp文本加载
      * @return                      有效值
      * @param sdp                   sdp文本
      */
     MY_COMMON::MyStatus_t           loadFrom(const std::string& sdp);
+
+    /**
+     * @brief                       从sdp文件加载
+     * @return                      有效值
+     * @param sdp                   sdp文件名称
+     */
+    MY_COMMON::MyStatus_t           loadFromFile(const std::string& fileName);
 
     /**
      * @brief                       生成sdp文本
@@ -33,6 +54,7 @@ public:
      */
     MY_COMMON::MyStatus_t           checkValid() const;
 
+public:
     /**
      * @brief                       获取媒体信息
      * @return                      有效值
@@ -41,13 +63,43 @@ public:
      */
     MY_COMMON::MyStatus_t           getMedia(MY_COMMON::MySdpTrackType_t type, MySdpMedia& media) const;
 
+    /**
+     * @brief                       获取端口数量
+     * @return                      有效值
+     * @param portCount             端口数量
+     */
+    MY_COMMON::MyStatus_t           getPortCount(unsigned int& portCount) const;
+
+    /**
+     * @brief                       设置地址
+     * @return                      有效值
+     * @param ipAddr                ip地址
+     */
+    MY_COMMON::MyStatus_t           setAddr(const std::string& ipAddr);
+
+    /**
+     * @brief                       设置端口
+     * @return                      有效值
+     * @param port                  端口
+     * @param type                  媒体类型
+     */
+    MY_COMMON::MyStatus_t           setPort(uint16_t port, MY_COMMON::MySdpTrackType_t type);
+
+    /**
+     * @brief                       设置ssrc
+     * @return                      有效值
+     * @param ssrcVec               ssrc数组
+     * @param type                  媒体类型
+     */
+    MY_COMMON::MyStatus_t           setSSRC(const MySdpMedia::SSRCVec& ssrcVec, MY_COMMON::MySdpTrackType_t type);
+
 public:
     uint32_t                        m_version;
     MySdpOrigin                     m_origin;
     std::string                     m_sessionName;
     MySdpTime                       m_time;
     MySdpConnection                 m_connection;
-    MySdpMedia::Vec                 m_mediaVec;
+    MySdpMedia::PtrVec              m_mediaPtrVec;
 };
 
-}; // MY_SDP
+}; // namespace MY_SDP

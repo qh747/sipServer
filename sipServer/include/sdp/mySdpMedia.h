@@ -13,7 +13,8 @@ namespace MY_SDP {
 class MySdpMedia
 {
 public:
-    using Vec = std::vector<MySdpMedia>;
+    using Ptr    = std::shared_ptr<MySdpMedia>;
+    using PtrVec = std::vector<MySdpMedia::Ptr>;
 
 public:
     /**
@@ -65,6 +66,7 @@ public:
     uint16_t                        m_port {0};
     MySdpConnection                 m_connection;
     std::string                     m_proto;
+    MySdpAttrSetup                  m_setup;
     MY_COMMON::MySdpDirection_t     m_direction {MY_COMMON::MySdpDirection_t::SDP_DIRECTION_INVALID};
     CodecPlanVector                 m_codecPlanVec;
     SSRCVec                         m_ssrcVec;

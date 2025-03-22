@@ -15,6 +15,10 @@ MyStatus_t MySdpMedia::checkValid() const
         return MyStatus_t::FAILED;
     }
 
+    if (std::string::npos != m_proto.find("TCP") && MySdpRole_t::SDP_ROLE_INVALID == m_setup.m_role) {
+        return MyStatus_t::FAILED;
+    }
+
     return MyStatus_t::SUCCESS;
 }
 

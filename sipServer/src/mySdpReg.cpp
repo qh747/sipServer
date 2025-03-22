@@ -21,7 +21,6 @@ bool MySdpReg::RegisterAllIterm()
     RegisterSdpItem<MySdpDirectRecvonly>();
     RegisterSdpItem<MySdpDirectSendrecv>();
     RegisterSdpItem<MySdpDirectInactive>();
-
     return true;
 }
 

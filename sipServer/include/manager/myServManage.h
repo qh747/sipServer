@@ -69,6 +69,13 @@ public:
     static MY_COMMON::MyStatus_t                    GetSipServAddrCfg(MY_COMMON::MySipServAddrCfg_dt& servAddrCfg);
 
     /**
+     * @brief                                       获取sip server内存
+     * @return                                      获取结果，0-success，-1-failed
+     * @param poolAddr                              sip server内存
+     */
+    static MY_COMMON::MyStatus_t                    GetSipServPool(MY_COMMON::MySipPoolPtrAddr poolAddr);
+
+    /**
      * @brief                                       获取sip服务udp transport
      * @return                                      获取结果，0-success，-1-failed
      * @param udpTpPtrAddr                          sip服务udp transport
@@ -89,16 +96,18 @@ public:
      * @param remoteIp                              远端ip地址
      * @param remotePort                            远端端口
      */
-    static MY_COMMON::MyStatus_t                    GetSipServTcpTp(MY_COMMON::MySipTransportPtrAddr tcpTpPtrAddr, const std::string& remoteIp, uint16_t remotePort);
+    static MY_COMMON::MyStatus_t                    GetSipServTcpTp(MY_COMMON::MySipTransportPtrAddr tcpTpPtrAddr,
+                                                        const std::string& remoteIp, uint16_t remotePort);
  
     /**
      * @brief                                       获取sip服务注册使用的tcp transport工厂
      * @return                                      获取结果，0-success，-1-failed
      * @param tcpTpPtrAddr                          sip服务tcp transport
-     * @param remoteIpAddr                          远端ip地址
+     * @param remoteIp                              远端ip地址
      * @param remotePort                            远端端口
      */
-    static MY_COMMON::MyStatus_t                    GetSipServRegTcpTp(MY_COMMON::MySipTransportPtrAddr tcpTpPtrAddr, const std::string& remoteIp, uint16_t remotePort);
+    static MY_COMMON::MyStatus_t                    GetSipServRegTcpTp(MY_COMMON::MySipTransportPtrAddr tcpTpPtrAddr,
+                                                        const std::string& remoteIp, uint16_t remotePort);
 
 public:
     public:

@@ -122,6 +122,13 @@ public:
     MY_COMMON::MyStatus_t                   getServAddrCfg(MY_COMMON::MySipServAddrCfg_dt& cfg);
 
     /**
+     * @brief                               获取sip服务内存
+     * @return                              获取结果，0-success，-1-failed
+     * @param poolAddr                      sip服务内存
+     */
+    MY_COMMON::MyStatus_t                   getServPool(MY_COMMON::MySipPoolPtrAddr poolAddr);
+
+    /**
      * @brief                               获取sip服务udp transport
      * @return                              获取结果，0-success，-1-failed
      * @param udpTpPtrAddr                  sip服务udp transport

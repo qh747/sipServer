@@ -19,6 +19,7 @@ namespace MY_COMMON {
 
 typedef const   pj_str_t*                                                   MySipStrCstPtr;
 typedef         pj_pool_t*                                                  MySipPoolPtr;
+typedef         pj_pool_t**                                                 MySipPoolPtrAddr;
 typedef         pjsip_event*                                                MySipEvPtr;
 typedef         pjsip_cred_info*                                            MySipCredInfoPtr;
 typedef         pjsip_tpmgr*                                                MySipTpmgrPtr;
@@ -36,11 +37,18 @@ typedef         pjsip_rx_data*                                              MySi
 typedef         pjsip_tx_data*                                              MySipTxDataPtr;
 typedef         pjsip_date_hdr*                                             MySipMsgDateHdrPtr;
 typedef         pjsip_www_authenticate_hdr*                                 MySipMsgAuthHdrPtr;
+typedef         pjsip_generic_string_hdr*                                   MySipMsgGenericHdrPtr;
 typedef         pjsip_regc_cbparam*                                         MySipRegCbParamPtr;
 typedef         pjsip_inv_session*                                          MySipInvSessionPtr;
+typedef         pjmedia_sdp_session*                                        MySipSdpSessionPtr;
+typedef         pjmedia_sdp_session**                                       MySipSdpSessionPtrAddr;
+typedef         pjmedia_sdp_conn*                                           MySipSdpConnPtr;
+typedef         pjmedia_sdp_media*                                          MySipSdpMediaPtr;
+typedef         pjmedia_sdp_attr*                                           MySipSdpAttrPtr;
 typedef         pjsip_transaction*                                          MySipTsxPtr;
 typedef         pj_thread_t*                                                MySipThdPtr; 
 typedef         pjsip_dialog*                                               MySipDialogPtr;
+typedef         pjsip_dialog**                                              MySipDialogPtrAddr;
 typedef         pjsip_module*                                               MySipModPtr;
 typedef         std::shared_ptr<pjsip_module>                               MySipModSmtPtr;
 typedef         std::shared_ptr<pjsip_inv_callback>                         MySipInvCbSmtPtr;
@@ -61,9 +69,9 @@ typedef         std::map<std::string, MySipTransportPtr>                    MySi
 typedef         std::map<std::string, MySipRegUpServCfg_dt>                 MySipRegUpServCfgMap;
 // key = low reg sip server id, value = low reg sip server config       
 typedef         std::map<std::string, MySipRegLowServCfg_dt>                MySipRegLowServCfgMap;
-// key = devide id, value = sip server platform config
+// key = device id, value = sip server platform config
 typedef         std::map<std::string, MySipCatalogPlatCfg_dt>               MySipCatalogPlatCfgMap;
-// key = devide id, value = sip server sub platform config
+// key = device id, value = sip server sub platform config
 typedef         std::map<std::string, MySipCatalogSubPlatCfg_dt>            MySipCatalogSubPlatCfgMap;
 // key = device id, value = sip server virtual sub platform config
 typedef         std::map<std::string, MySipCatalogVirtualSubPlatCfg_dt>     MySipCatalogSubVirtualPlatCfgMap;

@@ -183,7 +183,7 @@ MyStatus_t MySipRegApp::run()
         }
 
         float timeInterval = 0;
-        if (MyStatus_t::SUCCESS != MySystemConfig::GetSipServRegistJugdeTimeInterval(timeInterval)) {
+        if (MyStatus_t::SUCCESS != MySystemConfig::GetSipServRegistJudgeTimeInterval(timeInterval)) {
             LOG(ERROR) << "Sip reg app module run failed. get sip serv regist jugde time interval failed.";
             return MyStatus_t::FAILED;
         }

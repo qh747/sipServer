@@ -342,5 +342,5 @@ public:
     MY_COMMON::MySdpDirection_t getDirect() const override { return MY_COMMON::MySdpDirection_t::SDP_DIRECTION_INACTIVE; }
 };
 
-}; // MY_SDP
+}; // namespace MY_SDP
 

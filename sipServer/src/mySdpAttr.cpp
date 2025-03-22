@@ -249,4 +249,4 @@ std::string MySdpGB28181SSRC::toString() const
     return MySdpItem::toString();
 }
 
-}; // MY_SDP
+}; // namespace MY_SDP
