@@ -37,7 +37,7 @@ public:
     /**
      * @brief                       从sdp文件加载
      * @return                      有效值
-     * @param sdp                   sdp文件名称
+     * @param fileName              sdp文件名称
      */
     MY_COMMON::MyStatus_t           loadFromFile(const std::string& fileName);
 

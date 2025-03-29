@@ -1,8 +1,9 @@
 #include <map>
-#include <iostream>
 #include <fstream>
-#include <cstdint>
 #include <json/json.h>
+#define GLOG_USE_GLOG_EXPORT
+#include <glog/logging.h>
+#include <gflags/gflags.h>
 #include "utils/myJsonHelper.h"
 using namespace MY_COMMON;
 
@@ -16,6 +17,11 @@ MyStatus_t MyJsonHelper::ParseSipRegJsonFile(const std::string& filePath, MySipR
 
     // 读取 json 文件
     std::ifstream ifs(filePath.c_str());
+    if (!ifs.is_open()) {
+        LOG(ERROR) << "open json file failed: " << filePath;
+        return MyStatus_t::FAILED;
+    }
+
     Json::Value rootNode;
     ifs >> rootNode;
 
@@ -54,9 +60,8 @@ MyStatus_t MyJsonHelper::ParseSipRegJsonFile(const std::string& filePath, MySipR
             }
 
             std::string sProto = curServNode["proto"].asString();
-            if      ("udp" == sProto) { upRegServCfg.proto = MyTpProto_t::UDP; }
-            else if ("tcp" == sProto) { upRegServCfg.proto = MyTpProto_t::TCP; }
-            else                      { upRegServCfg.proto = MyTpProto_t::UDP; }
+            if ("tcp" == sProto) { upRegServCfg.proto = MyTpProto_t::TCP; }
+            else                 { upRegServCfg.proto = MyTpProto_t::UDP; }
 
             regCfg.upRegSipServMap.insert(std::make_pair(upRegServCfg.upSipServRegAddrCfg.id, std::move(upRegServCfg)));
         }
@@ -97,9 +102,8 @@ MyStatus_t MyJsonHelper::ParseSipRegJsonFile(const std::string& filePath, MySipR
             }
         
             std::string sProto = curServNode["proto"].asString();
-            if      ("udp" == sProto)   { regLowServCfg.proto = MyTpProto_t::UDP; }
-            else if ("tcp" == sProto)   { regLowServCfg.proto = MyTpProto_t::TCP; }
-            else                        { regLowServCfg.proto = MyTpProto_t::UDP; }
+            if ("tcp" == sProto)   { regLowServCfg.proto = MyTpProto_t::TCP; }
+            else                   { regLowServCfg.proto = MyTpProto_t::UDP; }
 
             regCfg.lowRegSipServMap.insert(std::make_pair(regLowServCfg.lowSipServRegAddrCfg.id, std::move(regLowServCfg)));
         }
@@ -117,6 +121,11 @@ MyStatus_t MyJsonHelper::ParseSipCatalogJsonFile(const std::string& filePath, My
 
     // 读取 json 文件
     std::ifstream ifs(filePath.c_str());
+    if (!ifs.is_open()) {
+        LOG(ERROR) << "open json file failed: " << filePath;
+        return MyStatus_t::FAILED;
+    }
+
     Json::Value rootNode;
     ifs >> rootNode;
 
@@ -578,7 +587,7 @@ MyStatus_t MyJsonHelper::GenerateDeviceInfo(const MySipCatalogPlatCfg_dt& device
     deviceNode["owner"]         = deviceInfo.owner;
     deviceNode["deviceIp"]      = deviceInfo.deviceIp;
     deviceNode["devicePort"]    = deviceInfo.devicePort;
-    root["paltformInfo"]        = deviceNode;
+    root["platformInfo"]           = deviceNode;
 
     // 生成JSON字符串
     Json::StreamWriterBuilder builder;
@@ -607,7 +616,7 @@ MyStatus_t MyJsonHelper::GenerateDeviceInfo(const MySipCatalogSubPlatCfg_dt& dev
     deviceNode["owner"]         = deviceInfo.owner;
     deviceNode["deviceIp"]      = deviceInfo.deviceIp;
     deviceNode["devicePort"]    = deviceInfo.devicePort;
-    root["subPaltformInfo"]     = deviceNode;
+    root["subPlatformInfo"]        = deviceNode;
 
     // 生成JSON字符串
     Json::StreamWriterBuilder builder;
@@ -636,7 +645,7 @@ MyStatus_t MyJsonHelper::GenerateDeviceInfo(const MySipCatalogVirtualSubPlatCfg_
     deviceNode["owner"]             = deviceInfo.owner;
     deviceNode["deviceIp"]          = deviceInfo.deviceIp;
     deviceNode["devicePort"]        = deviceInfo.devicePort;
-    root["subVirtualPaltformInfo"]  = deviceNode;
+    root["subVirtualPlatformInfo"]     = deviceNode;
 
     // 生成JSON字符串
     Json::StreamWriterBuilder builder;

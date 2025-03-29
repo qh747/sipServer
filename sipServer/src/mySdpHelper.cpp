@@ -1,7 +1,11 @@
+#include "utils/myStrHelper.h"
 #include "utils/mySdpHelper.h"
 using namespace MY_COMMON;
 
 namespace MY_UTILS {
+
+std::set<std::string> MySdpHelper::AudioCodecSet;
+std::set<std::string> MySdpHelper::VideoCodecSet;
 
 MyStatus_t MySdpHelper::ConvertToSdpDirection(const std::string& str, MySdpDirection_t& direction)
 {
@@ -172,6 +176,42 @@ MyStatus_t MySdpHelper::ConvertToSdpTrackTypeStr(MySdpTrackType_t type, std::str
         str = "application";
         return MyStatus_t::SUCCESS;
     }
+    return MyStatus_t::FAILED;
+}
+
+MyStatus_t MySdpHelper::ConvertToSdpTrackTypeByPayloadType(const std::string& str, MY_COMMON::MySdpTrackType_t& type)
+{
+    std::string lowStr;
+    MyStrHelper::ConvertToLowStr(str, lowStr);
+
+    if (!AudioCodecSet.empty() && !VideoCodecSet.empty()) {
+        // 大部分情况代码进入此逻辑
+        if (AudioCodecSet.end() != AudioCodecSet.find(lowStr)) {
+            type = MySdpTrackType_t::SDP_TRACK_TYPE_AUDIO;
+            return MyStatus_t::SUCCESS;
+        }
+
+        if (VideoCodecSet.end() != VideoCodecSet.find(lowStr)) {
+            type = MySdpTrackType_t::SDP_TRACK_TYPE_VIDEO;
+            return MyStatus_t::SUCCESS;
+        }
+    }
+    else {
+        // 首次查找进入此逻辑
+        AudioCodecSet = {"pcmu", "pcma", "g729", "g722", "aac", "opus", "g711", "mp3", "flac", "amr-nb", "amr-wb"};
+        VideoCodecSet = {"ps", "mpeg4", "h264", "h265", "h263", "av1", "vp8", "vp9"};
+
+        if (AudioCodecSet.end() != AudioCodecSet.find(lowStr)) {
+            type = MySdpTrackType_t::SDP_TRACK_TYPE_AUDIO;
+            return MyStatus_t::SUCCESS;
+        }
+
+        if (VideoCodecSet.end() != VideoCodecSet.find(lowStr)) {
+            type = MySdpTrackType_t::SDP_TRACK_TYPE_VIDEO;
+            return MyStatus_t::SUCCESS;
+        }
+    }
+
     return MyStatus_t::FAILED;
 }
 

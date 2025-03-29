@@ -142,6 +142,13 @@ MyStatus_t MySipInviteApp::shutdown()
 MyStatus_t MySipInviteApp::onSipInviteAppReqDevicePlayMedia(const std::string& deviceId,
     const MY_COMMON::MyHttpReqMediaInfo_dt& reqInfo, std::string& respInfo)
 {
+    // pjsip要求自定义线程进行注册才能使用
+    pj_thread_desc desc;
+    if(!pj_thread_is_registered()) {
+        MySipThdPtr thdPtr = nullptr;
+        pj_thread_register(nullptr, desc, &thdPtr);
+    }
+
     // 设备类型校验
     if (MyStatus_t::SUCCESS != this->reqDevicePlayMediaCheck(deviceId, reqInfo)) {
         respInfo = "check device type error.";
@@ -185,12 +192,12 @@ MyStatus_t MySipInviteApp::onSipInviteAppReqDevicePlayMedia(const std::string& d
 
     // 发送invite请求
     MySipInvSessionPtr invSessPtr = nullptr;
-    if(PJ_SUCCESS != pjsip_inv_create_uac(dlgPtr, sdpSessionPtr,0, &invSessPtr)) {
+    if(PJ_SUCCESS != pjsip_inv_create_uac(dlgPtr, sdpSessionPtr, 0, &invSessPtr)) {
         pjsip_dlg_terminate(dlgPtr);
         LOG(ERROR) << "Sip app module req device play media failed. create invite session error. device id: " << deviceId;
         return MyStatus_t::FAILED;
     }
-
+    
     MySipTxDataPtr txDataPtr = nullptr;
     if(PJ_SUCCESS != pjsip_inv_invite(invSessPtr, &txDataPtr)) {
         pjsip_dlg_terminate(dlgPtr);
@@ -280,6 +287,9 @@ MyStatus_t MySipInviteApp::reqDevicePlayMediaGetInfo(const std::string& deviceId
             }
         }
     }
+    else {
+        deviceOwnerId = m_servId;
+    }
 
     if (deviceOwnerId.empty()) {
         LOG(ERROR) << "Get req device info failed. device owner id invalid. device id: " << deviceId;
@@ -327,8 +337,8 @@ MyStatus_t MySipInviteApp::reqDevicePlayMediaPrepareSdp(const std::string& devic
     sdpSessionPtr->media_count = m_localSdpPlayPtr->m_mediaPtrVec.size();
     unsigned int mediaIndex = 0;
     for (const auto& media : m_localSdpPlayPtr->m_mediaPtrVec) {
-        if (MySdpTrackType_t::SDP_TRACK_TYPE_AUDIO != media->m_type ||
-            MySdpTrackType_t::SDP_TRACK_TYPE_VIDEO!= media->m_type) {
+        if (MySdpTrackType_t::SDP_TRACK_TYPE_AUDIO != media->m_type &&
+            MySdpTrackType_t::SDP_TRACK_TYPE_VIDEO != media->m_type) {
             continue;
         }
 
@@ -340,34 +350,43 @@ MyStatus_t MySipInviteApp::reqDevicePlayMediaPrepareSdp(const std::string& devic
         }
 
         MySipSdpMediaPtr mediaPtr = static_cast<MySipSdpMediaPtr>(pj_pool_zalloc(poolPtr, sizeof(pjmedia_sdp_media)));
+        if (!media->m_connection.empty()) {
+            mediaPtr->conn = static_cast<MySipSdpConnPtr>(pj_pool_zalloc(poolPtr,sizeof(pjmedia_sdp_conn)));
+            mediaPtr->conn->net_type  = pj_str(const_cast<char*>(media->m_connection.m_netType.c_str()));
+            mediaPtr->conn->addr_type = pj_str(const_cast<char*>(media->m_connection.m_addrType.c_str()));
+            mediaPtr->conn->addr      = pj_str(const_cast<char*>(media->m_connection.m_address.c_str()));
+        }
+
         mediaPtr->desc.port       = media->m_port;
         mediaPtr->desc.port_count = 1;
-        mediaPtr->attr_count      = 0;
         mediaPtr->desc.fmt_count  = media->m_codecPlanVec.size();
-        mediaPtr->desc.transport  = (MyTpProto_t::UDP == reqProtoType ?
-            pj_str(const_cast<char*>("RTP/AVP")) :
+
+        mediaPtr->desc.transport  = (MyTpProto_t::UDP == reqProtoType ? pj_str(const_cast<char*>("RTP/AVP")) :
             pj_str(const_cast<char*>("TCP/RTP/AVP")));
-        mediaPtr->desc.media      = (MySdpTrackType_t::SDP_TRACK_TYPE_AUDIO == media->m_type ?
-            pj_str(const_cast<char*>("audio")) :
+
+        mediaPtr->desc.media = (MySdpTrackType_t::SDP_TRACK_TYPE_AUDIO == media->m_type ? pj_str(const_cast<char*>("audio")) :
             pj_str(const_cast<char*>("video")));
 
-        MySipSdpAttrPtr attrPtr = nullptr;
+        mediaPtr->attr_count = 0;
         for (unsigned int fmtIndex = 0; fmtIndex < media->m_codecPlanVec.size(); ++fmtIndex) {
             const auto& codecPlan = media->m_codecPlanVec[fmtIndex];
-            mediaPtr->desc.fmt[fmtIndex] = pj_str(const_cast<char*>(std::to_string(codecPlan.m_pt).c_str()));
 
-            attrPtr = static_cast<MySipSdpAttrPtr>(pj_pool_zalloc(poolPtr, sizeof(pjmedia_sdp_attr)));
-            attrPtr->name  = pj_str(const_cast<char*>("rtpmap"));
-            attrPtr->value = pj_str(const_cast<char*>(std::string(codecPlan.m_codec + std::string("/") +
-                std::to_string(codecPlan.m_sampleRate)).c_str()));
+            std::string ptStr = std::to_string(codecPlan.m_pt);
+            pj_strdup2(poolPtr, &mediaPtr->desc.fmt[fmtIndex], ptStr.c_str());
+
+            MySipSdpAttrPtr attrPtr = static_cast<MySipSdpAttrPtr>(pj_pool_zalloc(poolPtr, sizeof(pjmedia_sdp_attr)));
+            pj_strdup2(poolPtr, &attrPtr->name, "rtpmap");
+
+            std::string rtpMapStr = ptStr + " " + std::string(codecPlan.m_codec) + "/" + std::to_string(codecPlan.m_sampleRate);
+            pj_strdup2(poolPtr, &attrPtr->value, rtpMapStr.c_str());
 
             mediaPtr->attr[mediaPtr->attr_count++] = attrPtr;
         }
 
         std::string directionStr;
         if (MyStatus_t::SUCCESS == MySdpHelper::ConvertToSdpDirectionStr(media->m_direction, directionStr)) {
-            attrPtr = static_cast<MySipSdpAttrPtr>(pj_pool_zalloc(poolPtr, sizeof(pjmedia_sdp_attr)));
-            attrPtr->name = pj_str(const_cast<char*>(directionStr.c_str()));
+            MySipSdpAttrPtr attrPtr = static_cast<MySipSdpAttrPtr>(pj_pool_zalloc(poolPtr, sizeof(pjmedia_sdp_attr)));
+            pj_strdup2(poolPtr, &attrPtr->name, directionStr.c_str());
             mediaPtr->attr[mediaPtr->attr_count++] = attrPtr;
         }
 
@@ -375,19 +394,23 @@ MyStatus_t MySipInviteApp::reqDevicePlayMediaPrepareSdp(const std::string& devic
             std::string setupStr;
             MySdpHelper::ConvertToSdpRoleStr(media->m_setup.m_role, directionStr);
 
-            attrPtr = static_cast<MySipSdpAttrPtr>(pj_pool_zalloc(poolPtr, sizeof(pjmedia_sdp_attr)));
+            MySipSdpAttrPtr attrPtr = static_cast<MySipSdpAttrPtr>(pj_pool_zalloc(poolPtr, sizeof(pjmedia_sdp_attr)));
             attrPtr->name = pj_str(const_cast<char*>("setup"));
             attrPtr->value = pj_str(const_cast<char*>(setupStr.c_str()));
             mediaPtr->attr[mediaPtr->attr_count++] = attrPtr;
         }
 
-        attrPtr = static_cast<MySipSdpAttrPtr>(pj_pool_zalloc(poolPtr, sizeof(pjmedia_sdp_attr)));
-        attrPtr->name  = pj_str(const_cast<char*>("y"));
-        attrPtr->value = pj_str(const_cast<char*>(std::to_string(media->m_ssrcVec[0]).c_str()));
-        mediaPtr->attr[mediaPtr->attr_count++] = attrPtr;
+        std::string ssrcStr = "y=" + std::to_string(media->m_ssrcVec[0]);
+        pj_strdup2(poolPtr, &sdpSessionPtr->gb28181_extend_f, ssrcStr.c_str());
 
         sdpSessionPtr->media[mediaIndex++] = mediaPtr;
     }
+
+    if (PJ_SUCCESS != pjmedia_sdp_validate(sdpSessionPtr)) {
+        LOG(ERROR) << "Prepare sdp failed. sdp invalid. device id: " << deviceId;
+        return MyStatus_t::FAILED;
+    }
+
     *sdpSessionPtrAddr = sdpSessionPtr;
     return MyStatus_t::SUCCESS;
 }

@@ -1,4 +1,5 @@
 #pragma once
+#include <set>
 #include <string>
 #include "common/mySdpDef.h"
 #include "common/myDataDef.h"
@@ -86,6 +87,21 @@ public:
      * @param str                   sdp轨道类型字符串
      */
     static MY_COMMON::MyStatus_t    ConvertToSdpTrackTypeStr(MY_COMMON::MySdpTrackType_t type, std::string& str);
+
+    /**
+     * @brief                       转换sdp轨道类型（根据pt类型）
+     * @return                      转换结果
+     * @param str                   sdp轨道类型字符串
+     * @param type                  sdp轨道类型
+     */
+    static MY_COMMON::MyStatus_t    ConvertToSdpTrackTypeByPayloadType(const std::string& str, MY_COMMON::MySdpTrackType_t& type);
+
+private:
+    //                              音频编解码类型集合
+    static std::set<std::string>    AudioCodecSet;
+
+    //                              视频编解码类型集合
+    static std::set<std::string>    VideoCodecSet;
 };
 
 }; // MY_UTILS

@@ -1,9 +1,10 @@
 # Introduction
 
-For SIP server code practice.
+For sip server code practice.
 
 # Note
- 1. support  sip upstream and downstream service interaction. see example: sipServer_rootPath/sipServer/testDemo/11_sipServer_test
+ 1. support sip upstream and downstream service interaction. see example: sipServer_rootPath/sipServer/testDemo/11_sipServer_test
+ 2. modify pjsip library. include: sdp.h sdp.c
 
 # Directory
 

@@ -102,7 +102,11 @@ MyStatus_t MySdpSession::loadFrom(const std::string& sdp)
     m_origin      = parser.getOrigin();
     m_sessionName = parser.getSessionName();
     m_time        = parser.getSessionTime();
-    m_connection  = parser.getConnection();
+
+    auto conn = parser.getConnection();
+    if (!conn.empty()) {
+        m_connection = conn;
+    }
 
     // 媒体参数加载
     for (auto& mediaParse : parser.m_sdpMediaVec) {
@@ -111,9 +115,13 @@ MyStatus_t MySdpSession::loadFrom(const std::string& sdp)
         sdpMedia->m_type       = mediaLine.m_type;
         sdpMedia->m_port       = mediaLine.m_port;
         sdpMedia->m_proto      = mediaLine.m_proto;
-        sdpMedia->m_connection = mediaParse.getItemClass<MySdpConnection>('c');
         sdpMedia->m_direction  = mediaParse.getDirection();
         sdpMedia->m_setup      = mediaParse.getItemClass<MySdpAttrSetup>('a', "setup");
+
+        auto mediaConn = mediaParse.getItemClass<MySdpConnection>('c');
+        if (!mediaConn.empty()) {
+            sdpMedia->m_connection = mediaConn;
+        }
 
         auto ssrcAttrVec = mediaParse.getAllItem<MySdpGB28181SSRC>('y');
         for (const auto& ssrcAttr : ssrcAttrVec) {
@@ -167,6 +175,7 @@ MyStatus_t MySdpSession::toString(std::string& sdp)
         mediaLinePtr->m_type       = media->m_type;
         mediaLinePtr->m_port       = media->m_port;
         mediaLinePtr->m_proto      = media->m_proto;
+
         for (const auto& codecPlan : media->m_codecPlanVec) {
             mediaLinePtr->m_fmts.push_back(std::to_string(codecPlan.m_pt));
         }

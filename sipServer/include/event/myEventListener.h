@@ -22,7 +22,7 @@ public:
      * @return                      添加结果
      * @param cb                    事件回调函数
      */
-    static MY_COMMON::MyStatus_t    AddListener(MyMediaReqEvCb cb);
+    static MY_COMMON::MyStatus_t    AddListener(const MyMediaReqEvCb& cb);
 
     /**
      * @brief                       删除事件监听

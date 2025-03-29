@@ -16,7 +16,7 @@ namespace MY_MANAGER {
 class MyAppManage::MyAppManageObject
 {
 public:
-    MyStatus_t addSipMsgProcApp(MySipMsgProcApp::SmtPtr sipMsgProcAppSmtPtr) {
+    MyStatus_t addSipMsgProcApp(const MySipMsgProcApp::SmtPtr& sipMsgProcAppSmtPtr) {
         boost::unique_lock<boost::shared_mutex> lock(m_rwMutex);
 
         if (nullptr != m_sipMsgProcAppSmtPtr) {
@@ -80,7 +80,7 @@ public:
     }
 
 public:
-    MyStatus_t addSipRegApp(MySipRegApp::SmtPtr sipRegAppSmtPtr) {
+    MyStatus_t addSipRegApp(const MySipRegApp::SmtPtr& sipRegAppSmtPtr) {
         boost::unique_lock<boost::shared_mutex> lock(m_rwMutex);
 
         if (nullptr != m_sipRegAppSmtPtr) {
@@ -141,7 +141,7 @@ public:
     }
 
 public:
-    MyStatus_t addSipCatalogApp(MySipCatalogApp::SmtPtr sipCatalogAppSmtPtr) {
+    MyStatus_t addSipCatalogApp(const MySipCatalogApp::SmtPtr& sipCatalogAppSmtPtr) {
         boost::unique_lock<boost::shared_mutex> lock(m_rwMutex);
 
         if (nullptr != m_sipCatalogAppSmtPtr) {
@@ -205,7 +205,7 @@ public:
     }
     
 public:
-    MyStatus_t addSipInviteApp(MySipInviteApp::SmtPtr sipInviteAppSmtPtr) {
+    MyStatus_t addSipInviteApp(const MySipInviteApp::SmtPtr& sipInviteAppSmtPtr) {
         boost::unique_lock<boost::shared_mutex> lock(m_rwMutex);
 
         if (nullptr != m_sipInviteAppSmtPtr) {

@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <memory>
+#include <vector>
 #include "common/mySdpDef.h"
 
 namespace MY_SDP {
@@ -137,9 +138,9 @@ public:
     bool empty() const { return m_address.empty(); }
 
 public:
-    std::string m_netType  { "IN" };
-    std::string m_addrType { "IP4" };
-    std::string m_address  { "0.0.0.0" };
+    std::string m_netType  { "" };
+    std::string m_addrType { "" };
+    std::string m_address  { "" };
 };
 
 // ------------------------------------ MySdpMediaLine -------------------------------------------

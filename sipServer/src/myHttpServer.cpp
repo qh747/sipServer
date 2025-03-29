@@ -21,7 +21,7 @@ namespace MY_SERVER {
 
 MyStatus_t MyHttpServer::ServThdFunc(MyFuncCbParamPtr arg)
 {
-    MyHttpServer::Ptr servPtr = (MyHttpServer::Ptr)arg;
+    auto servPtr = static_cast<MyHttpServer::Ptr>(arg);
 
     MyHttpServAddrCfg_dt addrCfg;
     if (MyStatus_t::SUCCESS != servPtr->getServAddrCfg(addrCfg)) {
@@ -60,10 +60,7 @@ MyStatus_t MyHttpServer::ServThdFunc(MyFuncCbParamPtr arg)
         }
 
         MyStatus_t state;
-        if (MyStatus_t::SUCCESS != servPtr->getState(state)) {
-            LOG(WARNING) << "HttpServer execute thread function failed. get server state failed.";
-            break;
-        }
+        servPtr->getState(state);
 
         // 等待 accept 完成或超时
         ioc.run_one();
@@ -129,7 +126,7 @@ MyStatus_t MyHttpServer::ServThdFunc(MyFuncCbParamPtr arg)
         }
 
         // 创建响应
-        http::response<http::string_body> response(http::status::ok, request.version());
+        http::response<http::string_body> response(respState, request.version());
         response.set(http::field::content_type, "application/json");
         response.body() = respBody;
         response.prepare_payload();

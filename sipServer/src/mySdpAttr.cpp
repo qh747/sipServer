@@ -1,3 +1,4 @@
+#include <sstream>
 #include <stdexcept>
 #include <cinttypes>
 #include <Util/util.h>
@@ -78,7 +79,7 @@ std::string MySdpConnection::toString() const
 void MySdpMediaLine::parse(const std::string& str)
 {
     auto vec = toolkit::split(str, " ");
-    if (4 != vec.size()) {
+    if (4 > vec.size()) {
         throw std::runtime_error("parse sdp media line failed");
     }
 
@@ -103,7 +104,7 @@ std::string MySdpMediaLine::toString() const
 
     if (m_value.empty()) {
         m_value = trackTypeStr + " " + std::to_string(m_port) + " " + m_proto;
-        for (auto fmt : m_fmts) {
+        for (const auto& fmt : m_fmts) {
             m_value += ' ';
             m_value += fmt;
         }
@@ -164,23 +165,39 @@ std::string MySdpAttrSetup::toString() const
 
 void MySdpAttrRtpMap::parse(const std::string& str)
 {
-    char buf[32] = { 0 };
-    if (sscanf(str.data(), "%" SCNu8 " %31[^/]/%" SCNd32 "/%" SCNd32, &m_pt, buf, &m_sampleRate, &m_channel) != 4) {
-        if (sscanf(str.data(), "%" SCNu8 " %31[^/]/%" SCNd32, &m_pt, buf, &m_sampleRate) != 3) {
-            throw std::runtime_error("parse sdp attr rtpmap failed");
-        }
+    std::vector<std::string> parts;
+    std::stringstream ss(str);
+    std::string item;
+
+    // 按空格分割第一部分
+    std::getline(ss, item, ' ');
+    parts.push_back(item);
+
+    // 剩余部分按'/'分割
+    while (std::getline(ss, item, '/')) {
+        parts.push_back(item);
+    }
+
+    std::size_t size = parts.size();
+    if (3 != size && 4 != size) {
+        throw std::runtime_error("parse sdp attr rtpmap failed. invalid size.");
     }
 
     MySdpTrackType_t trackType = MySdpTrackType_t::SDP_TRACK_TYPE_INVALID;
-    if (MyStatus_t::SUCCESS != MySdpHelper::ConvertToSdpTrackType(buf, trackType)) {
-        // 未指定通道数时，且为音频时，那么通道数默认为1
-        m_channel = 1;
-    }
-    else {
-        m_channel = 0;
+    if (MyStatus_t::SUCCESS != MySdpHelper::ConvertToSdpTrackTypeByPayloadType(parts[1], trackType)) {
+        throw std::runtime_error("parse sdp attr rtpmap failed. invalid pt.");
     }
 
-    m_codec = buf;
+    m_pt         = std::stoi(parts[0]);
+    m_codec      = parts[1];
+    m_sampleRate = std::stoi(parts[2]);
+
+    if (parts.size() == 3) {
+        m_channel = MySdpTrackType_t::SDP_TRACK_TYPE_AUDIO != trackType ? 1 : 0;
+    }
+    else {
+        m_channel = std::stoi(parts[3]);
+    }
 }
 
 std::string MySdpAttrRtpMap::toString() const
@@ -232,13 +249,7 @@ std::string MySdpAttrSSRC::toString() const
 
 void MySdpGB28181SSRC::parse(const std::string& str_in)
 {
-    size_t equal_pos = str_in.find('=');
-    if (std::string::npos == equal_pos) {
-        throw std::runtime_error("parse sdp gb28181 ssrc failed");
-    }
-
-    std::string num_str = str_in.substr(equal_pos + 1);
-    m_ssrc = std::stoul(num_str);
+    m_ssrc = std::stoul(str_in);
 }
 
 std::string MySdpGB28181SSRC::toString() const

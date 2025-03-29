@@ -27,7 +27,7 @@ MyStatus_t MyRandomHelper::Get32BytesLenRandomStr(std::string& str)
 
 MyStatus_t MyRandomHelper::Get4BytesLenRandomStr(std::string& str)
 {
-    std::srand(static_cast<unsigned int>(std::time(0)));
+    std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
     // 随机数范围
     int lower_bound = 1000; 

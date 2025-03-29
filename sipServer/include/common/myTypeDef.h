@@ -17,6 +17,7 @@
 
 namespace MY_COMMON {
 
+typedef         pj_str_t*                                                   MySipStrPtr;
 typedef const   pj_str_t*                                                   MySipStrCstPtr;
 typedef         pj_pool_t*                                                  MySipPoolPtr;
 typedef         pj_pool_t**                                                 MySipPoolPtrAddr;

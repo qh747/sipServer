@@ -11,7 +11,7 @@ namespace MY_EVENT {
 MyEventTagPtr                           MyMediaReqEvListener::EvTagPtr = nullptr;
 MyMediaReqEvListener::MyMediaReqEvCbPtr MyMediaReqEvListener::EvCbPtr  = nullptr;
 
-MyStatus_t MyMediaReqEvListener::AddListener(MyMediaReqEvCb cb)
+MyStatus_t MyMediaReqEvListener::AddListener(const MyMediaReqEvCb& cb)
 {
     if (nullptr != EvCbPtr) {
         LOG(WARNING) << "MyMediaReqEvListener add listener failed, listener exists.";
