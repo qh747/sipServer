@@ -269,9 +269,7 @@ MyStatus_t MySipRegManage::HasSipRegUpServInfo(const std::string& upRegServId)
 MyStatus_t MySipRegManage::GetSipRegUpServCfgMap(MySipRegUpServCfgMap& upRegCfgMap)
 {
     MySipRegManage::MySipUpRegServInfoMap upRegInfoMap;
-    if (MyStatus_t::SUCCESS != ManageObject.getUpRegInfoMap(upRegInfoMap)) {
-        return MyStatus_t::FAILED;
-    }
+    ManageObject.getUpRegInfoMap(upRegInfoMap);
 
     if (upRegInfoMap.empty()) {
         return MyStatus_t::FAILED;
@@ -366,9 +364,7 @@ MyStatus_t MySipRegManage::GetSipRegLowServExpired(const std::string& lowRegServ
 MyStatus_t MySipRegManage::GetSipRegLowServCfgMap(MySipRegLowServCfgMap& lowRegCfgMap)
 {
     MySipRegManage::MySipLowRegServInfoMap lowRegInfoMap;
-    if (MyStatus_t::SUCCESS != ManageObject.getLowRegInfoMap(lowRegInfoMap)) {
-        return MyStatus_t::FAILED;
-    }
+    ManageObject.getLowRegInfoMap(lowRegInfoMap);
 
     if (lowRegInfoMap.empty()) {
         return MyStatus_t::FAILED;
@@ -380,12 +376,30 @@ MyStatus_t MySipRegManage::GetSipRegLowServCfgMap(MySipRegLowServCfgMap& lowRegC
     return MyStatus_t::SUCCESS;
 }
 
+MyStatus_t MySipRegManage::GetSipRegLowServCfg(const std::string& lowRegServId, MY_COMMON::MySipRegLowServCfg_dt& lowRegServCfg)
+{
+    MySipRegLowServCfgMap lowRegCfgMap;
+    if(MyStatus_t::SUCCESS != MySipRegManage::GetSipRegLowServCfgMap( lowRegCfgMap)) {
+        return MyStatus_t::FAILED;
+    }
+
+    if (lowRegCfgMap.empty()) {
+        return MyStatus_t::FAILED;
+    }
+
+    auto iter = lowRegCfgMap.find(lowRegServId);
+    if (lowRegCfgMap.end() == iter) {
+        return MyStatus_t::FAILED;
+    }
+
+    lowRegServCfg = iter->second;
+    return MyStatus_t::SUCCESS;
+}
+
 MyStatus_t MySipRegManage::GetSipRegLowAuthCfg(const std::string& name, const std::string& realm, MySipServAuthCfg_dt& authCfg)
 {
     MySipLowRegServInfoMap lowRegServInfoMap;
-    if (MyStatus_t::SUCCESS != ManageObject.getLowRegInfoMap(lowRegServInfoMap)) {
-        return MyStatus_t::FAILED;
-    }
+    ManageObject.getLowRegInfoMap(lowRegServInfoMap);
 
     if (lowRegServInfoMap.empty()) {
         return MyStatus_t::FAILED;

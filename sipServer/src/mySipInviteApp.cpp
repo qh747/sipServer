@@ -143,11 +143,7 @@ MyStatus_t MySipInviteApp::onSipInviteAppReqDevicePlayMedia(const std::string& d
     const MY_COMMON::MyHttpReqMediaInfo_dt& reqInfo, std::string& respInfo)
 {
     // pjsip要求自定义线程进行注册才能使用
-    pj_thread_desc desc;
-    if(!pj_thread_is_registered()) {
-        MySipThdPtr thdPtr = nullptr;
-        pj_thread_register(nullptr, desc, &thdPtr);
-    }
+    MySystemPjsip::RegistSelfThread();
 
     // 设备类型校验
     if (MyStatus_t::SUCCESS != this->reqDevicePlayMediaCheck(deviceId, reqInfo)) {

@@ -58,6 +58,16 @@ MyStatus_t MySystemPjsip::Shutdown()
     return MyStatus_t::SUCCESS;
 }
 
+void MySystemPjsip::RegistSelfThread()
+{
+    // pjsip要求自定义线程进行注册才能使用
+    if(!pj_thread_is_registered()) {
+        pj_thread_desc desc;
+        MySipThdPtr thdPtr = nullptr;
+        pj_thread_register(nullptr, desc, &thdPtr);
+    }
+}
+
 MyStatus_t MySystemPjsip::GetState(MyStatus_t& status)
 {
     status = SysPjsipState.load();

@@ -38,7 +38,6 @@ public:
         }
 
         iter->second.sn = servCatalogInfo.sn;
-
         {
             auto& oldSipPlatMap = iter->second.sipPlatMap;
             const auto& newSipPlatMap = servCatalogInfo.sipPlatMap;
@@ -231,7 +230,7 @@ public:
         }
         
         mapPtr->insert(std::make_pair(servAddrCfg.id, servAddrCfg));
-        return MyStatus_t::FAILED;
+        return MyStatus_t::SUCCESS;
     }
 
     MyStatus_t del(const std::string& servId, bool isUpServ) {
@@ -280,7 +279,7 @@ private:
 };
 
 static MySipCatalogManage::MySipCatalogManageObject         CatalogManageObject;
-static MySipCatalogManage::MySipCatalogInfoManageObject     CatalogSipServgManageObject;
+static MySipCatalogManage::MySipCatalogInfoManageObject     CatalogSipServManageObject;
 
 MyStatus_t MySipCatalogManage::AddSipCatalogInfo(const std::string& servId, const MySipCatalogInfo_dt& servCatalogInfo)
 {
@@ -304,22 +303,22 @@ MyStatus_t MySipCatalogManage::UpdateSipCatalogSN(const std::string& servId, con
 
 MyStatus_t MySipCatalogManage::AddSipQueryInfo(const MY_COMMON::MySipServRegAddrCfg_dt& servAddr)
 {
-    return CatalogSipServgManageObject.add(servAddr, true);
+    return CatalogSipServManageObject.add(servAddr, true);
 }
           
 MyStatus_t MySipCatalogManage::DelSipQueryInfo(const std::string& upServId)
 {
-    return CatalogSipServgManageObject.del(upServId, true);
+    return CatalogSipServManageObject.del(upServId, true);
 }
 
 MyStatus_t MySipCatalogManage::AddSipRespInfo(const MY_COMMON::MySipServRegAddrCfg_dt& servAddr)
 {
-    return CatalogSipServgManageObject.add(servAddr, false);
+    return CatalogSipServManageObject.add(servAddr, false);
 }
           
 MyStatus_t MySipCatalogManage::DelSipRespInfo(const std::string& lowServId)
 {
-    return CatalogSipServgManageObject.del(lowServId, false);
+    return CatalogSipServManageObject.del(lowServId, false);
 }
 
 /**
@@ -369,22 +368,22 @@ MyStatus_t MySipCatalogManageView::GetDeviceInfo(const std::string& deviceId, st
 
 MyStatus_t MySipCatalogManageView::GetSipRespInfoMap(MySipRegServAddrMap& servAddrMap)
 {
-    return CatalogSipServgManageObject.get(servAddrMap, false);
+    return CatalogSipServManageObject.get(servAddrMap, false);
 }
 
 MyStatus_t MySipCatalogManageView::HasSipRespInfo(const std::string& lowServId)
 {
-    return CatalogSipServgManageObject.has(lowServId, false);
+    return CatalogSipServManageObject.has(lowServId, false);
 }
 
 MyStatus_t MySipCatalogManageView::GetSipQueryInfo(MySipRegServAddrMap& servAddrMap)
 {
-    return CatalogSipServgManageObject.get(servAddrMap, true);
+    return CatalogSipServManageObject.get(servAddrMap, true);
 }
 
 MyStatus_t MySipCatalogManageView::HasSipQueryInfo(const std::string& upServId)
 {
-    return CatalogSipServgManageObject.has(upServId, true);
+    return CatalogSipServManageObject.has(upServId, true);
 }
 
 MyStatus_t MySipCatalogManageView::GetSipCatalogSN(const std::string& servId, std::string& sn)

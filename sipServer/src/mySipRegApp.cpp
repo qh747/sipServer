@@ -184,7 +184,7 @@ MyStatus_t MySipRegApp::run()
 
         float timeInterval = 0;
         if (MyStatus_t::SUCCESS != MySystemConfig::GetSipServRegistJudgeTimeInterval(timeInterval)) {
-            LOG(ERROR) << "Sip reg app module run failed. get sip serv regist jugde time interval failed.";
+            LOG(ERROR) << "Sip reg app module run failed. get sip serv regist judge time interval failed.";
             return MyStatus_t::FAILED;
         }
        
@@ -194,11 +194,7 @@ MyStatus_t MySipRegApp::run()
             }
 
             // pjsip要求自定义线程进行注册才能使用
-            pj_thread_desc desc;
-            if(!pj_thread_is_registered()) {
-                MySipThdPtr thdPtr = nullptr;
-                pj_thread_register(nullptr, desc, &thdPtr);
-            }
+            MySystemPjsip::RegistSelfThread();
 
             return weakSelf.lock()->onTimer();
         }, EventPollerPool::Instance().getFirstPoller());

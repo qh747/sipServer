@@ -22,6 +22,11 @@ public:
      */                                         
     static MY_COMMON::MyStatus_t                Shutdown();
 
+    /**
+     * @brief                                   注册自定义线程
+     */
+    static void                                 RegistSelfThread();
+
 public: 
     /**         
      * @brief                                   获取状态

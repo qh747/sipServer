@@ -129,14 +129,14 @@ public:
     /** 
      * @brief                               删除下级服务注册信息
      * @return                              删除结果，success-0, failed-非0
-     * @param lowRegServInfo                下级服务注册信息
+     * @param lowRegServId                 下级服务注册id
      */             
     static MY_COMMON::MyStatus_t            DelSipRegLowServInfo(const std::string& lowRegServId);
 
     /** 
      * @brief                               下级服务注册信息是否存在
      * @return                              是否存在，success-0, failed-非0
-     * @param lowRegServInfo                下级服务注册信息
+     * @param lowRegServId                  下级服务注册id
      */             
     static MY_COMMON::MyStatus_t            HasSipRegLowServInfo(const std::string& lowRegServId);
 
@@ -163,6 +163,14 @@ public:
      */ 
     static MY_COMMON::MyStatus_t            GetSipRegLowServCfgMap(MY_COMMON::MySipRegLowServCfgMap& lowRegCfgMap);
 
+    /**
+     * @brief                               获取下级服务注册配置
+     * @return                              获取结果，success-0, failed-非0
+     * @param lowRegServId                  下级服务注册id
+     * @param lowRegServCfg                 下级服务注册配置
+     */
+    static MY_COMMON::MyStatus_t            GetSipRegLowServCfg(const std::string& lowRegServId, MY_COMMON::MySipRegLowServCfg_dt& lowRegServCfg);
+
     /**     
      * @brief                               获取下级服务注册认证配置
      * @return                              获取结果，success-0, failed-非0
@@ -173,10 +181,10 @@ public:
     static MY_COMMON::MyStatus_t            GetSipRegLowAuthCfg(const std::string& name, const std::string& realm, MY_COMMON::MySipServAuthCfg_dt& authCfg);
 
     /**     
-     * @brief                               获取上级服务注册配置
+     * @brief                               获取下级服务注册配置
      * @return                              获取结果，success-0, failed-非0
-     * @param upRegServId                   上级服务注册id
-     * @param proto                         上级服务协议类型
+     * @param lowRegServId                  下级服务注册id
+     * @param proto                         下级服务协议类型
      */ 
     static MY_COMMON::MyStatus_t            GetSipRegLowServProto(const std::string& lowRegServId, MY_COMMON::MyTpProto_t& proto);
 
@@ -200,7 +208,7 @@ public:
      * @brief                               更新下级服务地址
      * @return                              更新结果，success-0, failed-非0
      * @param lowRegServId                  下级服务注册id
-     * @param expired                       下级服务地址
+     * @param lowRegServAddr                下级服务地址
      */ 
     static MY_COMMON::MyStatus_t            UpdateSipRegLowServIpAddr(const std::string& lowRegServId, const MY_COMMON::MySipServRegAddrCfg_dt& lowRegServAddr);
 };
