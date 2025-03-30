@@ -112,11 +112,13 @@ void MySipRegApp::OnKeepAliveRespCb(MyFuncCbParamPtr evParamPtr, MySipEvPtr evPt
         // 更新有效上级服务
         uint32_t keepAliveIdx;
         if (MyStatus_t::SUCCESS != MySipRegManage::GetSipRegUpServKeepAliveIdx(sipRegUpServCfgPtr->upSipServRegAddrCfg.id, keepAliveIdx)) {
-            LOG(ERROR) << "Sip reg app reg module keep alive response callback failed. get keep alive index failed. id: " << sipRegUpServCfgPtr->upSipServRegAddrCfg.id;
+            LOG(ERROR) << "Sip reg app reg module keep alive response callback failed. get keep alive index failed. id: "
+                       << sipRegUpServCfgPtr->upSipServRegAddrCfg.id;
             return;
         }
-        
-        MySipRegManage::UpdateSipRegUpServKeepAliveIdx(sipRegUpServCfgPtr->upSipServRegAddrCfg.id, ++keepAliveIdx);
+        else {
+            MySipRegManage::UpdateSipRegUpServKeepAliveIdx(sipRegUpServCfgPtr->upSipServRegAddrCfg.id, ++keepAliveIdx);
+        }
 
         std::string lastRegTime;
         MyTimeHelper::GetCurrentFormatTime(lastRegTime);
@@ -256,7 +258,7 @@ MyStatus_t MySipRegApp::regUpServ(const MySipRegUpServCfg_dt& regUpServCfg, cons
     // sip register消息首部生成
     std::string sURL;
     MySipMsgHelper::GenerateSipMsgURL(regUpServCfg.upSipServRegAddrCfg.id, regUpServCfg.upSipServRegAddrCfg.ipAddr, 
-                                      regUpServCfg.upSipServRegAddrCfg.port, regUpServCfg.proto, sURL);
+        regUpServCfg.upSipServRegAddrCfg.port, regUpServCfg.proto, sURL);
 
     std::string sFromHdr;
     MySipMsgHelper::GenerateSipMsgFromHeader(localServCfg.id, localServCfg.ipAddr, sFromHdr);
@@ -291,9 +293,9 @@ MyStatus_t MySipRegApp::regUpServ(const MySipRegUpServCfg_dt& regUpServCfg, cons
     }
 
     // 指定传输端口为注册端口
-    pjsip_tpselector tpSeclector;
-    tpSeclector.type = PJSIP_TPSELECTOR_TRANSPORT;
-    tpSeclector.disable_connection_reuse = false;
+    pjsip_tpselector tpSelector;
+    tpSelector.type = PJSIP_TPSELECTOR_TRANSPORT;
+    tpSelector.disable_connection_reuse = false;
 
     MySipTransportPtr transportPtr = nullptr;
     if (MyTpProto_t::UDP == regUpServCfg.proto) {
@@ -312,8 +314,8 @@ MyStatus_t MySipRegApp::regUpServ(const MySipRegUpServCfg_dt& regUpServCfg, cons
         }
     }
 
-    tpSeclector.u.transport = transportPtr;
-    pjsip_regc_set_transport(regcPtr, &tpSeclector);
+    tpSelector.u.transport = transportPtr;
+    pjsip_regc_set_transport(regcPtr, &tpSelector);
 
     if(PJ_SUCCESS != pjsip_regc_init(regcPtr, &sipMsgURL, &sipMsgFromHdr, &sipMsgToHdr, 1, &sipMsgContact, expired)) {
         pjsip_regc_destroy(regcPtr);
@@ -396,9 +398,9 @@ MyStatus_t MySipRegApp::keepAliveUpServ(const MySipRegUpServCfg_dt& regUpServCfg
     }
 
     // 指定传输端口为注册端口
-    pjsip_tpselector tpSeclector;
-    tpSeclector.type = PJSIP_TPSELECTOR_TRANSPORT;
-    tpSeclector.disable_connection_reuse = false;
+    pjsip_tpselector tpSelector;
+    tpSelector.type = PJSIP_TPSELECTOR_TRANSPORT;
+    tpSelector.disable_connection_reuse = false;
 
     MySipTransportPtr transportPtr = nullptr;
     if (MyTpProto_t::UDP == regUpServCfg.proto) {
@@ -415,8 +417,8 @@ MyStatus_t MySipRegApp::keepAliveUpServ(const MySipRegUpServCfg_dt& regUpServCfg
         }
     }
 
-    tpSeclector.u.transport = transportPtr;
-    pjsip_tx_data_set_transport(txDataPtr, &tpSeclector);
+    tpSelector.u.transport = transportPtr;
+    pjsip_tx_data_set_transport(txDataPtr, &tpSelector);
 
     // sip keepAlive消息内容生成
     uint32_t keepAliveIdx = 0;
@@ -568,7 +570,7 @@ MyStatus_t MySipRegApp::onLowSipServRegSuccess(const MySipRegLowServCfg_dt& sipR
 MyStatus_t MySipRegApp::onRecvSipRegReqMsg(MySipRxDataPtr rxDataPtr)
 {
     // 解析下级sip服务id
-    MySipMsgHdrPtr contactHeader = (MySipMsgHdrPtr)pjsip_msg_find_hdr(rxDataPtr->msg_info.msg, PJSIP_H_CONTACT, nullptr);
+    auto contactHeader = static_cast<MySipMsgHdrPtr>(pjsip_msg_find_hdr(rxDataPtr->msg_info.msg, PJSIP_H_CONTACT, nullptr));
     if (nullptr == contactHeader) {
         LOG(ERROR) << "Sip reg app receive register request message failed. Can't find contact header. ";
         return MyStatus_t::FAILED;
@@ -587,7 +589,7 @@ MyStatus_t MySipRegApp::onRecvSipRegReqMsg(MySipRxDataPtr rxDataPtr)
     MySipMsgHelper::PrintSipMsgContactHdr(sipContactHeader, contactHeaderStr);
 
     // 解析下级sip服务注册有效时间
-    MySipMsgHdrPtr expireHeader = (MySipMsgHdrPtr)pjsip_msg_find_hdr(rxDataPtr->msg_info.msg, PJSIP_H_EXPIRES, nullptr);
+    auto expireHeader = static_cast<MySipMsgHdrPtr>(pjsip_msg_find_hdr(rxDataPtr->msg_info.msg, PJSIP_H_EXPIRES, nullptr));
     if (nullptr == expireHeader) {
         LOG(ERROR) << "Sip reg app receive register request message failed. Can't find expire header. " << contactHeaderStr << ".";
         return MyStatus_t::FAILED;
@@ -603,7 +605,7 @@ MyStatus_t MySipRegApp::onRecvSipRegReqMsg(MySipRxDataPtr rxDataPtr)
     }
 
     // 解析下级sip服务鉴权信息
-    MySipMsgHdrPtr authHeader = (MySipMsgHdrPtr)pjsip_msg_find_hdr(rxDataPtr->msg_info.msg, PJSIP_H_AUTHORIZATION, nullptr);
+    auto authHeader = static_cast<MySipMsgHdrPtr>(pjsip_msg_find_hdr(rxDataPtr->msg_info.msg, PJSIP_H_AUTHORIZATION, nullptr));
     if (nullptr != authHeader) {
         memset(buf, 0, sizeof(buf));
         pjsip_hdr_print_on(authHeader, buf, sizeof(buf));
@@ -645,8 +647,6 @@ MyStatus_t MySipRegApp::onRecvSipRegReqMsg(MySipRxDataPtr rxDataPtr)
     }
 
     // 创建sip应答消息
-    pjsip_tx_data *txDataPtr = nullptr;
-
     pjsip_hdr hdrList;
     pj_list_init(&hdrList);
 
@@ -717,7 +717,8 @@ MyStatus_t MySipRegApp::onRecvSipRegReqMsg(MySipRxDataPtr rxDataPtr)
             lowRegServInfo.sipRegLowServExpired        = expire;
             MyTimeHelper::GetCurrentFormatTime(lowRegServInfo.sipRegLowServLastRegTime);
 
-            if (lowSipServAddrCfg.lowSipServRegAddrCfg.ipAddr != sipContactHeader.ipAddr || lowSipServAddrCfg.lowSipServRegAddrCfg.port != sipContactHeader.port) {
+            if (lowSipServAddrCfg.lowSipServRegAddrCfg.ipAddr != sipContactHeader.ipAddr ||
+                lowSipServAddrCfg.lowSipServRegAddrCfg.port != sipContactHeader.port) {
                 lowRegServInfo.sipRegLowServCfg.lowSipServRegAddrCfg.ipAddr  = sipContactHeader.ipAddr;
                 lowRegServInfo.sipRegLowServCfg.lowSipServRegAddrCfg.port    = sipContactHeader.port;
             }
@@ -731,7 +732,8 @@ MyStatus_t MySipRegApp::onRecvSipRegReqMsg(MySipRxDataPtr rxDataPtr)
             MyTimeHelper::GetCurrentFormatTime(lastRegTime);
             MySipRegManage::UpdateSipRegLowServLastRegTime(cfgIter->second.lowSipServRegAddrCfg.id, lastRegTime);
 
-            if (lowSipServAddrCfg.lowSipServRegAddrCfg.ipAddr != sipContactHeader.ipAddr || lowSipServAddrCfg.lowSipServRegAddrCfg.port != sipContactHeader.port) {
+            if (lowSipServAddrCfg.lowSipServRegAddrCfg.ipAddr != sipContactHeader.ipAddr ||
+                lowSipServAddrCfg.lowSipServRegAddrCfg.port != sipContactHeader.port) {
                 auto tmpAddrCfg = lowSipServAddrCfg.lowSipServRegAddrCfg;
                 tmpAddrCfg.ipAddr = sipContactHeader.ipAddr;
                 tmpAddrCfg.port   = sipContactHeader.port;
@@ -762,7 +764,7 @@ MyStatus_t MySipRegApp::onRecvSipRegReqMsg(MySipRxDataPtr rxDataPtr)
     return MyStatus_t::SUCCESS;
 }
 
-MyStatus_t MySipRegApp::onSipRegAppRecvSipKeepAliveReqMsg(MySipRxDataPtr rxDataPtr)
+MyStatus_t MySipRegApp::onRecvSipKeepAliveReqMsg(MySipRxDataPtr rxDataPtr)
 {
     MySipKeepAliveMsgBody_dt keepAliveMsgBody;
     if (MyStatus_t::SUCCESS != MyXmlHelper::ParseSipKeepAliveMsgBody(static_cast<char*>(rxDataPtr->msg_info.msg->body->data), keepAliveMsgBody)) {
@@ -795,7 +797,8 @@ MyStatus_t MySipRegApp::onSipRegAppRecvSipKeepAliveReqMsg(MySipRxDataPtr rxDataP
     }
 
     // 发送sip应答消息
-    if (PJ_SUCCESS != pjsip_endpt_respond(endptPtr, nullptr, rxDataPtr, statusCode, nullptr, nullptr, nullptr, nullptr)) {
+    if (PJ_SUCCESS != pjsip_endpt_respond(endptPtr, nullptr, rxDataPtr, statusCode, nullptr, nullptr,
+        nullptr, nullptr)) {
         LOG(ERROR) << "Sip reg app receive keepAlive message failed. can't send response message. " << keepAliveMsgBodyStr << ".";
         return MyStatus_t::FAILED;
     }

@@ -1,7 +1,6 @@
 #pragma once
 #include <memory>
 #include <string>
-#include <cstdbool>
 #include <Poller/Timer.h>
 #include <Poller/EventPoller.h>
 #include "common/myTypeDef.h"
@@ -18,6 +17,10 @@ public:
     typedef std::weak_ptr<MySipRegApp>      SmtWkPtr;
 
 public:
+    MySipRegApp();
+    ~MySipRegApp();
+
+public:
     /**
      * @brief                               回调函数：sip注册响应
      * @param regParamPtr                   回调参数
@@ -27,25 +30,20 @@ public:
     /**             
      * @brief                               回调函数：sip注册鉴权信息填充
      * @return                              填充结果，0-success，-1-failed
-     * @param pool                          内存池
-     * @param realm                         鉴权域
-     * @param name                          用户名
-     * @param credInfo                      鉴权信息
+     * @param poolPtr                       内存池
+     * @param realmPtr                      鉴权域
+     * @param namePtr                       用户名
+     * @param credInfoPtr                   鉴权信息
      */                 
-    static pj_status_t                      OnRegFillAuthInfoCb(MY_COMMON::MySipPoolPtr   poolPtr, MY_COMMON::MySipStrCstPtr   realmPtr, 
-                                                                MY_COMMON::MySipStrCstPtr namePtr, MY_COMMON::MySipCredInfoPtr credInfoPtr);
+    static pj_status_t                      OnRegFillAuthInfoCb(MY_COMMON::MySipPoolPtr poolPtr, MY_COMMON::MySipStrCstPtr realmPtr,
+                                                MY_COMMON::MySipStrCstPtr namePtr, MY_COMMON::MySipCredInfoPtr credInfoPtr);
 
     /**             
      * @brief                               回调函数：sip保活应答处理
      * @param evParamPtr                    回调参数
      * @param evPtr                         回调事件
      */ 
-    static void                             OnKeepAliveRespCb(MY_COMMON::MyFuncCbParamPtr evParamPtr, 
-                                                              MY_COMMON::MySipEvPtr       evPtr);
-
-public:
-    MySipRegApp();
-    ~MySipRegApp();
+    static void                             OnKeepAliveRespCb(MY_COMMON::MyFuncCbParamPtr evParamPtr, MY_COMMON::MySipEvPtr evPtr);
 
 public:
     /**     
@@ -56,10 +54,8 @@ public:
      * @param name                          应用名称
      * @param priority                      应用优先级
      */                         
-    MY_COMMON::MyStatus_t                   init(const std::string&    servId, 
-                                                 const std::string&    id, 
-                                                 const std::string&    name, 
-                                                 pjsip_module_priority priority);
+    MY_COMMON::MyStatus_t                   init(const std::string& servId, const std::string& id, const std::string& name,
+                                                pjsip_module_priority priority);
 
     /**                 
      * @brief                               运行
@@ -86,7 +82,7 @@ public:
      * @return                              处理结果，0-success，-1-failed
      * @param rxDataPtr                     sip保活请求消息
      */
-    MY_COMMON::MyStatus_t                   onSipRegAppRecvSipKeepAliveReqMsg(MY_COMMON::MySipRxDataPtr rxDataPtr);   
+    MY_COMMON::MyStatus_t                   onRecvSipKeepAliveReqMsg(MY_COMMON::MySipRxDataPtr rxDataPtr);
 
 public:   
     /**     
@@ -131,7 +127,7 @@ private:
      * @param localServCfg                  本地sip服务地址配置
      */             
     MY_COMMON::MyStatus_t                   regUpServ(const MY_COMMON::MySipRegUpServCfg_dt& regUpServCfg, 
-                                                      const MY_COMMON::MySipServAddrCfg_dt&  localServCfg);
+                                                const MY_COMMON::MySipServAddrCfg_dt&  localServCfg);
 
     /**
      * @brief                               向上级sip服务发起保活
@@ -140,7 +136,7 @@ private:
      * @param localServCfg                  本地sip服务地址配置
      */             
     MY_COMMON::MyStatus_t                   keepAliveUpServ(const MY_COMMON::MySipRegUpServCfg_dt& regUpServCfg,
-                                                            const MY_COMMON::MySipServAddrCfg_dt&  localServCfg);                                                       
+                                                const MY_COMMON::MySipServAddrCfg_dt&  localServCfg);
 
 private:
     //                                      sip服务ID

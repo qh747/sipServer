@@ -16,7 +16,7 @@ public:
     typedef std::weak_ptr<MySipInviteApp>       SmtWkPtr;
 
 public:
-    MySipInviteApp();
+    MySipInviteApp() : m_status(MY_COMMON::MyStatus_t::FAILED), m_invCbPtr(nullptr) {}
     ~MySipInviteApp();
 
 public:
@@ -83,9 +83,15 @@ public:
      * @param reqInfo                           请求信息
      * @param respInfo                          响应信息
      */ 
-    MY_COMMON::MyStatus_t                       onSipInviteAppReqDevicePlayMedia(const std::string& deviceId,
-                                                    const MY_COMMON::MyHttpReqMediaInfo_dt& reqInfo,
-                                                    std::string& respInfo);
+    MY_COMMON::MyStatus_t                       onReqDevicePlayMedia(const std::string& deviceId, const MY_COMMON::MyHttpReqMediaInfo_dt& reqInfo,
+                                                    std::string& respInfo) const;
+
+    /**
+     * @brief                                   处理上级sip服务的sip invite请求消息
+     * @return                                  处理结果，0-success，-1-failed
+     * @param rxDataPtr                         sip invite请求消息
+     */
+    MY_COMMON::MyStatus_t                       onRecvSipInviteReqMsg(MY_COMMON::MySipRxDataPtr rxDataPtr);
 
 public:     
     /**     
@@ -117,7 +123,7 @@ private:
      * @param reqInfo                           请求信息
      */
     MY_COMMON::MyStatus_t                       reqDevicePlayMediaCheck(const std::string& deviceId,
-                                                    const MY_COMMON::MyHttpReqMediaInfo_dt& reqInfo);
+                                                    const MY_COMMON::MyHttpReqMediaInfo_dt& reqInfo) const;
 
     /**
      * @brief                                   获取请求设备播放媒体流的相关参数
@@ -128,7 +134,7 @@ private:
      */
     MY_COMMON::MyStatus_t                       reqDevicePlayMediaGetInfo(const std::string& deviceId,
                                                     MY_COMMON::MySipCatalogDeviceCfg_dt& deviceCfg,
-                                                    MY_COMMON::MySipCatalogPlatCfg_dt& deviceOwnerCfg);
+                                                    MY_COMMON::MySipCatalogPlatCfg_dt& deviceOwnerCfg) const;
 
     /**
      * @brief                                   获取请求设备播放媒体流的相关参数
@@ -141,7 +147,7 @@ private:
     MY_COMMON::MyStatus_t                       reqDevicePlayMediaPrepareSdp(const std::string& deviceId,
                                                     MY_COMMON::MySipPoolPtr poolPtr,
                                                     MY_COMMON::MyTpProto_t reqProtoType,
-                                                    MY_COMMON::MySipSdpSessionPtrAddr sdpSessionPtrAddr);
+                                                    MY_COMMON::MySipSdpSessionPtrAddr sdpSessionPtrAddr) const;
 
     /**
      * @brief                                   获取请求设备播放媒体流的相关参数
@@ -153,10 +159,21 @@ private:
      * @param dlgPtrAddr                        会话地址
      */
     MY_COMMON::MyStatus_t                       reqDevicePlayMediaConstructDialog(const std::string& deviceId,
-                                                    MY_COMMON::MySipCatalogDeviceCfg_dt& deviceCfg,
-                                                    MY_COMMON::MySipCatalogPlatCfg_dt& deviceOwnerCfg,
+                                                    const MY_COMMON::MySipCatalogDeviceCfg_dt& deviceCfg,
+                                                    const MY_COMMON::MySipCatalogPlatCfg_dt& deviceOwnerCfg,
                                                     MY_COMMON::MyTpProto_t protoType,
-                                                    MY_COMMON::MySipDialogPtrAddr dlgPtrAddr);
+                                                    MY_COMMON::MySipDialogPtrAddr dlgPtrAddr) const;
+
+    /**
+     * @brief                                   设置请求设备播放媒体流的传输协议
+     * @return                                  设置结果，0-success，-1-failed
+     * @param deviceId                          设备ID
+     * @param deviceOwnerCfg                    设备所属平台配置
+     * @param dlgPtr                            会话
+     */
+    MY_COMMON::MyStatus_t                       reqDevicePlayMediaSetTransport(const std::string& deviceId,
+                                                    const MY_COMMON::MySipCatalogPlatCfg_dt& deviceOwnerCfg, 
+                                                    MY_COMMON::MySipDialogPtr dlgPtr) const;
 
 private:    
     //                                          sip服务ID

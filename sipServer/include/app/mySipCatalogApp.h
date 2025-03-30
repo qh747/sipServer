@@ -21,28 +21,28 @@ public:
      * @return                              回调结果，0-success，-1-failed
      * @param arg                           回调参数
      */
-    static int                              SipCatalogAppPushCatalogThdFunc(MY_COMMON::MyFuncCbParamPtr arg);
+    static int                              OnPushCatalogCb(MY_COMMON::MyFuncCbParamPtr arg);
 
     /**
-     * @brief                               sip catalog应用推送设备目录回调函数
+     * @brief                               sip catalog应用推送设备目录响应回调函数
      * @param arg                           回调参数
      * @param ev                            回调事件
      */
-    static void                             OnSipCatalogAppPushCatalogCb(MY_COMMON::MyFuncCbParamPtr arg, MY_COMMON::MySipEvPtr ev);
+    static void                             OnRespPushCatalogCb(MY_COMMON::MyFuncCbParamPtr arg, MY_COMMON::MySipEvPtr ev);
 
     /**
      * @brief                               sip catalog应用更新设备目录线程回调函数
      * @return                              回调结果，0-success，-1-failed
      * @param arg                           回调参数
      */
-    static int                              SipCatalogAppUpdateCatalogThdFunc(MY_COMMON::MyFuncCbParamPtr arg);
+    static int                              OnUpdateCatalogCb(MY_COMMON::MyFuncCbParamPtr arg);
 
     /**
-     * @brief                               sip catalog应用更新设备目录回调函数
+     * @brief                               sip catalog应用更新设备目录响应回调函数
      * @param arg                           回调参数
      * @param ev                            回调事件
      */
-    static void                             OnSipCatalogAppUpdateCatalogCb(MY_COMMON::MyFuncCbParamPtr arg, MY_COMMON::MySipEvPtr ev);
+    static void                             OnRespUpdateCatalogCb(MY_COMMON::MyFuncCbParamPtr arg, MY_COMMON::MySipEvPtr ev);
 
 public:
     MySipCatalogApp();
@@ -57,10 +57,8 @@ public:
      * @param name                          应用名称
      * @param priority                      应用优先级
      */                         
-    MY_COMMON::MyStatus_t                   init(const std::string&    servId, 
-                                                 const std::string&    id, 
-                                                 const std::string&    name, 
-                                                 pjsip_module_priority priority);
+    MY_COMMON::MyStatus_t                   init(const std::string& servId, const std::string& id, const std::string& name,
+                                                pjsip_module_priority priority);
 
     /**                 
      * @brief                               运行
@@ -80,14 +78,14 @@ public:
      * @return                              处理结果，0-success，-1-failed
      * @param rxDataPtr                     sip设备目录查询请求消息
      */
-    MY_COMMON::MyStatus_t                   onSipCatalogAppRecvSipCatalogQueryReqMsg(MY_COMMON::MySipRxDataPtr rxDataPtr);  
+    MY_COMMON::MyStatus_t                   onRecvSipCatalogQueryReqMsg(MY_COMMON::MySipRxDataPtr rxDataPtr);
 
     /**             
      * @brief                               处理下级sip服务的sip设备目录响应请求消息
      * @return                              处理结果，0-success，-1-failed
      * @param rxDataPtr                     sip设备目录响应请求消息
      */
-    MY_COMMON::MyStatus_t                   onSipCatalogAppRecvSipCatalogResponseReqMsg(MY_COMMON::MySipRxDataPtr rxDataPtr);  
+    MY_COMMON::MyStatus_t                   onRecvSipCatalogResponseReqMsg(MY_COMMON::MySipRxDataPtr rxDataPtr);
 
 public:             
     /**                     
@@ -117,8 +115,8 @@ public:
      * @param regLowServCfg                 下级sip注册服务配置
      * @param localServCfg                  本地sip服务地址配置
      */             
-    MY_COMMON::MyStatus_t                   onSipCatalogAppReqLowServCatalog(const MY_COMMON::MySipRegLowServCfg_dt& regLowServCfg, 
-                                                                             const MY_COMMON::MySipServAddrCfg_dt&   localServCfg);
+    MY_COMMON::MyStatus_t                   onReqLowServCatalog(const MY_COMMON::MySipRegLowServCfg_dt& regLowServCfg,
+                                                const MY_COMMON::MySipServAddrCfg_dt& localServCfg);
 
     /**
      * @brief                               发送本级sip服务设备目录
@@ -127,9 +125,8 @@ public:
      * @param regUpServCfg                  上级sip注册服务配置
      * @param localServCfg                  本地sip服务地址配置
      */             
-    MY_COMMON::MyStatus_t                   sendLocalServCatalog(const std::string&                      sn,
-                                                                 const MY_COMMON::MySipRegUpServCfg_dt&  regUpServCfg, 
-                                                                 const MY_COMMON::MySipServAddrCfg_dt&   localServCfg);
+    MY_COMMON::MyStatus_t                   sendLocalServCatalog(const std::string& sn, const MY_COMMON::MySipRegUpServCfg_dt& regUpServCfg,
+                                                const MY_COMMON::MySipServAddrCfg_dt& localServCfg);
 
 private:
     //                                      sip服务ID

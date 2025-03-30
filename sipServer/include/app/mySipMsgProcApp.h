@@ -66,28 +66,35 @@ public:
     /**
      * @brief                                   回调函数：处理sip注册请求消息
      * @return                                  处理结果，0-success，-1-failed
-     * @param rdata                             接收到的sip注册请求消息
+     * @param rdataPtr                          接收到的sip注册请求消息
      */
     MY_COMMON::MyStatus_t                       onProcSipRegisterReqMsg(MY_COMMON::MySipRxDataPtr rdataPtr);
 
     /**
+     * @brief                                   回调函数：处理sip邀请请求消息
+     * @return                                  处理结果，0-success，-1-failed
+     * @param rdataPtr                          接收到的sip邀请请求消息
+     */
+    MY_COMMON::MyStatus_t                       onProcSipInviteReqMsg(MY_COMMON::MySipRxDataPtr rdataPtr);
+
+    /**
      * @brief                                   回调函数：处理sip保活请求消息
      * @return                                  处理结果，0-success，-1-failed
-     * @param rdata                             接收到的sip保活请求消息
+     * @param rdataPtr                          接收到的sip保活请求消息
      */
     MY_COMMON::MyStatus_t                       onProcSipKeepAliveReqMsg(MY_COMMON::MySipRxDataPtr rdataPtr);
 
     /**
      * @brief                                   回调函数：处理sip设备目录查询请求消息
      * @return                                  处理结果，0-success，-1-failed
-     * @param rdata                             接收到的sip设备目录查询请求消息
+     * @param rdataPtr                          接收到的sip设备目录查询请求消息
      */
     MY_COMMON::MyStatus_t                       onProcSipCatalogQueryReqMsg(MY_COMMON::MySipRxDataPtr rdataPtr);
 
     /**
      * @brief                                   回调函数：处理sip设备目录响应请求消息
      * @return                                  处理结果，0-success，-1-failed
-     * @param rdata                             接收到的sip设备目录响应请求消息
+     * @param rdataPtr                          接收到的sip设备目录响应请求消息
      */
     MY_COMMON::MyStatus_t                       onProcSipCatalogResponseReqMsg(MY_COMMON::MySipRxDataPtr rdataPtr);
 
@@ -95,7 +102,7 @@ public:
     /** 
      * @brief                                   回调函数：模块加载
      * @return                                  加载结果，0-success，-1-failed
-     * @param endpt                             pjsip endpoint
+     * @param endptPtr                          pjsip endpoint
      */
     static pj_status_t                          OnAppModuleLoadCb(MY_COMMON::MySipEndptPtr endptPtr);
 
@@ -120,38 +127,38 @@ public:
     /** 
      * @brief                                   回调函数：模块接收请求消息
      * @return                                  接收请求消息结果，0-success，-1-failed
-     * @param rdata                             接收到的请求消息
+     * @param rdataPtr                          接收到的请求消息
      */ 
     static pj_bool_t                            OnAppModuleRecvReqCb(MY_COMMON::MySipRxDataPtr rdataPtr);
 
     /**
      * @brief                                   回调函数：模块接收应答消息
      * @return                                  接收应答消息结果，0-success，-1-failed
-     * @param rdata                             接收到的应答消息
+     * @param rdataPtr                          接收到的应答消息
      */ 
     static pj_bool_t                            OnAppModuleRecvRespCb(MY_COMMON::MySipRxDataPtr rdataPtr);
 
     /** 
      * @brief                                   回调函数：模块发送请求消息
      * @return                                  发送请求消息结果，0-success，-1-failed
-     * @param tdata                             待发送的请求消息
+     * @param tdataPtr                          待发送的请求消息
      */ 
     static pj_status_t                          OnAppModuleSendReqCb(MY_COMMON::MySipTxDataPtr tdataPtr);
 
     /** 
      * @brief                                   回调函数：模块发送应答消息
      * @return                                  发送应答消息结果，0-success，-1-failed
-     * @param tdata                             待发送的应答消息
+     * @param tdataPtr                          待发送的应答消息
      */ 
     static pj_status_t                          OnAppModuleSendRespCb(MY_COMMON::MySipTxDataPtr tdataPtr);
 
     /** 
      * @brief                                   回调函数：模块事务状态改变
-     * @param tsx                               事务
-     * @param event                             事件
+     * @param tsxPtr                            事务
+     * @param evPtr                             事件
      */
     static void                                 OnAppModuleTsxStateChangeCb(MY_COMMON::MySipTsxPtr tsxPtr, 
-                                                                            MY_COMMON::MySipEvPtr evPtr);
+                                                    MY_COMMON::MySipEvPtr evPtr);
 
 private:    
     //                                          sip服务ID

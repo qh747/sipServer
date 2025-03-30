@@ -21,27 +21,22 @@ using MY_MANAGER::MySipCatalogManageView;
 
 namespace MY_APP {
 
-void MySipInviteApp::OnInviteStateChanged(MY_COMMON::MySipInvSessionPtr invSessPtr, MY_COMMON::MySipEvPtr evPtr)
+void MySipInviteApp::OnInviteStateChanged(MySipInvSessionPtr invSessPtr, MySipEvPtr evPtr)
 {
 
 }
 
-void MySipInviteApp::OnNewInviteSession(MY_COMMON::MySipInvSessionPtr invSessPtr, MY_COMMON::MySipEvPtr evPtr)
+void MySipInviteApp::OnNewInviteSession(MySipInvSessionPtr invSessPtr, MySipEvPtr evPtr)
 {
 
 }
 
-void MySipInviteApp::OnInviteMediaUpdate(MY_COMMON::MySipInvSessionPtr invSessPtr, pj_status_t status)
+void MySipInviteApp::OnInviteMediaUpdate(MySipInvSessionPtr invSessPtr, pj_status_t status)
 {
     
 }
 
-void MySipInviteApp::OnInviteSendAck(MY_COMMON::MySipInvSessionPtr invSessPtr, MY_COMMON::MySipRxDataPtr rxDataPtr)
-{
-
-}
-
-MySipInviteApp::MySipInviteApp() : m_status(MyStatus_t::FAILED), m_invCbPtr(nullptr)
+void MySipInviteApp::OnInviteSendAck(MySipInvSessionPtr invSessPtr, MySipRxDataPtr rxDataPtr)
 {
 
 }
@@ -139,8 +134,7 @@ MyStatus_t MySipInviteApp::shutdown()
     return MyStatus_t::SUCCESS;
 }
 
-MyStatus_t MySipInviteApp::onSipInviteAppReqDevicePlayMedia(const std::string& deviceId,
-    const MY_COMMON::MyHttpReqMediaInfo_dt& reqInfo, std::string& respInfo)
+MyStatus_t MySipInviteApp::onReqDevicePlayMedia(const std::string& deviceId, const MyHttpReqMediaInfo_dt& reqInfo, std::string& respInfo) const
 {
     // pjsip要求自定义线程进行注册才能使用
     MySystemPjsip::RegistSelfThread();
@@ -148,7 +142,7 @@ MyStatus_t MySipInviteApp::onSipInviteAppReqDevicePlayMedia(const std::string& d
     // 设备类型校验
     if (MyStatus_t::SUCCESS != this->reqDevicePlayMediaCheck(deviceId, reqInfo)) {
         respInfo = "check device type error.";
-        LOG(ERROR) << "Sip app module req device play media failed. check device type error. device id: " << deviceId;
+        LOG(ERROR) << "Sip app module req device play media error. check device type error. device id: " << deviceId;
         return MyStatus_t::FAILED;
     }
 
@@ -157,7 +151,7 @@ MyStatus_t MySipInviteApp::onSipInviteAppReqDevicePlayMedia(const std::string& d
     MySipCatalogPlatCfg_dt deviceOwnerCfg;
     if (MyStatus_t::SUCCESS != this->reqDevicePlayMediaGetInfo(deviceId, deviceCfg, deviceOwnerCfg)) {
         respInfo = "device not exists.";
-        LOG(ERROR) << "Sip app module req device play media failed. device not exists. device id: " << deviceId;
+        LOG(ERROR) << "Sip app module req device play media error. device not exists. device id: " << deviceId;
         return MyStatus_t::FAILED;
     }
 
@@ -165,7 +159,7 @@ MyStatus_t MySipInviteApp::onSipInviteAppReqDevicePlayMedia(const std::string& d
     MySipPoolPtr poolPtr = nullptr;
     if (MyStatus_t::SUCCESS != MyServManage::GetSipServPool(&poolPtr)) {
         respInfo = "sip server pool invalid.";
-        LOG(ERROR) << "Sip app module req device play media failed. sip server pool invalid. device id: " << deviceId;
+        LOG(ERROR) << "Sip app module req device play media error. sip server pool invalid. device id: " << deviceId;
         return MyStatus_t::FAILED;
     }
 
@@ -173,31 +167,45 @@ MyStatus_t MySipInviteApp::onSipInviteAppReqDevicePlayMedia(const std::string& d
     MySipSdpSessionPtr sdpSessionPtr = nullptr;
     if (MyStatus_t::SUCCESS != this->reqDevicePlayMediaPrepareSdp(deviceId, poolPtr, reqInfo.protoType, &sdpSessionPtr)) {
         respInfo = "sdp prepared error.";
-        LOG(ERROR) << "Sip app module req device play media failed. prepare sdp invalid. device id: " << deviceId;
+        LOG(ERROR) << "Sip app module req device play media error. prepare sdp invalid. device id: " << deviceId;
         return MyStatus_t::FAILED;
     }
 
-    // 构造invite请求
+    // 创建会话
     MySipDialogPtr dlgPtr = nullptr;
     if (MyStatus_t::SUCCESS != this->reqDevicePlayMediaConstructDialog(deviceId, deviceCfg, deviceOwnerCfg,
         reqInfo.protoType, &dlgPtr)) {
         respInfo = "construct dialog error.";
-        LOG(ERROR) << "Sip app module req device play media failed. construct dialog invalid. device id: " << deviceId;
+
+        LOG(ERROR) << "Sip app module req device play media error. construct dialog invalid. device id: " << deviceId;
         return MyStatus_t::FAILED;
     }
 
-    // 发送invite请求
     MySipInvSessionPtr invSessPtr = nullptr;
     if(PJ_SUCCESS != pjsip_inv_create_uac(dlgPtr, sdpSessionPtr, 0, &invSessPtr)) {
+        respInfo = "pjsip create uac error.";
+
         pjsip_dlg_terminate(dlgPtr);
-        LOG(ERROR) << "Sip app module req device play media failed. create invite session error. device id: " << deviceId;
+        LOG(ERROR) << "Sip app module req device play media error. create invite session failed. device id: " << deviceId;
         return MyStatus_t::FAILED;
     }
-    
+
+    // 设置invite请求使用的transport
+    if (MyStatus_t::SUCCESS != this->reqDevicePlayMediaSetTransport(deviceId, deviceOwnerCfg, dlgPtr)) {
+        respInfo = "set transport error.";
+
+        pjsip_dlg_terminate(dlgPtr);
+        LOG(ERROR) << "Sip app module req device play media error. set transport failed. device id: " << deviceId;
+        return MyStatus_t::FAILED;
+    }
+
+    // 构造invite请求
     MySipTxDataPtr txDataPtr = nullptr;
     if(PJ_SUCCESS != pjsip_inv_invite(invSessPtr, &txDataPtr)) {
+        respInfo = "pjsip create invite message error.";
+
         pjsip_dlg_terminate(dlgPtr);
-        LOG(ERROR) << "Sip app module req device play media failed. generate invite message error. device id: " << deviceId;
+        LOG(ERROR) << "Sip app module req device play media error. generate invite message error. device id: " << deviceId;
         return MyStatus_t::FAILED;
     }
 
@@ -209,11 +217,22 @@ MyStatus_t MySipInviteApp::onSipInviteAppReqDevicePlayMedia(const std::string& d
     MySipMsgGenericHdrPtr hdr = pjsip_generic_string_hdr_create(poolPtr, &subjectName, &subjectValue);
     pjsip_msg_add_hdr(txDataPtr->msg, reinterpret_cast<MySipMsgHdrPtr>(hdr));
 
+    // 发送invite请求
     if(PJ_SUCCESS != pjsip_inv_send_msg(invSessPtr, txDataPtr)) {
+        respInfo = "pjsip send invite message error.";
+
         pjsip_dlg_terminate(dlgPtr);
-        LOG(ERROR) << "Sip app module req device play media failed. send invite message error. device id: " << deviceId;
+        LOG(ERROR) << "Sip app module req device play media error. send invite message error. device id: " << deviceId;
         return MyStatus_t::FAILED;
     }
+
+    respInfo = "pjsip send invite message success.";
+    return MyStatus_t::SUCCESS;
+}
+
+MyStatus_t MySipInviteApp::onRecvSipInviteReqMsg(MySipRxDataPtr rxDataPtr)
+{
+
     return MyStatus_t::SUCCESS;
 }
 
@@ -245,7 +264,7 @@ MyStatus_t MySipInviteApp::getSipInviteApp(MySipInviteApp::SmtWkPtr& wkPtr)
     return MyStatus_t::SUCCESS;
 }
 
-MyStatus_t MySipInviteApp::reqDevicePlayMediaCheck(const std::string& deviceId, const MyHttpReqMediaInfo_dt& reqInfo)
+MyStatus_t MySipInviteApp::reqDevicePlayMediaCheck(const std::string& deviceId, const MyHttpReqMediaInfo_dt& reqInfo) const
 {
     // 校验设备类型
     std::string deviceType = deviceId.substr(10, 3);
@@ -263,7 +282,7 @@ MyStatus_t MySipInviteApp::reqDevicePlayMediaCheck(const std::string& deviceId, 
 }
 
 MyStatus_t MySipInviteApp::reqDevicePlayMediaGetInfo(const std::string& deviceId, MySipCatalogDeviceCfg_dt& deviceCfg,
-    MySipCatalogPlatCfg_dt& deviceOwnerCfg)
+    MySipCatalogPlatCfg_dt& deviceOwnerCfg) const
 {
     // 查询设备信息
     std::string deviceOwnerId;
@@ -305,7 +324,7 @@ MyStatus_t MySipInviteApp::reqDevicePlayMediaGetInfo(const std::string& deviceId
 }
 
 MyStatus_t MySipInviteApp::reqDevicePlayMediaPrepareSdp(const std::string& deviceId, MySipPoolPtr poolPtr,
-    MyTpProto_t reqProtoType, MySipSdpSessionPtrAddr sdpSessionPtrAddr)
+    MyTpProto_t reqProtoType, MySipSdpSessionPtrAddr sdpSessionPtrAddr) const
 {
     if (nullptr == m_localSdpPlayPtr) {
         LOG(ERROR) << "Prepare sdp failed. local sdp info invalid. device id: " << deviceId;
@@ -411,14 +430,13 @@ MyStatus_t MySipInviteApp::reqDevicePlayMediaPrepareSdp(const std::string& devic
     return MyStatus_t::SUCCESS;
 }
 
-MyStatus_t MySipInviteApp::reqDevicePlayMediaConstructDialog(const std::string& deviceId,
-    MySipCatalogDeviceCfg_dt& deviceCfg, MySipCatalogPlatCfg_dt& deviceOwnerCfg, MyTpProto_t protoType,
-    MySipDialogPtrAddr dlgPtrAddr)
+MyStatus_t MySipInviteApp::reqDevicePlayMediaConstructDialog(const std::string& deviceId, const MySipCatalogDeviceCfg_dt& deviceCfg,
+    const MySipCatalogPlatCfg_dt& deviceOwnerCfg, MyTpProto_t protoType, MySipDialogPtrAddr dlgPtrAddr) const
 {
     // 获取本级平台信息
     MySipServAddrCfg_dt servAddr;
     if (MyStatus_t::SUCCESS != MyServManage::GetSipServAddrCfg(servAddr)) {
-        LOG(ERROR) << "Construct sip dialog failed. get sip server addr error. device id: " << deviceId;
+        LOG(ERROR) << "Construct sip dialog error. get sip server addr error. device id: " << deviceId;
         return MyStatus_t::FAILED;
     }
 
@@ -440,7 +458,7 @@ MyStatus_t MySipInviteApp::reqDevicePlayMediaConstructDialog(const std::string& 
         MySipMsgHelper::GenerateSipMsgURL(deviceCfg.deviceID, deviceOwnerCfg.deviceIp,
             std::stoul(deviceOwnerCfg.devicePort), protoType, sURL);
         MySipMsgHelper::GenerateSipMsgFromHeader(servAddr.id, servAddr.ipAddr, sFromHdr);
-        MySipMsgHelper::GenerateSipMsgToHeader(deviceCfg.deviceID, deviceOwnerCfg.deviceIp, sToHdr);
+        MySipMsgHelper::GenerateSipMsgToHeader(deviceOwnerCfg.deviceID, deviceOwnerCfg.deviceIp, sToHdr);
         MySipMsgHelper::GenerateSipMsgContactHeader(servAddr.id, servAddr.ipAddr, servAddr.regPort, sContact);
     }
 
@@ -451,10 +469,57 @@ MyStatus_t MySipInviteApp::reqDevicePlayMediaConstructDialog(const std::string& 
 
     if (PJ_SUCCESS != pjsip_dlg_create_uac(pjsip_ua_instance(), &sipMsgFromHdr, &sipMsgContact,
         &sipMsgToHdr, &sipMsgURL, dlgPtrAddr)) {
-        LOG(ERROR) << "Construct sip dialog failed. create invite session failed. device id: " << deviceId;
+        LOG(ERROR) << "Construct sip dialog error. create invite session failed. device id: " << deviceId;
         pjsip_dlg_terminate(*dlgPtrAddr);
         return MyStatus_t::FAILED;
     }
+
+    return MyStatus_t::SUCCESS;
+}
+
+MyStatus_t MySipInviteApp::reqDevicePlayMediaSetTransport(const std::string& deviceId, const MY_COMMON::MySipCatalogPlatCfg_dt& deviceOwnerCfg, 
+    MySipDialogPtr dlgPtr) const
+{
+    // 指定发送invite请求的transport
+    pjsip_tpselector tpSelector;
+    tpSelector.type = PJSIP_TPSELECTOR_TRANSPORT;
+    tpSelector.disable_connection_reuse = false;
+
+    if (deviceOwnerCfg.deviceID == m_servId) {
+        // 本级服务默认使用udp传输
+        if (MyStatus_t::SUCCESS != MyServManage::GetSipServUdpTp(&tpSelector.u.transport)) {
+            LOG(ERROR) << "Set sip invite transport error. get sip serv udp tp failed. device id: " << deviceId << ".";
+            return MyStatus_t::FAILED;
+        }
+    }
+    else {
+        // 下级服务根据注册类型选择传输方式
+        MySipRegLowServCfg_dt lowRegServCfg;
+        if (MyStatus_t::SUCCESS != MySipRegManage::GetSipRegLowServCfg(deviceOwnerCfg.deviceID, lowRegServCfg)) {
+            LOG(ERROR) << "Set sip invite transport error. get sip reg low serv cfg failed. device id: " << deviceId << ".";
+            return MyStatus_t::FAILED;
+        }
+
+        if (MyTpProto_t::UDP == lowRegServCfg.proto) {
+            if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegUdpTp(&tpSelector.u.transport)) {
+                LOG(ERROR) << "Set sip invite transport error. get sip reg low serv udp tp failed. device id: " << deviceId << ".";
+                return MyStatus_t::FAILED;
+            }
+        }
+        else {
+            if (MyStatus_t::SUCCESS != MyServManage::GetSipServRegTcpTp(&tpSelector.u.transport, deviceOwnerCfg.deviceIp,
+                std::stoul(deviceOwnerCfg.devicePort))) {
+                LOG(ERROR) << "Set sip invite transport error. get sip serv reg tcp tp failed. device id: " << deviceId << ".";
+                return MyStatus_t::FAILED;
+            }
+        }
+    }
+
+    if (PJ_SUCCESS != pjsip_dlg_set_transport(dlgPtr, &tpSelector)) {
+        LOG(ERROR) << "Set sip invite transport error. set dialog transport failed. device id: " << deviceId;
+        return MyStatus_t::FAILED;
+    }
+
     return MyStatus_t::SUCCESS;
 }
 

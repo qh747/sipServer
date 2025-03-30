@@ -18,6 +18,10 @@ public:
     typedef std::weak_ptr<MySipServer>      SmtWkPtr;
 
 public:
+    MySipServer();
+    ~MySipServer();
+
+public:
     /**
      * @brief                               sip服务事件线程回调函数
      * @return                              回调结果，0-success，-1-failed
@@ -27,15 +31,8 @@ public:
 
     /**
      * @brief                               sip服务监听事件回调函数
-     * @param deviceId                      设备id
-     * @param status                        处理状态
-     * @param info                          处理信息
      */
     static void                             ServMediaReqEvFunc(MY_MEDIA_REQ_EV_ARGS);
-
-public:         
-    MySipServer();          
-    ~MySipServer();         
 
 public:         
     /**         
@@ -45,7 +42,7 @@ public:
      * @param evThdMemCfg                   sip服务事件线程内存配置
      */             
     MY_COMMON::MyStatus_t                   init(const MY_COMMON::MySipServAddrCfg_dt& addrCfg, 
-                                                 const MY_COMMON::MySipEvThdMemCfg_dt& evThdMemCfg);
+                                                const MY_COMMON::MySipEvThdMemCfg_dt& evThdMemCfg);
 
     /**
      * @brief                               启动sip服务
@@ -66,6 +63,13 @@ public:
      * @param regReqMsgPtr                  注册请求消息
      */
     MY_COMMON::MyStatus_t                   onServRecvSipRegReqMsg(MY_COMMON::MySipRxDataPtr regReqMsgPtr);
+
+    /**
+     * @brief                               回调函数: sip invite请求消息接收
+     * @return                              处理结果，0-success，-1-failed
+     * @param invReqMsgPtr                  invite请求消息
+     */
+    MY_COMMON::MyStatus_t                   onServRecvSipInviteReqMsg(MY_COMMON::MySipRxDataPtr invReqMsgPtr);
 
     /**
      * @brief                               回调函数: sip保活请求消息接收

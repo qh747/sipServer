@@ -269,6 +269,17 @@ MyStatus_t MySipServer::onServRecvSipRegReqMsg(MySipRxDataPtr regReqMsgPtr)
     return sipRegAppWkPtr.lock()->onRecvSipRegReqMsg(regReqMsgPtr);
 }
 
+MyStatus_t MySipServer::onServRecvSipInviteReqMsg(MySipRxDataPtr invReqMsgPtr)
+{
+    MySipInviteApp::SmtWkPtr sipInvAppWkPtr;
+    if (MyStatus_t::SUCCESS != MyAppManage::GetSipInviteApp(sipInvAppWkPtr)) {
+        LOG(ERROR) << "SipServer recv sip invite request error. get sip invite app failed.";
+        return MyStatus_t::FAILED;
+    }
+
+    return sipInvAppWkPtr.lock()->onRecvSipInviteReqMsg(invReqMsgPtr);
+}
+
 MyStatus_t MySipServer::onServRecvSipKeepAliveReqMsg(MySipRxDataPtr keepAliveReqMsgPtr)
 {
     MySipRegApp::SmtWkPtr sipRegAppWkPtr;
@@ -276,7 +287,7 @@ MyStatus_t MySipServer::onServRecvSipKeepAliveReqMsg(MySipRxDataPtr keepAliveReq
         LOG(ERROR) << "SipServer recv sip keepAlive request failed. sipRegApp invalid.";
         return MyStatus_t::FAILED;
     }
-    return sipRegAppWkPtr.lock()->onSipRegAppRecvSipKeepAliveReqMsg(keepAliveReqMsgPtr);
+    return sipRegAppWkPtr.lock()->onRecvSipKeepAliveReqMsg(keepAliveReqMsgPtr);
 }
 
 MyStatus_t MySipServer::onServRecvSipCatalogQueryReqMsg(MySipRxDataPtr catalogQueryReqMsgPtr)
@@ -286,7 +297,7 @@ MyStatus_t MySipServer::onServRecvSipCatalogQueryReqMsg(MySipRxDataPtr catalogQu
         LOG(ERROR) << "SipServer recv sip catalog query request failed. sipCatalogApp invalid.";
         return MyStatus_t::FAILED;
     }
-    return sipCatalogAppWkPtr.lock()->onSipCatalogAppRecvSipCatalogQueryReqMsg(catalogQueryReqMsgPtr);
+    return sipCatalogAppWkPtr.lock()->onRecvSipCatalogQueryReqMsg(catalogQueryReqMsgPtr);
 }
 MyStatus_t MySipServer::onServRecvSipCatalogRespMsg(MySipRxDataPtr catalogResponseReqMsgPtr)
 {
@@ -295,7 +306,7 @@ MyStatus_t MySipServer::onServRecvSipCatalogRespMsg(MySipRxDataPtr catalogRespon
         LOG(ERROR) << "SipServer recv sip catalog response request failed. sipCatalogApp invalid.";
         return MyStatus_t::FAILED;
     }
-    return sipCatalogAppWkPtr.lock()->onSipCatalogAppRecvSipCatalogResponseReqMsg(catalogResponseReqMsgPtr);
+    return sipCatalogAppWkPtr.lock()->onRecvSipCatalogResponseReqMsg(catalogResponseReqMsgPtr);
 }
 
 MyStatus_t MySipServer::onReqLowServCatalog(const MySipRegLowServCfg_dt& lowSipRegServAddrCfg)
@@ -305,11 +316,10 @@ MyStatus_t MySipServer::onReqLowServCatalog(const MySipRegLowServCfg_dt& lowSipR
         LOG(ERROR) << "SipServer onReqLowServCatalog() failed. sipCatalogApp invalid.";
         return MyStatus_t::FAILED;
     }
-    return sipCatalogAppWkPtr.lock()->onSipCatalogAppReqLowServCatalog(lowSipRegServAddrCfg, m_servAddrCfg);
+    return sipCatalogAppWkPtr.lock()->onReqLowServCatalog(lowSipRegServAddrCfg, m_servAddrCfg);
 }
 
-MyStatus_t MySipServer::onReqDeviceMedia(const std::string& deviceId, const MY_COMMON::MyHttpReqMediaInfo_dt& reqInfo,
-    std::string& respInfo)
+MyStatus_t MySipServer::onReqDeviceMedia(const std::string& deviceId, const MyHttpReqMediaInfo_dt& reqInfo, std::string& respInfo)
 {
     MySipInviteApp::SmtWkPtr sipInviteAppWkPtr;
     if (MyStatus_t::SUCCESS != MyAppManage::GetSipInviteApp(sipInviteAppWkPtr)) {
@@ -318,7 +328,7 @@ MyStatus_t MySipServer::onReqDeviceMedia(const std::string& deviceId, const MY_C
     }
 
     if (MyMedaPlayWay_t::PLAY == reqInfo.playType) {
-        return sipInviteAppWkPtr.lock()->onSipInviteAppReqDevicePlayMedia(deviceId, reqInfo, respInfo);
+        return sipInviteAppWkPtr.lock()->onReqDevicePlayMedia(deviceId, reqInfo, respInfo);
     }
     else {
         LOG(ERROR) << "SipServer onReqDeviceMedia() failed. current not support play type.";
@@ -332,7 +342,7 @@ MyStatus_t MySipServer::getState(MyStatus_t& status) const
     return MyStatus_t::SUCCESS;
 }
 
-MyStatus_t MySipServer::getServAddrCfg(MY_COMMON::MySipServAddrCfg_dt& cfg)
+MyStatus_t MySipServer::getServAddrCfg(MySipServAddrCfg_dt& cfg)
 {
     if (MyStatus_t::FAILED == m_status.load()) {
         LOG(ERROR) << "SipServer is not init.";
@@ -371,7 +381,7 @@ MyStatus_t MySipServer::getServUdpTp(MySipTransportPtrAddr udpTpPtrAddr)
     return MyStatus_t::SUCCESS;
 }
 
-MyStatus_t MySipServer::getServRegUdpTp(MY_COMMON::MySipTransportPtrAddr udpTpPtrAddr)
+MyStatus_t MySipServer::getServRegUdpTp(MySipTransportPtrAddr udpTpPtrAddr)
 {
     if (MyStatus_t::FAILED == m_status.load()) {
         LOG(ERROR) << "SipServer is not init.";
