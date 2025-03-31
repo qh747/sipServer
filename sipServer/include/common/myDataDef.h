@@ -18,6 +18,9 @@ const std::string DEVICE_TYPE_IP_CAMERA                     = "131";
 // 网络硬盘录像机
 const std::string DEVICE_TYPE_NETWORK_VIDEO_RECORDER        = "132";
 
+// 设备类型长度
+const uint32_t DEVICE_TYPE_LENGTH                           = 20;
+
 /**
  * @brief 自定义返回值枚举类型
  */

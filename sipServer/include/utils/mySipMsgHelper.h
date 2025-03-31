@@ -106,7 +106,7 @@ public:
     /**
      * @brief                       打印sip消息catalog消息体
      * @return                      打印结果，0-success, -1-failed
-     * @param keepAliveMsgBody      sip catalog消息体结构体
+     * @param catalogMsgBody        sip catalog消息体结构体
      * @param str                   sip catalog消息体字符串
      */
     static MY_COMMON::MyStatus_t    PrintSipCatalogMsgBody(const MY_COMMON::MySipCatalogReqMsgBody_dt& catalogMsgBody, std::string& str);

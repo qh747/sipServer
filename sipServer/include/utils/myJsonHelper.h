@@ -55,7 +55,7 @@ public:
     /**
      * @brief                       生成sip设备信息
      * @return                      生成结果，0-success, -1-failed
-     * @param deviceInfoMap         sip设备信息
+     * @param deviceInfo            sip设备信息
      * @param deviceInfoStr         sip设备信息字符串
      */
     static MY_COMMON::MyStatus_t    GenerateDeviceInfo(const MY_COMMON::MySipCatalogPlatCfg_dt& deviceInfo, std::string& deviceInfoStr);
@@ -63,7 +63,7 @@ public:
     /**
      * @brief                       生成sip设备信息
      * @return                      生成结果，0-success, -1-failed
-     * @param deviceInfoMap         sip设备信息
+     * @param deviceInfo            sip设备信息
      * @param deviceInfoStr         sip设备信息字符串
      */
     static MY_COMMON::MyStatus_t    GenerateDeviceInfo(const MY_COMMON::MySipCatalogSubPlatCfg_dt& deviceInfo, std::string& deviceInfoStr);
@@ -71,7 +71,7 @@ public:
     /**
      * @brief                       生成sip设备信息
      * @return                      生成结果，0-success, -1-failed
-     * @param deviceInfoMap         sip设备信息
+     * @param deviceInfo            sip设备信息
      * @param deviceInfoStr         sip设备信息字符串
      */
     static MY_COMMON::MyStatus_t    GenerateDeviceInfo(const MY_COMMON::MySipCatalogVirtualSubPlatCfg_dt& deviceInfo, std::string& deviceInfoStr);
@@ -79,7 +79,7 @@ public:
     /**
      * @brief                       生成sip设备信息
      * @return                      生成结果，0-success, -1-failed
-     * @param deviceInfoMap         sip设备信息
+     * @param deviceInfo            sip设备信息
      * @param deviceInfoStr         sip设备信息字符串
      */
     static MY_COMMON::MyStatus_t    GenerateDeviceInfo(const MY_COMMON::MySipCatalogDeviceCfg_dt& deviceInfo, std::string& deviceInfoStr);

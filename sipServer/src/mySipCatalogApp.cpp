@@ -783,7 +783,8 @@ int MySipCatalogApp::OnUpdateCatalogCb(MyFuncCbParamPtr arg)
         for (const auto& subVirtualPlatCfgPair : uptLowSubVirtualPlatCfgMap) {
             // sip catalog消息创建
             MySipTxDataPtr txDataPtr = nullptr;
-            if(PJ_SUCCESS != pjsip_endpt_create_request(endptPtr, &sipMethod, &sipMsgURL, &sipMsgFromHdr, &sipMsgToHdr, nullptr, nullptr, -1, nullptr, &txDataPtr)) {
+            if(PJ_SUCCESS != pjsip_endpt_create_request(endptPtr, &sipMethod, &sipMsgURL, &sipMsgFromHdr, &sipMsgToHdr,
+                nullptr, nullptr, -1, nullptr, &txDataPtr)) {
                 LOG(ERROR) << "Sip catalog app update catalog to up server failed. create pjsip request failed. " << upRegServInfo << ".";
                 return -1;
             }

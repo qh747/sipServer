@@ -35,7 +35,7 @@ void MySipRegApp::OnRegRespCb(MySipRegCbParamPtr regParamPtr)
         return;
     }
 
-    MySipRegUpServCfgPtr sipRegUpServCfgPtr = (MySipRegUpServCfgPtr)(regParamPtr->token);
+    auto sipRegUpServCfgPtr = static_cast<MySipRegUpServCfgPtr>(regParamPtr->token);
     std::unique_ptr<MySipRegUpServCfg_dt> thdMemManagePtr(sipRegUpServCfgPtr);
 
     if (200 == regParamPtr->code) {
@@ -61,8 +61,7 @@ void MySipRegApp::OnRegRespCb(MySipRegCbParamPtr regParamPtr)
     regParamPtr->token = nullptr;
 }
 
-pj_status_t MySipRegApp::OnRegFillAuthInfoCb(MySipPoolPtr poolPtr, MySipStrCstPtr realmPtr, 
-                                             MySipStrCstPtr namePtr, MySipCredInfoPtr credInfoPtr)
+pj_status_t MySipRegApp::OnRegFillAuthInfoCb(MySipPoolPtr poolPtr, MySipStrCstPtr realmPtr, MySipStrCstPtr namePtr, MySipCredInfoPtr credInfoPtr)
 {
     std::string nameStr  = std::string(namePtr->ptr).substr(0, namePtr->slen);
     std::string realmStr = std::string(realmPtr->ptr).substr(0, realmPtr->slen);
@@ -92,7 +91,7 @@ pj_status_t MySipRegApp::OnRegFillAuthInfoCb(MySipPoolPtr poolPtr, MySipStrCstPt
 
 void MySipRegApp::OnKeepAliveRespCb(MyFuncCbParamPtr evParamPtr, MySipEvPtr evPtr)
 {
-    MySipRegUpServCfgPtr sipRegUpServCfgPtr = static_cast<MySipRegUpServCfgPtr>(evParamPtr); 
+    auto sipRegUpServCfgPtr = static_cast<MySipRegUpServCfgPtr>(evParamPtr);
 
     // 内存管理, new in function: MySipRegApp::keepAliveUpServ()
     std::unique_ptr<MySipRegUpServCfg_dt> memManagePtr(sipRegUpServCfgPtr);
@@ -275,7 +274,7 @@ MyStatus_t MySipRegApp::regUpServ(const MySipRegUpServCfg_dt& regUpServCfg, cons
     pj_str_t sipMsgContact = pj_str(const_cast<char*>(sContact.c_str()));
 
     // free in func: MySipRegApp::OnRegRespCb()
-    MySipRegUpServCfgPtr cpRegUpServCfgPtr = new MySipRegUpServCfg_dt(regUpServCfg);
+    auto cpRegUpServCfgPtr = new MySipRegUpServCfg_dt(regUpServCfg);
     
     // sip register上下文创建
     MySipRegcPtr regcPtr = nullptr;
@@ -437,7 +436,7 @@ MyStatus_t MySipRegApp::keepAliveUpServ(const MySipRegUpServCfg_dt& regUpServCfg
     txDataPtr->msg->body = pjsip_msg_body_create(txDataPtr->pool, &type, &subtype, &xmldata);
 
     // delete in function: MySipRegApp::OnKeepAliveRespCb()
-    MySipRegUpServCfgPtr cpRegUpServCfgPtr = new MySipRegUpServCfg_dt(regUpServCfg);
+    auto cpRegUpServCfgPtr = new MySipRegUpServCfg_dt(regUpServCfg);
 
     // sip keepAlive消息发送
     if(PJ_SUCCESS != pjsip_endpt_send_request(endptPtr, txDataPtr ,-1, cpRegUpServCfgPtr, &MySipRegApp::OnKeepAliveRespCb)) {

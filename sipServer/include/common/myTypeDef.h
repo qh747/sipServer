@@ -46,6 +46,7 @@ typedef         pjmedia_sdp_session**                                       MySi
 typedef         pjmedia_sdp_conn*                                           MySipSdpConnPtr;
 typedef         pjmedia_sdp_media*                                          MySipSdpMediaPtr;
 typedef         pjmedia_sdp_attr*                                           MySipSdpAttrPtr;
+typedef         pjsip_rdata_sdp_info*                                       MySipRdataSdpInfoPtr;
 typedef         pjsip_transaction*                                          MySipTsxPtr;
 typedef         pj_thread_t*                                                MySipThdPtr; 
 typedef         pjsip_dialog*                                               MySipDialogPtr;

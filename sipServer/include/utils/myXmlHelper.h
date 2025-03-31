@@ -44,7 +44,7 @@ public:
      * @brief                           sip keepalive消息生成
      * @return                          生成结果，0-success，-1-failed
      * @param idx                       消息索引编号
-     * @param id                        本级服务id
+     * @param localServId               本级服务id
      * @param msgBody                   sip keepalive消息体
      */                 
     static MY_COMMON::MyStatus_t        GenerateSipKeepAliveMsgBody(const std::string& idx, const std::string& localServId, std::string& msgBody);
@@ -55,8 +55,8 @@ public:
      * @param xmlStr                    字符串格式消息内容
      * @param keepAliveMsgBody          sip keepalive消息体
      */                 
-    static MY_COMMON::MyStatus_t        ParseSipKeepAliveMsgBody(const std::string&                   xmlStr, 
-                                                                 MY_COMMON::MySipKeepAliveMsgBody_dt& keepAliveMsgBody);
+    static MY_COMMON::MyStatus_t        ParseSipKeepAliveMsgBody(const std::string& xmlStr,
+                                            MY_COMMON::MySipKeepAliveMsgBody_dt& keepAliveMsgBody);
 
 public:                 
     /**                 
@@ -81,8 +81,8 @@ public:
      * @param xmlStr                    字符串格式消息内容
      * @param catalogReqMsgBody         sip catalog查询请求消息内容
      */                 
-    static MY_COMMON::MyStatus_t        ParseSipCatalogQueryReqMsgBody(const std::string&                    xmlStr, 
-                                                                       MY_COMMON::MySipCatalogReqMsgBody_dt& catalogReqMsgBody);
+    static MY_COMMON::MyStatus_t        ParseSipCatalogQueryReqMsgBody(const std::string& xmlStr,
+                                            MY_COMMON::MySipCatalogReqMsgBody_dt& catalogReqMsgBody);
 
 public:                 
     /**                 

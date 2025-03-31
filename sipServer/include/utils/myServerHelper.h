@@ -15,7 +15,7 @@ public:
     /**                         
      * @brief                       获取sip服务信息
      * @return                      获取结果, success-0, fail-非0
-     * @param servAddrCfg           sip服务配置
+     * @param sipServAddrCfg        sip服务配置
      * @param info                  sip服务信息
      */                     
     static MY_COMMON::MyStatus_t    PrintSipServInfo(const MY_COMMON::MySipServAddrCfg_dt& sipServAddrCfg, std::string& info);
