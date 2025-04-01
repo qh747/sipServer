@@ -12,10 +12,10 @@ MyStatus_t MySipMsgHelper::GenerateSipMsgURL(const std::string& id, const std::s
 {
     std::stringstream ss;
     if (MyTpProto_t::TCP == type) {
-        ss << "sip:" << id << "@" << ipAddr << ":" << port << ";transport=tcp" << std::endl;
+        ss << "sip:" << id << "@" << ipAddr << ":" << port << ";transport=tcp";
     }
     else {
-        ss << "sip:" << id << "@" << ipAddr << ":" << port << ";transport=udp" << std::endl;
+        ss << "sip:" << id << "@" << ipAddr << ":" << port << ";transport=udp";
     }
 
     url = ss.str();
@@ -25,7 +25,7 @@ MyStatus_t MySipMsgHelper::GenerateSipMsgURL(const std::string& id, const std::s
 MyStatus_t MySipMsgHelper::GenerateSipMsgFromHeader(const std::string& id, const std::string& ipAddr, std::string& fromHeader)
 {
     std::stringstream ss;
-    ss << "<sip:" << id << "@" << ipAddr << ">" << std::endl;
+    ss << "<sip:" << id << "@" << ipAddr << ">";
 
     fromHeader = ss.str();
     return MyStatus_t::SUCCESS;
@@ -34,7 +34,7 @@ MyStatus_t MySipMsgHelper::GenerateSipMsgFromHeader(const std::string& id, const
 MyStatus_t MySipMsgHelper::GenerateSipMsgToHeader(const std::string& id, const std::string& ipAddr, std::string& toHeader)
 {
     std::stringstream ss;
-    ss << "<sip:" << id << "@" << ipAddr << ">" << std::endl;
+    ss << "<sip:" << id << "@" << ipAddr << ">";
 
     toHeader = ss.str();
     return MyStatus_t::SUCCESS;
@@ -43,7 +43,7 @@ MyStatus_t MySipMsgHelper::GenerateSipMsgToHeader(const std::string& id, const s
 MyStatus_t MySipMsgHelper::GenerateSipMsgContactHeader(const std::string& id, const std::string& natIpAddr, uint16_t natPort, std::string& contactHeader)
 {
     std::stringstream ss;
-    ss << "<sip:" << id << "@" << natIpAddr << ":" << natPort << ">" << std::endl;
+    ss << "<sip:" << id << "@" << natIpAddr << ":" << natPort << ">";
 
     contactHeader = ss.str();
     return MyStatus_t::SUCCESS;

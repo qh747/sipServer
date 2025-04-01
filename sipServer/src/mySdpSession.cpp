@@ -14,9 +14,13 @@ namespace MY_SDP {
 MyStatus_t MySdpSession::CreateAnswer(const MySdpSession& remoteSdp, const MySdpSession& localSdp, MySdpSession& answerSdp)
 {
     answerSdp.m_version     = remoteSdp.m_version;
-    answerSdp.m_origin      = remoteSdp.m_origin;
     answerSdp.m_sessionName = remoteSdp.m_sessionName;
     answerSdp.m_time        = remoteSdp.m_time;
+
+    answerSdp.m_origin                  = localSdp.m_origin;
+    answerSdp.m_origin.m_username       = remoteSdp.m_origin.m_username;
+    answerSdp.m_origin.m_sessionId      = remoteSdp.m_origin.m_sessionId;
+    answerSdp.m_origin.m_sessionVersion = remoteSdp.m_origin.m_sessionVersion;
 
     if (!localSdp.m_connection.empty()) {
         answerSdp.m_connection  = localSdp.m_connection;

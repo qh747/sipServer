@@ -24,7 +24,7 @@ public:
      * @param answerSdp             应答sdp
      */
     static MY_COMMON::MyStatus_t    CreateAnswer(const MySdpSession& remoteSdp, const MySdpSession& localSdp,
-                                                 MySdpSession& answerSdp);
+                                        MySdpSession& answerSdp);
 
 public:
     /**

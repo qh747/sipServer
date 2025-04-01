@@ -178,17 +178,6 @@ MyStatus_t MySipMsgProcApp::onProcSipInviteReqMsg(MySipRxDataPtr rdataPtr)
     pjsip_uri_print(PJSIP_URI_IN_REQ_URI, rdataPtr->msg_info.msg->line.req.uri, buf, sizeof(buf));
     LOG(INFO) << "Sip app module recv sip invite message. uri: " << buf;
 
-    MySipMsgUri_dt sipUri;
-    if (MyStatus_t::SUCCESS != MySipMsgHelper::ParseSipMsgURL(buf, sipUri)) {
-        LOG(ERROR) << "Sip app module recv sip invite message error. parse uri failed. uri: " << buf << ".";
-        return MyStatus_t::FAILED;
-    }
-
-    if (sipUri.id != m_servId) {
-        LOG(ERROR) << "Sip app module recv sip invite message error. invalid service id. uri: " << buf << ".";
-        return MyStatus_t::FAILED;
-    }
-
     MySipServer::SmtWkPtr sipServWkPtr;
     if (MyStatus_t::SUCCESS != MyServManage::GetSipServer(sipServWkPtr)) {
         LOG(ERROR) << "Sip app module recv sip invite message error. find sip server failed. uri: " << buf << ".";
@@ -196,7 +185,7 @@ MyStatus_t MySipMsgProcApp::onProcSipInviteReqMsg(MySipRxDataPtr rdataPtr)
     }
 
     // 处理sip invite请求
-    return sipServWkPtr.lock()->onServRecvSipRegReqMsg(rdataPtr);
+    return sipServWkPtr.lock()->onServRecvSipInviteReqMsg(rdataPtr);
 }
 
 MyStatus_t MySipMsgProcApp::onProcSipKeepAliveReqMsg(MySipRxDataPtr rdataPtr)
@@ -326,23 +315,6 @@ pj_bool_t MySipMsgProcApp::OnAppModuleRecvReqCb(MySipRxDataPtr rdataPtr)
     // sip 消息uri解析
     char buf[256];
     pjsip_uri_print(PJSIP_URI_IN_REQ_URI, rdataPtr->msg_info.msg->line.req.uri, buf, sizeof(buf));
-
-    MySipMsgUri_dt sipUri;
-    if (MyStatus_t::SUCCESS != MySipMsgHelper::ParseSipMsgURL(buf, sipUri)) {
-        LOG(ERROR) << "Sip msg proc app module sip request message failed. parse uri failed. uri: " << buf << ".";
-        return PJ_FALSE;
-    }
-
-    std::string localServId;
-    if (MyStatus_t::SUCCESS != MyServManage::GetSipServId(localServId)) {
-        LOG(ERROR) << "Sip msg proc app module recv sip request message failed. get local serv id failed. uri: " << buf << ".";
-        return PJ_FALSE;
-    }
-
-    if (sipUri.id != localServId) {
-        LOG(ERROR) << "Sip msg proc app module recv sip request message failed. invalid serv id. uri: " << buf << ".";
-        return PJ_FALSE;
-    }
 
     // 消息处理app获取
     MySipMsgProcApp::SmtWkPtr sipMsgProcAppWkPtr;

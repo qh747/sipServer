@@ -59,12 +59,18 @@ MyStatus_t MySdpHelper::MatchSdpDirection(MySdpDirection_t remoteDirection, MySd
                 matchDirection = MySdpDirection_t::SDP_DIRECTION_RECVONLY;
                 return MyStatus_t::SUCCESS;
             }
+            else {
+                return MyStatus_t::FAILED;
+            }
         }
         case MySdpDirection_t::SDP_DIRECTION_RECVONLY: {
             if (MySdpDirection_t::SDP_DIRECTION_SENDONLY ==  localDirection ||
                 MySdpDirection_t::SDP_DIRECTION_SENDRECV == localDirection) {
                 matchDirection = MySdpDirection_t::SDP_DIRECTION_SENDONLY;
                 return MyStatus_t::SUCCESS;
+            }
+            else {
+                return MyStatus_t::FAILED;
             }
         }
         case MySdpDirection_t::SDP_DIRECTION_SENDRECV: {
@@ -74,10 +80,9 @@ MyStatus_t MySdpHelper::MatchSdpDirection(MySdpDirection_t remoteDirection, MySd
                 matchDirection = localDirection;
                 return MyStatus_t::SUCCESS;
             }
-        }
-        case MySdpDirection_t::SDP_DIRECTION_INACTIVE: {
-            matchDirection = MySdpDirection_t::SDP_DIRECTION_INACTIVE;
-            return MyStatus_t::SUCCESS;
+            else {
+                return MyStatus_t::FAILED;
+            }
         }
         default: {
             return MyStatus_t::FAILED;

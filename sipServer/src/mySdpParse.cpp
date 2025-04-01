@@ -1,5 +1,6 @@
 #include <set>
 #include <cstdlib>
+#include <sstream>
 #include <Util/util.h>
 #include "sdp/mySdpReg.h"
 #include "sdp/mySdpParse.h"
@@ -11,12 +12,12 @@ namespace MY_SDP {
 
 std::string MySdpParse::toString() const
 {
-    toolkit::_StrPrinter printer;
+    std::stringstream ss;
     for (auto& item : m_itemVec) {
-        printer << item->getKey() << "=" << item->toString() << "\r\n";
+        ss << item->getKey() << "=" << item->toString() << "\r\n";
     }
 
-    return std::move(printer.data());
+    return ss.str();
 }
 
 void MySdpParse::addItem(MySdpItem::Ptr item)

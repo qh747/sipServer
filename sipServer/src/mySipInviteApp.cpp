@@ -270,9 +270,9 @@ MyStatus_t MySipInviteApp::onRecvSipInviteReqMsg(MySipRxDataPtr rxDataPtr)
             break;
         }
 
-        deviceId = std::string(sdpSessionPtr->origin.user.ptr, sdpSessionPtr->origin.user.slen).substr(0, 10);
+        deviceId = std::string(sdpSessionPtr->origin.user.ptr, sdpSessionPtr->origin.user.slen).substr(0, 20);
         std::string deviceType = deviceId.substr(10, 3);
-        if (DEVICE_TYPE_IP_CAMERA != deviceType || DEVICE_TYPE_NETWORK_VIDEO_RECORDER != deviceType) {
+        if (DEVICE_TYPE_IP_CAMERA != deviceType && DEVICE_TYPE_NETWORK_VIDEO_RECORDER != deviceType) {
             LOG(ERROR) << "Sip invite app receive invite request message error. invalid device type. ";
             statusCode = 404;
             break;
@@ -529,7 +529,7 @@ MyStatus_t MySipInviteApp::reqDevicePlayMediaPrepareSdp(const std::string& devic
         }
 
         std::string directionStr;
-        if (MyStatus_t::SUCCESS == MySdpHelper::ConvertToSdpDirectionStr(media->m_direction, directionStr)) {
+        if (MyStatus_t::SUCCESS == MySdpHelper::ConvertToSdpDirectionStr(MySdpDirection_t::SDP_DIRECTION_RECVONLY, directionStr)) {
             auto attrPtr = static_cast<MySipSdpAttrPtr>(pj_pool_zalloc(poolPtr, sizeof(pjmedia_sdp_attr)));
             pj_strdup2(poolPtr, &attrPtr->name, directionStr.c_str());
             mediaPtr->attr[mediaPtr->attr_count++] = attrPtr;
