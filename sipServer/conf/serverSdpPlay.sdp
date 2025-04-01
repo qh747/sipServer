@@ -7,5 +7,5 @@ m=video 5552 RTP/AVP 96 97 98
 a=rtpmap:96 PS/90000
 a=rtpmap:97 MPEG4/90000
 a=rtpmap:98 H264/90000
-a=recvonly
+a=sendrecv
 y=0999999999

@@ -38,7 +38,7 @@ void MySipRegApp::OnRegRespCb(MySipRegCbParamPtr regParamPtr)
     auto sipRegUpServCfgPtr = static_cast<MySipRegUpServCfgPtr>(regParamPtr->token);
     std::unique_ptr<MySipRegUpServCfg_dt> thdMemManagePtr(sipRegUpServCfgPtr);
 
-    if (200 == regParamPtr->code) {
+    if (MySipStatusCode_t::SIP_STATE_200_OK == regParamPtr->code) {
         // 注册成功，保存sip reg上下文
         MySipUpRegServInfo_dt upRegServInfo;
         upRegServInfo.sipRegUpServCfg = *sipRegUpServCfgPtr;
@@ -103,7 +103,7 @@ void MySipRegApp::OnKeepAliveRespCb(MyFuncCbParamPtr evParamPtr, MySipEvPtr evPt
         return;
     }
 
-    if(200 != evPtr->body.tsx_state.tsx->status_code) {
+    if(MySipStatusCode_t::SIP_STATE_200_OK != evPtr->body.tsx_state.tsx->status_code) {
         // 移除无效上级服务
         MySipRegManage::DelSipRegUpServInfo(sipRegUpServCfgPtr->upSipServRegAddrCfg.id);
     }
@@ -242,7 +242,7 @@ MyStatus_t MySipRegApp::shutdown()
     return MyStatus_t::SUCCESS;
 }
 
-MyStatus_t MySipRegApp::regUpServ(const MySipRegUpServCfg_dt& regUpServCfg, const MySipServAddrCfg_dt& localServCfg)
+MyStatus_t MySipRegApp::regUpServ(const MySipRegUpServCfg_dt& regUpServCfg, const MySipServAddrCfg_dt& localServCfg) const
 {
     std::string upRegServInfoStr;
     MyServerHelper::PrintSipUpRegServInfo(regUpServCfg, upRegServInfoStr);
@@ -360,7 +360,7 @@ MyStatus_t MySipRegApp::regUpServ(const MySipRegUpServCfg_dt& regUpServCfg, cons
     return MyStatus_t::SUCCESS;
 }
 
-MyStatus_t MySipRegApp::keepAliveUpServ(const MySipRegUpServCfg_dt& regUpServCfg, const MySipServAddrCfg_dt& localServCfg)
+MyStatus_t MySipRegApp::keepAliveUpServ(const MySipRegUpServCfg_dt& regUpServCfg, const MySipServAddrCfg_dt& localServCfg) const
 {
     std::string upRegServInfoStr;
     MyServerHelper::PrintSipUpRegServInfo(regUpServCfg, upRegServInfoStr);
@@ -375,7 +375,7 @@ MyStatus_t MySipRegApp::keepAliveUpServ(const MySipRegUpServCfg_dt& regUpServCfg
     // sip keepAlive消息首部生成
     std::string sURL;
     MySipMsgHelper::GenerateSipMsgURL(regUpServCfg.upSipServRegAddrCfg.id, regUpServCfg.upSipServRegAddrCfg.ipAddr, 
-                                    regUpServCfg.upSipServRegAddrCfg.port, regUpServCfg.proto, sURL);
+        regUpServCfg.upSipServRegAddrCfg.port, regUpServCfg.proto, sURL);
 
     std::string sFromHdr;
     MySipMsgHelper::GenerateSipMsgFromHeader(localServCfg.id, localServCfg.ipAddr, sFromHdr);
@@ -391,7 +391,8 @@ MyStatus_t MySipRegApp::keepAliveUpServ(const MySipRegUpServCfg_dt& regUpServCfg
 
     // sip keepAlive消息创建
     MySipTxDataPtr txDataPtr = nullptr;
-    if(PJ_SUCCESS != pjsip_endpt_create_request(endptPtr, &sipMethod, &sipMsgURL, &sipMsgFromHdr, &sipMsgToHdr, nullptr, nullptr, -1, nullptr, &txDataPtr)) {
+    if(PJ_SUCCESS != pjsip_endpt_create_request(endptPtr, &sipMethod, &sipMsgURL, &sipMsgFromHdr, &sipMsgToHdr, nullptr, nullptr,
+        -1, nullptr, &txDataPtr)) {
         LOG(WARNING) << "Sip reg app keepAlive up server failed. create sip message failed. " << upRegServInfoStr << ".";
         return MyStatus_t::FAILED;
     }
@@ -446,7 +447,7 @@ MyStatus_t MySipRegApp::keepAliveUpServ(const MySipRegUpServCfg_dt& regUpServCfg
     return MyStatus_t::SUCCESS;
 }
 
-bool MySipRegApp::onTimer()
+bool MySipRegApp::onTimer() const
 {
     if (MyStatus_t::SUCCESS != m_status.load()) {
         return false;
@@ -497,8 +498,10 @@ bool MySipRegApp::onTimer()
             continue;
         }
 
-        // 上级sip服务注册即将超时，重新注册(小于5分钟)
-        if (timeDiff <= (60 * 5)) {
+        // 上级sip服务注册即将超时，重新注册(小于1小时)
+        unsigned int timeInterval = 3600;
+        MySystemConfig::GetSipServRegExpiredTimeInterval(timeInterval);
+        if (timeDiff <= timeInterval) {
             this->keepAliveUpServ(pair.second, servAddrCfg);
         }
     }
@@ -546,7 +549,7 @@ bool MySipRegApp::onTimer()
     return true;
 }
 
-MyStatus_t MySipRegApp::onLowSipServRegSuccess(const MySipRegLowServCfg_dt& sipRegLowServCfg)
+MyStatus_t MySipRegApp::onLowSipServRegSuccess(const MySipRegLowServCfg_dt& sipRegLowServCfg) const
 {
     std::string lowRegServInfoStr;
     MyServerHelper::PrintSipLowRegServInfo(sipRegLowServCfg, lowRegServInfoStr);
@@ -649,7 +652,7 @@ MyStatus_t MySipRegApp::onRecvSipRegReqMsg(MySipRxDataPtr rxDataPtr)
     pjsip_hdr hdrList;
     pj_list_init(&hdrList);
 
-    int statusCode = 200;
+    int statusCode = MySipStatusCode_t::SIP_STATE_200_OK;
 
     // 向sip应答消息添加Date首部
     std::string curTime;
@@ -682,7 +685,7 @@ MyStatus_t MySipRegApp::onRecvSipRegReqMsg(MySipRxDataPtr rxDataPtr)
             authHdrPtr->challenge.digest.algorithm = pj_str(const_cast<char*>("MD5"));
             pj_list_push_back(&hdrList, authHdrPtr);
 
-            statusCode = 401;
+            statusCode = MySipStatusCode_t::SIP_STATE_401_UNAUTHORIZED;
         }
         else {
             // 下级sip服务注册时携带鉴权信息
@@ -692,14 +695,14 @@ MyStatus_t MySipRegApp::onRecvSipRegReqMsg(MySipRxDataPtr rxDataPtr)
             // 鉴权信息初始化
             if(PJ_SUCCESS != pjsip_auth_srv_init(rxDataPtr->tp_info.pool, &authSrv, &realm, &MySipRegApp::OnRegFillAuthInfoCb, 0)) {
                 LOG(ERROR) << "Sip reg app receive register request message failed. create auth info failed." << contactHeaderStr << ".";
-                statusCode = 401;
+                statusCode = MySipStatusCode_t::SIP_STATE_401_UNAUTHORIZED;
             }
 
             // 鉴权处理
             pjsip_auth_srv_verify(&authSrv, rxDataPtr, &statusCode);
 
             // 鉴权失败
-            if (200 != statusCode) {
+            if (MySipStatusCode_t::SIP_STATE_200_OK != statusCode) {
                 LOG(ERROR) << "Sip reg app receive register request message failed. auth failed." << contactHeaderStr << ".";
             }
         }
@@ -751,22 +754,23 @@ MyStatus_t MySipRegApp::onRecvSipRegReqMsg(MySipRxDataPtr rxDataPtr)
         return MyStatus_t::FAILED;
     }
 
-    if (200 != statusCode && 401 != statusCode) {
+    if (MySipStatusCode_t::SIP_STATE_200_OK != statusCode && MySipStatusCode_t::SIP_STATE_401_UNAUTHORIZED != statusCode) {
         LOG(ERROR) << "Sip reg app receive register request message failed. regist failed. " << " code: " << statusCode 
                    << " " << contactHeaderStr << ".";
         return MyStatus_t::FAILED;
     }
 
-    if (200 == statusCode) {
+    if (MySipStatusCode_t::SIP_STATE_200_OK == statusCode) {
         this->onLowSipServRegSuccess(lowSipServAddrCfg);
     }
     return MyStatus_t::SUCCESS;
 }
 
-MyStatus_t MySipRegApp::onRecvSipKeepAliveReqMsg(MySipRxDataPtr rxDataPtr)
+MyStatus_t MySipRegApp::onRecvSipKeepAliveReqMsg(MySipRxDataPtr rxDataPtr) const
 {
     MySipKeepAliveMsgBody_dt keepAliveMsgBody;
-    if (MyStatus_t::SUCCESS != MyXmlHelper::ParseSipKeepAliveMsgBody(static_cast<char*>(rxDataPtr->msg_info.msg->body->data), keepAliveMsgBody)) {
+    if (MyStatus_t::SUCCESS != MyXmlHelper::ParseSipKeepAliveMsgBody(static_cast<char*>(rxDataPtr->msg_info.msg->body->data),
+        keepAliveMsgBody)) {
         LOG(ERROR) << "Sip reg app module recv keepAlive message. parse keepalive msg failed.";
         return MyStatus_t::FAILED;
     }
@@ -775,10 +779,10 @@ MyStatus_t MySipRegApp::onRecvSipKeepAliveReqMsg(MySipRxDataPtr rxDataPtr)
     MySipMsgHelper::PrintSipKeepAliveMsgBody(keepAliveMsgBody, keepAliveMsgBodyStr);
 
     // 查询下级sip服务注册信息
-    int statusCode = 200;
+    int statusCode = MySipStatusCode_t::SIP_STATE_200_OK;
     if (MyStatus_t::SUCCESS != MySipRegManage::HasSipRegLowServInfo(keepAliveMsgBody.deviceId)) {
         // 下级sip服务未注册
-        statusCode = 403;
+        statusCode = MySipStatusCode_t::SIP_STATE_403_FORBIDDEN;
         LOG(ERROR) << "Sip reg app module recv keepAlive message. find lower sip server failed. device id: " << keepAliveMsgBodyStr << ".";
     }
     else {

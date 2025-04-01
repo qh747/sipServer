@@ -82,7 +82,7 @@ public:
      * @return                              处理结果，0-success，-1-failed
      * @param rxDataPtr                     sip保活请求消息
      */
-    MY_COMMON::MyStatus_t                   onRecvSipKeepAliveReqMsg(MY_COMMON::MySipRxDataPtr rxDataPtr);
+    MY_COMMON::MyStatus_t                   onRecvSipKeepAliveReqMsg(MY_COMMON::MySipRxDataPtr rxDataPtr) const;
 
 public:   
     /**     
@@ -111,14 +111,14 @@ private:
      * @brief                               定时器回调
      * @return                              是否继续触发定时器，true-继续，false-停止
      */             
-    bool                                    onTimer();
+    bool                                    onTimer() const;
     
     /**             
      * @brief                               下级sip服务注册成功
      * @return                              处理结果，0-success，-1-failed
      * @param sipRegLowServCfg              下级sip服务注册配置
      */
-    MY_COMMON::MyStatus_t                   onLowSipServRegSuccess(const MY_COMMON::MySipRegLowServCfg_dt& sipRegLowServCfg);
+    MY_COMMON::MyStatus_t                   onLowSipServRegSuccess(const MY_COMMON::MySipRegLowServCfg_dt& sipRegLowServCfg) const;
 
     /**
      * @brief                               向上级sip服务发起注册
@@ -127,7 +127,7 @@ private:
      * @param localServCfg                  本地sip服务地址配置
      */             
     MY_COMMON::MyStatus_t                   regUpServ(const MY_COMMON::MySipRegUpServCfg_dt& regUpServCfg, 
-                                                const MY_COMMON::MySipServAddrCfg_dt&  localServCfg);
+                                                const MY_COMMON::MySipServAddrCfg_dt&  localServCfg) const;
 
     /**
      * @brief                               向上级sip服务发起保活
@@ -136,7 +136,7 @@ private:
      * @param localServCfg                  本地sip服务地址配置
      */             
     MY_COMMON::MyStatus_t                   keepAliveUpServ(const MY_COMMON::MySipRegUpServCfg_dt& regUpServCfg,
-                                                const MY_COMMON::MySipServAddrCfg_dt&  localServCfg);
+                                                const MY_COMMON::MySipServAddrCfg_dt&  localServCfg) const;
 
 private:
     //                                      sip服务ID

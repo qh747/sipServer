@@ -1,7 +1,6 @@
 #pragma once
 #include <memory>
 #include <string>
-#include <cstdbool>
 #include "common/myTypeDef.h"
 
 namespace MY_APP {
@@ -78,7 +77,7 @@ public:
      * @return                              处理结果，0-success，-1-failed
      * @param rxDataPtr                     sip设备目录查询请求消息
      */
-    MY_COMMON::MyStatus_t                   onRecvSipCatalogQueryReqMsg(MY_COMMON::MySipRxDataPtr rxDataPtr);
+    MY_COMMON::MyStatus_t                   onRecvSipCatalogQueryReqMsg(MY_COMMON::MySipRxDataPtr rxDataPtr) const;
 
     /**             
      * @brief                               处理下级sip服务的sip设备目录响应请求消息
@@ -116,7 +115,7 @@ public:
      * @param localServCfg                  本地sip服务地址配置
      */             
     MY_COMMON::MyStatus_t                   onReqLowServCatalog(const MY_COMMON::MySipRegLowServCfg_dt& regLowServCfg,
-                                                const MY_COMMON::MySipServAddrCfg_dt& localServCfg);
+                                                const MY_COMMON::MySipServAddrCfg_dt& localServCfg) const;
 
     /**
      * @brief                               发送本级sip服务设备目录

@@ -91,7 +91,7 @@ public:
      * @return                                  处理结果，0-success，-1-failed
      * @param rxDataPtr                         sip invite请求消息
      */
-    MY_COMMON::MyStatus_t                       onRecvSipInviteReqMsg(MY_COMMON::MySipRxDataPtr rxDataPtr);
+    MY_COMMON::MyStatus_t                       onRecvSipInviteReqMsg(MY_COMMON::MySipRxDataPtr rxDataPtr) const;
 
 public:     
     /**     

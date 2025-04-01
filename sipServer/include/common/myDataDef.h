@@ -19,7 +19,7 @@ const std::string DEVICE_TYPE_IP_CAMERA                     = "131";
 const std::string DEVICE_TYPE_NETWORK_VIDEO_RECORDER        = "132";
 
 // 设备类型长度
-const uint32_t DEVICE_TYPE_LENGTH                           = 20;
+constexpr uint32_t DEVICE_TYPE_LENGTH                       = 20;
 
 /**
  * @brief 自定义返回值枚举类型
@@ -32,6 +32,28 @@ typedef enum class MyStatusType : int
     SUCCESS                                                 = 0,
 
 } MyStatus_t;
+
+/**
+ * @brief sip状态码枚举类型
+ */
+typedef enum MySipStatusCodeType
+{
+    //                                                      180 ringing
+    SIP_STATE_180_RINGING                                   = 180,
+    //                                                      183 session progress
+    SIP_STATE_183_SESSION_PROGRESS                          = 183,
+    //                                                      200 ok
+    SIP_STATE_200_OK                                        = 200,
+    //                                                      400 bad request
+    SIP_STATE_400_BAD_REQUEST                               = 400,
+    //                                                      401 unauthorized
+    SIP_STATE_401_UNAUTHORIZED                              = 401,
+    //                                                      403 forbidden
+    SIP_STATE_403_FORBIDDEN                                 = 403,
+    //                                                      404 not found
+    SIP_STATE_404_NOT_FOUND                                 = 404
+
+} MySipStatusCode_t;
 
 /**
  * @brief 媒体播放方式枚举类型

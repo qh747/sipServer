@@ -65,19 +65,14 @@ int MySipCatalogApp::OnPushCatalogCb(MyFuncCbParamPtr arg)
     // pjsip要求自定义线程进行注册才能使用
     MySystemPjsip::RegistSelfThread();
 
-    auto thdParamPtr = static_cast<MySipCatalogAppPushCatalogThdParamPtr>(arg);
-    if (nullptr == thdParamPtr) {
-        LOG(ERROR) << "Sip catalog app push local server catalog failed. thd param is null.";
-        return -1;
-    }
-
     // 内存管理, new in function: MySipCatalogApp::onRecvSipCatalogQueryReqMsg()
+    auto thdParamPtr = static_cast<MySipCatalogAppPushCatalogThdParamPtr>(arg);
     std::unique_ptr<MySipCatalogAppPushCatalogThdParam_dt> thdParamMemManagePtr(thdParamPtr);
 
-    unsigned int                cseq              = thdParamPtr->m_cseq;
-    const std::string&          sn                = thdParamPtr->m_sn;
-    const MySipRegUpServCfg_dt& regUpServCfg      = thdParamPtr->m_regUpServCfg;
-    const MySipServAddrCfg_dt&  localServAddrCfg  = thdParamPtr->m_servAddrCfg;
+    unsigned int cseq = thdParamPtr->m_cseq;
+    const std::string& sn = thdParamPtr->m_sn;
+    const MySipRegUpServCfg_dt& regUpServCfg = thdParamPtr->m_regUpServCfg;
+    const MySipServAddrCfg_dt& localServAddrCfg = thdParamPtr->m_servAddrCfg;
 
     std::string upRegServInfo;
     MyServerHelper::PrintSipUpRegServInfo(regUpServCfg, upRegServInfo);
@@ -222,7 +217,8 @@ int MySipCatalogApp::OnPushCatalogCb(MyFuncCbParamPtr arg)
             // sip catalog消息发送
             cbStatuePtr->store(MyStatus_t::FAILED);
             if(PJ_SUCCESS != pjsip_endpt_send_request(endptPtr, txDataPtr, -1, cbStatuePtr, &MySipCatalogApp::OnRespPushCatalogCb)) {
-                LOG(ERROR) << "Sip catalog app push local server catalog platform config failed. send pjsip request failed. " << upRegServInfo << ".";
+                LOG(ERROR) << "Sip catalog app push local server catalog platform config failed. send pjsip request failed. "
+                           << upRegServInfo << ".";
                 return;
             }
 
@@ -235,7 +231,8 @@ int MySipCatalogApp::OnPushCatalogCb(MyFuncCbParamPtr arg)
                 // 计算时间差
                 auto duration = std::chrono::duration_cast<std::chrono::seconds>(end - start);
                 if (duration.count() > 10) {
-                    LOG(ERROR) << "Sip catalog app push local server catalog platform config failed. recv up serv response failed. " << upRegServInfo << ".";
+                    LOG(ERROR) << "Sip catalog app push local server catalog platform config failed. recv up serv response failed. "
+                               << upRegServInfo << ".";
                     return;
                 }
 
@@ -289,7 +286,8 @@ int MySipCatalogApp::OnPushCatalogCb(MyFuncCbParamPtr arg)
             // sip catalog消息发送
             cbStatuePtr->store(MyStatus_t::FAILED);
             if(PJ_SUCCESS != pjsip_endpt_send_request(endptPtr, txDataPtr, -1, cbStatuePtr, &MySipCatalogApp::OnRespPushCatalogCb)) {
-                LOG(ERROR) << "Sip catalog app push local server catalog subPlatform config failed. send pjsip request failed. " << upRegServInfo << ".";
+                LOG(ERROR) << "Sip catalog app push local server catalog subPlatform config failed. send pjsip request failed. "
+                           << upRegServInfo << ".";
                 return;
             }
 
@@ -302,7 +300,8 @@ int MySipCatalogApp::OnPushCatalogCb(MyFuncCbParamPtr arg)
                 // 计算时间差
                 auto duration = std::chrono::duration_cast<std::chrono::seconds>(end - start);
                 if (duration.count() > 10) {
-                    LOG(ERROR) << "Sip catalog app push local server subPlatform platform config failed. recv up serv response failed. " << upRegServInfo << ".";
+                    LOG(ERROR) << "Sip catalog app push local server subPlatform platform config failed. recv up serv response failed. "
+                               << upRegServInfo << ".";
                     return;
                 }
 
@@ -651,7 +650,8 @@ int MySipCatalogApp::OnUpdateCatalogCb(MyFuncCbParamPtr arg)
         for (const auto& platCfgPair : uptLowPlatCfgMap) {
             // sip catalog消息创建
             MySipTxDataPtr txDataPtr = nullptr;
-            if(PJ_SUCCESS != pjsip_endpt_create_request(endptPtr, &sipMethod, &sipMsgURL, &sipMsgFromHdr, &sipMsgToHdr, nullptr, nullptr, -1, nullptr, &txDataPtr)) {
+            if(PJ_SUCCESS != pjsip_endpt_create_request(endptPtr, &sipMethod, &sipMsgURL, &sipMsgFromHdr, &sipMsgToHdr, nullptr,
+                nullptr, -1, nullptr, &txDataPtr)) {
                 LOG(ERROR) << "Sip catalog app update catalog to up server failed. create pjsip request failed. " << upRegServInfo << ".";
                 return -1;
             }
@@ -717,7 +717,8 @@ int MySipCatalogApp::OnUpdateCatalogCb(MyFuncCbParamPtr arg)
         for (const auto& subPlatCfgPair : uptLowSubPlatCfgMap) {
             // sip catalog消息创建
             MySipTxDataPtr txDataPtr = nullptr;
-            if(PJ_SUCCESS != pjsip_endpt_create_request(endptPtr, &sipMethod, &sipMsgURL, &sipMsgFromHdr, &sipMsgToHdr, nullptr, nullptr, -1, nullptr, &txDataPtr)) {
+            if(PJ_SUCCESS != pjsip_endpt_create_request(endptPtr, &sipMethod, &sipMsgURL, &sipMsgFromHdr, &sipMsgToHdr, nullptr,
+                nullptr, -1, nullptr, &txDataPtr)) {
                 LOG(ERROR) << "Sip catalog app update catalog to up server failed. create pjsip request failed. " << upRegServInfo << ".";
                 return -1;
             }
@@ -758,7 +759,8 @@ int MySipCatalogApp::OnUpdateCatalogCb(MyFuncCbParamPtr arg)
             // sip catalog消息发送
             cbStatuePtr->store(MyStatus_t::FAILED);
             if(PJ_SUCCESS != pjsip_endpt_send_request(endptPtr, txDataPtr, -1, cbStatuePtr, &MySipCatalogApp::OnRespUpdateCatalogCb)) {
-                LOG(ERROR) << "Sip catalog app update catalog sub plat cfg to up server failed. send pjsip request failed. " << upRegServInfo << ".";
+                LOG(ERROR) << "Sip catalog app update catalog sub plat cfg to up server failed. send pjsip request failed. "
+                           << upRegServInfo << ".";
                 return -1;
             }
 
@@ -771,7 +773,8 @@ int MySipCatalogApp::OnUpdateCatalogCb(MyFuncCbParamPtr arg)
                 // 计算时间差
                 auto duration = std::chrono::duration_cast<std::chrono::seconds>(end - start);
                 if (duration.count() > 5) {
-                    LOG(ERROR) << "Sip catalog app update catalog sub plat cfg to up server failed. recv up serv response failed. " << upRegServInfo << ".";
+                    LOG(ERROR) << "Sip catalog app update catalog sub plat cfg to up server failed. recv up serv response failed. "
+                               << upRegServInfo << ".";
                     return -1;
                 }
 
@@ -1068,7 +1071,7 @@ MyStatus_t MySipCatalogApp::shutdown()
     return MyStatus_t::SUCCESS;
 }
 
-MyStatus_t MySipCatalogApp::onRecvSipCatalogQueryReqMsg(MySipRxDataPtr rxDataPtr)
+MyStatus_t MySipCatalogApp::onRecvSipCatalogQueryReqMsg(MySipRxDataPtr rxDataPtr) const
 {
     MySipCatalogReqMsgBody_dt catalogMsgBody;
     if (MyStatus_t::SUCCESS != MyXmlHelper::ParseSipCatalogQueryReqMsgBody(static_cast<char*>(rxDataPtr->msg_info.msg->body->data),
@@ -1131,7 +1134,8 @@ MyStatus_t MySipCatalogApp::onRecvSipCatalogQueryReqMsg(MySipRxDataPtr rxDataPtr
     }
 
     // 发送sip应答消息
-    if (PJ_SUCCESS != pjsip_endpt_respond(endptPtr, nullptr, rxDataPtr, 200, nullptr, nullptr, nullptr, nullptr)) {
+    if (PJ_SUCCESS != pjsip_endpt_respond(endptPtr, nullptr, rxDataPtr, 200, nullptr, nullptr, nullptr,
+        nullptr)) {
         LOG(ERROR) << "Sip catalog app receive catalog message failed. can't send response message. ";
         return MyStatus_t::FAILED;
     }
@@ -1201,7 +1205,8 @@ MyStatus_t MySipCatalogApp::onRecvSipCatalogResponseReqMsg(MySipRxDataPtr rxData
     }
 
     // 发送sip应答消息
-    if (PJ_SUCCESS != pjsip_endpt_respond(endptPtr, nullptr, rxDataPtr, 200, nullptr, nullptr, nullptr, nullptr)) {
+    if (PJ_SUCCESS != pjsip_endpt_respond(endptPtr, nullptr, rxDataPtr, 200, nullptr, nullptr, nullptr,
+        nullptr)) {
         LOG(ERROR) << "Sip catalog app module recv catalog response message failed. can't send response message. " 
                    << thdParamPtr->m_catalogRespMsgBody.deviceId << ".";
 
@@ -1246,7 +1251,7 @@ MyStatus_t MySipCatalogApp::getSipCatalogApp(MySipCatalogApp::SmtWkPtr& wkPtr)
     return MyStatus_t::SUCCESS;
 }
 
-MyStatus_t MySipCatalogApp::onReqLowServCatalog(const MySipRegLowServCfg_dt& regLowServCfg, const MySipServAddrCfg_dt& localServCfg)
+MyStatus_t MySipCatalogApp::onReqLowServCatalog(const MySipRegLowServCfg_dt& regLowServCfg, const MySipServAddrCfg_dt& localServCfg) const
 {
     std::string lowRegServInfo;
     MyServerHelper::PrintSipLowRegServInfo(regLowServCfg, lowRegServInfo);
