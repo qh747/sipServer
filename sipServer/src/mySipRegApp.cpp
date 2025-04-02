@@ -38,7 +38,7 @@ void MySipRegApp::OnRegRespCb(MySipRegCbParamPtr regParamPtr)
     auto sipRegUpServCfgPtr = static_cast<MySipRegUpServCfgPtr>(regParamPtr->token);
     std::unique_ptr<MySipRegUpServCfg_dt> thdMemManagePtr(sipRegUpServCfgPtr);
 
-    if (MySipStatusCode_t::SIP_STATE_200_OK == regParamPtr->code) {
+    if (pjsip_status_code::PJSIP_SC_OK == regParamPtr->code) {
         // 注册成功，保存sip reg上下文
         MySipUpRegServInfo_dt upRegServInfo;
         upRegServInfo.sipRegUpServCfg = *sipRegUpServCfgPtr;
@@ -103,7 +103,7 @@ void MySipRegApp::OnKeepAliveRespCb(MyFuncCbParamPtr evParamPtr, MySipEvPtr evPt
         return;
     }
 
-    if(MySipStatusCode_t::SIP_STATE_200_OK != evPtr->body.tsx_state.tsx->status_code) {
+    if(pjsip_status_code::PJSIP_SC_OK != evPtr->body.tsx_state.tsx->status_code) {
         // 移除无效上级服务
         MySipRegManage::DelSipRegUpServInfo(sipRegUpServCfgPtr->upSipServRegAddrCfg.id);
     }
@@ -652,7 +652,7 @@ MyStatus_t MySipRegApp::onRecvSipRegReqMsg(MySipRxDataPtr rxDataPtr)
     pjsip_hdr hdrList;
     pj_list_init(&hdrList);
 
-    int statusCode = MySipStatusCode_t::SIP_STATE_200_OK;
+    int statusCode = pjsip_status_code::PJSIP_SC_OK;
 
     // 向sip应答消息添加Date首部
     std::string curTime;
@@ -685,7 +685,7 @@ MyStatus_t MySipRegApp::onRecvSipRegReqMsg(MySipRxDataPtr rxDataPtr)
             authHdrPtr->challenge.digest.algorithm = pj_str(const_cast<char*>("MD5"));
             pj_list_push_back(&hdrList, authHdrPtr);
 
-            statusCode = MySipStatusCode_t::SIP_STATE_401_UNAUTHORIZED;
+            statusCode = pjsip_status_code::PJSIP_SC_UNAUTHORIZED;
         }
         else {
             // 下级sip服务注册时携带鉴权信息
@@ -695,14 +695,14 @@ MyStatus_t MySipRegApp::onRecvSipRegReqMsg(MySipRxDataPtr rxDataPtr)
             // 鉴权信息初始化
             if(PJ_SUCCESS != pjsip_auth_srv_init(rxDataPtr->tp_info.pool, &authSrv, &realm, &MySipRegApp::OnRegFillAuthInfoCb, 0)) {
                 LOG(ERROR) << "Sip reg app receive register request message failed. create auth info failed." << contactHeaderStr << ".";
-                statusCode = MySipStatusCode_t::SIP_STATE_401_UNAUTHORIZED;
+                statusCode = pjsip_status_code::PJSIP_SC_UNAUTHORIZED;
             }
 
             // 鉴权处理
             pjsip_auth_srv_verify(&authSrv, rxDataPtr, &statusCode);
 
             // 鉴权失败
-            if (MySipStatusCode_t::SIP_STATE_200_OK != statusCode) {
+            if (pjsip_status_code::PJSIP_SC_OK != statusCode) {
                 LOG(ERROR) << "Sip reg app receive register request message failed. auth failed." << contactHeaderStr << ".";
             }
         }
@@ -754,13 +754,13 @@ MyStatus_t MySipRegApp::onRecvSipRegReqMsg(MySipRxDataPtr rxDataPtr)
         return MyStatus_t::FAILED;
     }
 
-    if (MySipStatusCode_t::SIP_STATE_200_OK != statusCode && MySipStatusCode_t::SIP_STATE_401_UNAUTHORIZED != statusCode) {
+    if (pjsip_status_code::PJSIP_SC_OK != statusCode && pjsip_status_code::PJSIP_SC_UNAUTHORIZED != statusCode) {
         LOG(ERROR) << "Sip reg app receive register request message failed. regist failed. " << " code: " << statusCode 
                    << " " << contactHeaderStr << ".";
         return MyStatus_t::FAILED;
     }
 
-    if (MySipStatusCode_t::SIP_STATE_200_OK == statusCode) {
+    if (pjsip_status_code::PJSIP_SC_OK == statusCode) {
         this->onLowSipServRegSuccess(lowSipServAddrCfg);
     }
     return MyStatus_t::SUCCESS;
@@ -779,10 +779,10 @@ MyStatus_t MySipRegApp::onRecvSipKeepAliveReqMsg(MySipRxDataPtr rxDataPtr) const
     MySipMsgHelper::PrintSipKeepAliveMsgBody(keepAliveMsgBody, keepAliveMsgBodyStr);
 
     // 查询下级sip服务注册信息
-    int statusCode = MySipStatusCode_t::SIP_STATE_200_OK;
+    int statusCode = pjsip_status_code::PJSIP_SC_OK;
     if (MyStatus_t::SUCCESS != MySipRegManage::HasSipRegLowServInfo(keepAliveMsgBody.deviceId)) {
         // 下级sip服务未注册
-        statusCode = MySipStatusCode_t::SIP_STATE_403_FORBIDDEN;
+        statusCode = pjsip_status_code::PJSIP_SC_FORBIDDEN;
         LOG(ERROR) << "Sip reg app module recv keepAlive message. find lower sip server failed. device id: " << keepAliveMsgBodyStr << ".";
     }
     else {

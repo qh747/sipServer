@@ -68,7 +68,6 @@ MyStatus_t MySipInviteApp::init(const std::string& servId, const std::string& na
     m_invCbPtr->on_state_changed = &MySipInviteApp::OnInviteStateChanged;
     m_invCbPtr->on_new_session   = &MySipInviteApp::OnNewInviteSession;
     m_invCbPtr->on_media_update  = &MySipInviteApp::OnInviteMediaUpdate;
-    m_invCbPtr->on_send_ack      = &MySipInviteApp::OnInviteSendAck;
 
     if (PJ_SUCCESS != pjsip_inv_usage_init(endptPtr, m_invCbPtr.get())) {
         LOG(ERROR) << "Sip app module init failed. pjsip_inv_usage_init() failed.";
@@ -239,19 +238,19 @@ MyStatus_t MySipInviteApp::onRecvSipInviteReqMsg(MySipRxDataPtr rxDataPtr) const
     MySdpSession localSdp;
 
     // sdp处理
-    int statusCode = MySipStatusCode_t::SIP_STATE_200_OK;
+    int statusCode = pjsip_status_code::PJSIP_SC_OK;
     do {
         // sdp解析
         if (nullptr == rxDataPtr->msg_info.msg->body) {
             LOG(ERROR) << "Sip invite app receive invite request message error. invalid msg body. ";
-            statusCode = MySipStatusCode_t::SIP_STATE_400_BAD_REQUEST;
+            statusCode = pjsip_status_code::PJSIP_SC_BAD_REQUEST;
             break;
         }
 
         MySipRdataSdpInfoPtr sdpInfoPtr = pjsip_rdata_get_sdp_info(rxDataPtr);
         if (nullptr == sdpInfoPtr) {
             LOG(ERROR) << "Sip invite app receive invite request message error. invalid sdp info. ";
-            statusCode = MySipStatusCode_t::SIP_STATE_400_BAD_REQUEST;
+            statusCode = pjsip_status_code::PJSIP_SC_BAD_REQUEST;
             break;
         }
 
@@ -259,14 +258,14 @@ MyStatus_t MySipInviteApp::onRecvSipInviteReqMsg(MySipRxDataPtr rxDataPtr) const
         MySipSdpSessionPtr sdpSessionPtr = sdpInfoPtr->sdp;
         if (nullptr == sdpSessionPtr || 0 == sdpSessionPtr->media_count) {
             LOG(ERROR) << "Sip invite app receive invite request message error. invalid sdp session. ";
-            statusCode = MySipStatusCode_t::SIP_STATE_400_BAD_REQUEST;
+            statusCode = pjsip_status_code::PJSIP_SC_BAD_REQUEST;
             break;
         }
 
         // 设备类型校验
         if (DEVICE_TYPE_LENGTH != sdpSessionPtr->origin.user.slen) {
             LOG(ERROR) << "Sip invite app receive invite request message error. invalid field origin length. ";
-            statusCode = MySipStatusCode_t::SIP_STATE_400_BAD_REQUEST;
+            statusCode = pjsip_status_code::PJSIP_SC_BAD_REQUEST;
             break;
         }
 
@@ -274,14 +273,14 @@ MyStatus_t MySipInviteApp::onRecvSipInviteReqMsg(MySipRxDataPtr rxDataPtr) const
         std::string deviceType = deviceId.substr(10, 3);
         if (DEVICE_TYPE_IP_CAMERA != deviceType && DEVICE_TYPE_NETWORK_VIDEO_RECORDER != deviceType) {
             LOG(ERROR) << "Sip invite app receive invite request message error. invalid device type. ";
-            statusCode = MySipStatusCode_t::SIP_STATE_400_BAD_REQUEST;
+            statusCode = pjsip_status_code::PJSIP_SC_BAD_REQUEST;
             break;
         }
 
         // 设备查询
         if (MyStatus_t::SUCCESS != MySipCatalogManageView::GetSipCatalogDeviceCfg(m_servId, deviceId, deviceCfg)) {
             LOG(ERROR) << "Sip invite app receive invite request message error. device not exists. device id: " << deviceId;
-            statusCode = MySipStatusCode_t::SIP_STATE_404_NOT_FOUND;
+            statusCode = pjsip_status_code::PJSIP_SC_NOT_FOUND;
             break;
         }
 
@@ -291,13 +290,13 @@ MyStatus_t MySipInviteApp::onRecvSipInviteReqMsg(MySipRxDataPtr rxDataPtr) const
 
         if (MyStatus_t::SUCCESS != remoteSdp.loadFrom(sdpOfferBuf)) {
             LOG(ERROR) << "Sip invite app receive invite request message error. load sdp from string error. ";
-            statusCode = MySipStatusCode_t::SIP_STATE_403_FORBIDDEN;
+            statusCode = pjsip_status_code::PJSIP_SC_FORBIDDEN;
             break;
         }
 
         if (MyStatus_t::SUCCESS != MySdpSession::CreateAnswer(remoteSdp, *m_localSdpPlayPtr, localSdp)) {
             LOG(ERROR) << "Sip invite app receive invite request message error. create answer sdp error. ";
-            statusCode = MySipStatusCode_t::SIP_STATE_403_FORBIDDEN;
+            statusCode = pjsip_status_code::PJSIP_SC_FORBIDDEN;
             break;
         }
 
@@ -317,7 +316,7 @@ MyStatus_t MySipInviteApp::onRecvSipInviteReqMsg(MySipRxDataPtr rxDataPtr) const
     MySipTxDataPtr txDataPtr = nullptr;
     pjsip_endpt_create_response(endptPtr, rxDataPtr, statusCode, nullptr, &txDataPtr);
 
-    if (MySipStatusCode_t::SIP_STATE_200_OK != statusCode) {
+    if (pjsip_status_code::PJSIP_SC_OK != statusCode) {
         txDataPtr->msg->body = pjsip_msg_body_create(txDataPtr->pool, &type, &sdpType, &(pjsip_rdata_get_sdp_info(rxDataPtr)->body));
     }
     else {
