@@ -22,4 +22,4 @@ MyStatus_t MySipAppHelper::GetSipAppThdPoolName(const MY_COMMON::MySipAppIdCfg_d
     return MyStatus_t::SUCCESS;
 }
 
-}; // namespace MY_UTILS
+} // namespace MY_UTILS

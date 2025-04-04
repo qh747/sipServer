@@ -96,6 +96,22 @@ public:
      */
     static MY_COMMON::MyStatus_t    ConvertToSdpTrackTypeByPayloadType(const std::string& str, MY_COMMON::MySdpTrackType_t& type);
 
+    /**
+     * @brief                       转换sdp播放方式
+     * @return                      转换结果
+     * @param str                   sdp字符串
+     * @param way                   sdp播放方式
+     */
+    static MY_COMMON::MyStatus_t    ConvertToSdpPlayWay(const std::string& str, MY_COMMON::MyMedaPlayWay_t& way);
+
+    /**
+     * @brief                       转换sdp协议类型
+     * @return                      转换结果
+     * @param str                   sdp字符串
+     * @param proto                 sdp协议类型
+     */
+    static MY_COMMON::MyStatus_t    ConvertToSdpProtoType(const std::string& str, MY_COMMON::MyTpProto_t& proto);
+
 private:
     //                              音频编解码类型集合
     static std::set<std::string>    AudioCodecSet;

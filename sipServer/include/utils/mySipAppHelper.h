@@ -1,7 +1,8 @@
 #pragma once
 #include <string>
-#include "common/myDataDef.h"
+#include "common/myTypeDef.h"
 #include "utils/myBaseHelper.h"
+#include "sdp/mySdpSession.h"
 
 namespace MY_UTILS {
 

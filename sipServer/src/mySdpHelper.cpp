@@ -220,4 +220,40 @@ MyStatus_t MySdpHelper::ConvertToSdpTrackTypeByPayloadType(const std::string& st
     return MyStatus_t::FAILED;
 }
 
+MyStatus_t MySdpHelper::ConvertToSdpPlayWay(const std::string& str, MyMedaPlayWay_t& way)
+{
+    std::string lowStr;
+    MyStrHelper::ConvertToLowStr(str, lowStr);
+
+    if ("play" == lowStr) {
+        way = MyMedaPlayWay_t::PLAY;
+        return MyStatus_t::SUCCESS;
+    }
+
+    if ("playback" == lowStr) {
+        way = MyMedaPlayWay_t::PLAYBACK;
+        return MyStatus_t::SUCCESS;
+    }
+
+    return MyStatus_t::FAILED;
+}
+
+MyStatus_t MySdpHelper::ConvertToSdpProtoType(const std::string& str, MY_COMMON::MyTpProto_t& proto)
+{
+    std::string lowStr;
+    MyStrHelper::ConvertToUpStr(str, lowStr);
+
+    if ("RTP/AVP" == lowStr) {
+        proto = MY_COMMON::MyTpProto_t::UDP;
+        return MyStatus_t::SUCCESS;
+    }
+
+    if ("TCP/RTP/AVP" == lowStr) {
+        proto = MY_COMMON::MyTpProto_t::TCP;
+        return MyStatus_t::SUCCESS;
+    }
+
+    return MyStatus_t::FAILED;
+}
+
 } // MY_UTILS

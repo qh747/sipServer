@@ -2,9 +2,8 @@
 #include "manager/mySipRegManage.h"
 using namespace MY_COMMON;
 
-namespace MY_MANAGER
-{
-
+namespace MY_MANAGER {
+    
 /**
  * sip服务注册管理对象类
  */

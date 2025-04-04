@@ -90,6 +90,7 @@ MyStatus_t MySdpSession::CreateAnswer(const MySdpSession& remoteSdp, const MySdp
 
         answerSdp.m_mediaPtrVec.push_back(answerMedia);
     }
+    
     return answerSdp.checkValid();
 }
 
@@ -143,7 +144,8 @@ MyStatus_t MySdpSession::loadFrom(const std::string& sdp)
         }
         m_mediaPtrVec.push_back(sdpMedia);
     }
-    return MyStatus_t::SUCCESS;
+
+    return this->checkValid();
 }
 
 MyStatus_t MySdpSession::loadFromFile(const std::string& fileName)

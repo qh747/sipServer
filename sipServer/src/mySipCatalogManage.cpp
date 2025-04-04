@@ -1,12 +1,12 @@
+#include <map>
 #include <boost/thread/shared_mutex.hpp>
 #include "utils/myJsonHelper.h"
 #include "manager/mySipCatalogManage.h"
 using namespace MY_COMMON;
 using MY_UTILS::MyJsonHelper;
 
-namespace MY_MANAGER
-{
-
+namespace MY_MANAGER {
+    
 /**
  * sip服务设备目录管理对象类
  */
@@ -15,6 +15,10 @@ class MySipCatalogManage::MySipCatalogManageObject
 public:
     // 将视图类声明为友元类，对外部提供设备目录信息获取接口
     friend class MySipCatalogManageView;
+
+public:
+    // key = server id, value = sip serv catalog info
+    typedef std::map<std::string, MY_COMMON::MySipCatalogInfo_dt> MySipServCatalogInfoMap;
 
 public:
     MyStatus_t add(const std::string& servId, const MySipCatalogInfo_dt& servCatalogInfo) {
@@ -278,8 +282,8 @@ private:
     MySipRegServAddrMap                 m_sipLowServInfoMap;
 };
 
-static MySipCatalogManage::MySipCatalogManageObject         CatalogManageObject;
-static MySipCatalogManage::MySipCatalogInfoManageObject     CatalogSipServManageObject;
+static MySipCatalogManage::MySipCatalogManageObject     CatalogManageObject;
+static MySipCatalogManage::MySipCatalogInfoManageObject CatalogSipServManageObject;
 
 MyStatus_t MySipCatalogManage::AddSipCatalogInfo(const std::string& servId, const MySipCatalogInfo_dt& servCatalogInfo)
 {
@@ -332,6 +336,8 @@ MyStatus_t MySipCatalogManageView::GetDeviceListInfo(std::string& catalogInfo)
 
 MyStatus_t MySipCatalogManageView::GetDeviceInfo(const std::string& deviceId, std::string& deviceInfo)
 {
+    boost::shared_lock<boost::shared_mutex> lock(CatalogManageObject.m_rwMutex);
+    
     for (const auto& pair : CatalogManageObject.m_sipServCatalogInfoMap) {
         // 获取设备类型
         std::string deviceType = deviceId.substr(10, 3);

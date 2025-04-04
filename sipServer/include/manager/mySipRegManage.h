@@ -5,8 +5,7 @@
 #include "common/myTypeDef.h"
 #include "utils/myBaseHelper.h"
 
-namespace MY_MANAGER
-{
+namespace MY_MANAGER {
 
 /**
  * sip服务注册管理类

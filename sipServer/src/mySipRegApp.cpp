@@ -127,6 +127,7 @@ void MySipRegApp::OnKeepAliveRespCb(MyFuncCbParamPtr evParamPtr, MySipEvPtr evPt
 
 MySipRegApp::MySipRegApp() : m_status(MyStatus_t::FAILED), m_timePtr(nullptr)
 {
+
 }
 
 MySipRegApp::~MySipRegApp()
@@ -591,7 +592,9 @@ MyStatus_t MySipRegApp::onRecvSipRegReqMsg(MySipRxDataPtr rxDataPtr)
     MySipMsgHelper::PrintSipMsgContactHdr(sipContactHeader, contactHeaderStr);
 
     // 解析下级sip服务注册有效时间
-    auto expireHeader = static_cast<MySipMsgHdrPtr>(pjsip_msg_find_hdr(rxDataPtr->msg_info.msg, PJSIP_H_EXPIRES, nullptr));
+    auto expireHeader = static_cast<MySipMsgHdrPtr>(pjsip_msg_find_hdr(rxDataPtr->msg_info.msg, PJSIP_H_EXPIRES, 
+        nullptr));
+
     if (nullptr == expireHeader) {
         LOG(ERROR) << "Sip reg app receive register request message failed. Can't find expire header. " << contactHeaderStr << ".";
         return MyStatus_t::FAILED;
@@ -607,7 +610,9 @@ MyStatus_t MySipRegApp::onRecvSipRegReqMsg(MySipRxDataPtr rxDataPtr)
     }
 
     // 解析下级sip服务鉴权信息
-    auto authHeader = static_cast<MySipMsgHdrPtr>(pjsip_msg_find_hdr(rxDataPtr->msg_info.msg, PJSIP_H_AUTHORIZATION, nullptr));
+    auto authHeader = static_cast<MySipMsgHdrPtr>(pjsip_msg_find_hdr(rxDataPtr->msg_info.msg, PJSIP_H_AUTHORIZATION, 
+        nullptr));
+        
     if (nullptr != authHeader) {
         memset(buf, 0, sizeof(buf));
         pjsip_hdr_print_on(authHeader, buf, sizeof(buf));

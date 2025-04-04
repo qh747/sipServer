@@ -1,6 +1,7 @@
 #define GLOG_USE_GLOG_EXPORT
 #include <glog/logging.h>
 #include <gflags/gflags.h>
+#include <pjmedia/sdp_neg.h>
 #include "envir/mySystemConfg.h"
 #include "envir/mySystemPjsip.h"
 #include "utils/mySdpHelper.h"
@@ -8,16 +9,15 @@
 #include "utils/mySipMsgHelper.h"
 #include "manager/myServManage.h"
 #include "manager/mySipRegManage.h"
+#include "manager/mySipSessionManage.h"
 #include "manager/mySipCatalogManage.h"
 #include "app/mySipInviteApp.h"
+using namespace MY_SDP;
 using namespace MY_UTILS;
 using namespace MY_COMMON;
-using MY_SDP::MySdpSession;
+using namespace MY_MANAGER;
 using MY_ENVIR::MySystemPjsip;
 using MY_ENVIR::MySystemConfig;
-using MY_MANAGER::MyServManage;
-using MY_MANAGER::MySipRegManage;
-using MY_MANAGER::MySipCatalogManageView;
 
 namespace MY_APP {
 
@@ -33,12 +33,223 @@ void MySipInviteApp::OnNewInviteSession(MySipInvSessionPtr invSessPtr, MySipEvPt
 
 void MySipInviteApp::OnInviteMediaUpdate(MySipInvSessionPtr invSessPtr, pj_status_t status)
 {
+    // 解析sip 200 ok消息响应的sdp
+    MySipSessionInfo_dt sessionInfo;
+    {
+        if (nullptr == invSessPtr) {
+            LOG(ERROR) << "Sip invite app media update error. invalid invite session.";
+            return;
+        }
+
+        // 获取sip 200 ok消息响应的sdp
+        MySipTxDataPtr errRespDataPtr = nullptr;
+        MySipSdpSessionCstPtr remoteSdpSessionPtr = nullptr;
+        if (PJ_SUCCESS != pjmedia_sdp_neg_get_active_remote(invSessPtr->neg, &remoteSdpSessionPtr)) {
+            pjsip_inv_end_session(invSessPtr, PJSIP_SC_UNSUPPORTED_MEDIA_TYPE, nullptr, &errRespDataPtr);
+            pjsip_inv_send_msg(invSessPtr, errRespDataPtr);
     
-}
+            LOG(ERROR) << "Sip invite app media update error. get remote sdp error.";
+            return;
+        }
+        
+        // 检查对端sdp是否有效
+        if (nullptr == remoteSdpSessionPtr || remoteSdpSessionPtr->media_count < 1) {
+            pjsip_inv_end_session(invSessPtr, PJSIP_SC_UNSUPPORTED_MEDIA_TYPE, nullptr, &errRespDataPtr);
+            pjsip_inv_send_msg(invSessPtr, errRespDataPtr);
+    
+            LOG(ERROR) << "Sip invite app media update error. invalid remote sdp.";
+            return;
+        }
 
-void MySipInviteApp::OnInviteSendAck(MySipInvSessionPtr invSessPtr, MySipRxDataPtr rxDataPtr)
-{
+        // 对端sdp解析
+        char remoteSdpBuf[1024] = {0};
+        pjmedia_sdp_print(remoteSdpSessionPtr, remoteSdpBuf, sizeof(remoteSdpBuf));
 
+        MySdpSession::Ptr remoteSdpPtr = std::make_shared<MySdpSession>();
+        if (MyStatus_t::SUCCESS != remoteSdpPtr->loadFrom(remoteSdpBuf)) {
+            pjsip_inv_end_session(invSessPtr, PJSIP_SC_UNSUPPORTED_MEDIA_TYPE, nullptr, &errRespDataPtr);
+            pjsip_inv_send_msg(invSessPtr, errRespDataPtr);
+
+            LOG(ERROR) << "Sip invite app media update error. load remote sdp error.";
+            return;
+        }
+
+        if (MyStatus_t::SUCCESS != remoteSdpPtr->checkValid()) {
+            pjsip_inv_end_session(invSessPtr, PJSIP_SC_UNSUPPORTED_MEDIA_TYPE, nullptr, &errRespDataPtr);
+            pjsip_inv_send_msg(invSessPtr, errRespDataPtr);
+
+            LOG(ERROR) << "Sip invite app media update error. invalid remote sdp.";
+            return;
+        }
+
+        // 本端sdp解析
+        MySipSdpSessionCstPtr localSdpSessionPtr = nullptr;
+        if (PJ_SUCCESS != pjmedia_sdp_neg_get_active_local(invSessPtr->neg, &localSdpSessionPtr)) {
+            pjsip_inv_end_session(invSessPtr, PJSIP_SC_UNSUPPORTED_MEDIA_TYPE, nullptr, &errRespDataPtr);
+            pjsip_inv_send_msg(invSessPtr, errRespDataPtr);
+    
+            LOG(ERROR) << "Sip invite app media update error. get local sdp error.";
+            return;
+        }
+
+        char localSdpBuf[1024] = {0};
+        pjmedia_sdp_print(localSdpSessionPtr, localSdpBuf, sizeof(localSdpBuf));
+
+        MySdpSession::Ptr localSdpPtr = std::make_shared<MySdpSession>();
+        if (MyStatus_t::SUCCESS != localSdpPtr->loadFrom(localSdpBuf)) {
+            pjsip_inv_end_session(invSessPtr, PJSIP_SC_UNSUPPORTED_MEDIA_TYPE, nullptr, &errRespDataPtr);
+            pjsip_inv_send_msg(invSessPtr, errRespDataPtr);
+
+            LOG(ERROR) << "Sip invite app media update error. load local sdp error.";
+            return;
+        }
+
+        if (MyStatus_t::SUCCESS != remoteSdpPtr->checkValid()) {
+            pjsip_inv_end_session(invSessPtr, PJSIP_SC_UNSUPPORTED_MEDIA_TYPE, nullptr, &errRespDataPtr);
+            pjsip_inv_send_msg(invSessPtr, errRespDataPtr);
+
+            LOG(ERROR) << "Sip invite app media update error. invalid local sdp.";
+            return;
+        }
+
+        // 会话信息内容填充
+        sessionInfo.deviceId = localSdpPtr->m_origin.m_username;
+        {
+            // 解析对端服务id
+            auto toHeader = static_cast<MySipMsgHdrPtr>(pjsip_msg_find_hdr(invSessPtr->invite_req->msg, 
+                PJSIP_H_TO, nullptr));
+
+            if (nullptr == toHeader) {
+                pjsip_inv_end_session(invSessPtr, PJSIP_SC_UNSUPPORTED_MEDIA_TYPE, nullptr, &errRespDataPtr);
+                pjsip_inv_send_msg(invSessPtr, errRespDataPtr);
+    
+                LOG(ERROR) << "Sip invite app media update error. to header invalid. device id: " << sessionInfo.deviceId;
+                return;
+            }
+
+            char toHdrBuf[256] = {0};
+            toHeader->vptr->print_on(toHeader, toHdrBuf, sizeof(toHdrBuf));
+
+            std::string remoteServId;
+            std::string remoteServIpAddr;
+            if (MyStatus_t::SUCCESS != MySipMsgHelper::ParseSipMsgToHdr(toHdrBuf, remoteServId, remoteServIpAddr)) {
+                pjsip_inv_end_session(invSessPtr, PJSIP_SC_UNSUPPORTED_MEDIA_TYPE, nullptr, &errRespDataPtr);
+                pjsip_inv_send_msg(invSessPtr, errRespDataPtr);
+    
+                LOG(ERROR) << "Sip invite app media update error. to header parser failed. device id: " << sessionInfo.deviceId;
+                return;
+            }
+            else {
+                sessionInfo.remoteServerId = remoteServId;
+            }
+
+            // 解析本端服务id
+            auto fromHeader = static_cast<MySipMsgHdrPtr>(pjsip_msg_find_hdr(invSessPtr->invite_req->msg, 
+                PJSIP_H_FROM, nullptr));
+
+            if (nullptr == fromHeader) {
+                pjsip_inv_end_session(invSessPtr, PJSIP_SC_UNSUPPORTED_MEDIA_TYPE, nullptr, &errRespDataPtr);
+                pjsip_inv_send_msg(invSessPtr, errRespDataPtr);
+    
+                LOG(ERROR) << "Sip invite app media update error. from header invalid. device id: " << sessionInfo.deviceId;
+                return;
+            }
+
+            char fromHdrBuf[256] = {0};
+            fromHeader->vptr->print_on(fromHeader, fromHdrBuf, sizeof(fromHdrBuf));
+
+            std::string localServId;
+            std::string localServIpAddr;
+            if (MyStatus_t::SUCCESS != MySipMsgHelper::ParseSipMsgToHdr(fromHdrBuf, localServId, localServIpAddr)) {
+                pjsip_inv_end_session(invSessPtr, PJSIP_SC_UNSUPPORTED_MEDIA_TYPE, nullptr, &errRespDataPtr);
+                pjsip_inv_send_msg(invSessPtr, errRespDataPtr);
+    
+                LOG(ERROR) << "Sip invite app media update error. from header parser failed. device id: " << sessionInfo.deviceId;
+                return;
+            }
+            else {
+                sessionInfo.localServerId = localServId;
+            }
+        }
+
+        {
+            if (MyStatus_t::SUCCESS != MySdpHelper::ConvertToSdpPlayWay(localSdpPtr->m_sessionName, sessionInfo.playType)) {
+                pjsip_inv_end_session(invSessPtr, PJSIP_SC_UNSUPPORTED_MEDIA_TYPE, nullptr, &errRespDataPtr);
+                pjsip_inv_send_msg(invSessPtr, errRespDataPtr);
+    
+                LOG(ERROR) << "Sip invite app media update error. invalid session name. device id: " << sessionInfo.deviceId;
+                return;
+            }
+    
+            MySdpMedia::Ptr validLocalMediaPtr;
+            for (const auto& media : localSdpPtr->m_mediaPtrVec) {
+                if (MyStatus_t::SUCCESS == media->checkValid()) {
+                    validLocalMediaPtr = media;
+                    break;
+                } 
+            }
+    
+            if (nullptr == validLocalMediaPtr) {
+                pjsip_inv_end_session(invSessPtr, PJSIP_SC_UNSUPPORTED_MEDIA_TYPE, nullptr, &errRespDataPtr);
+                pjsip_inv_send_msg(invSessPtr, errRespDataPtr);
+    
+                LOG(ERROR) << "Sip invite app media update error. invalid local media. device id: " << sessionInfo.deviceId;
+                return;
+            }
+    
+            if (nullptr == validLocalMediaPtr || MyStatus_t::SUCCESS != MySdpHelper::ConvertToSdpProtoType(validLocalMediaPtr->m_proto,
+                sessionInfo.protoType)) {
+                pjsip_inv_end_session(invSessPtr, PJSIP_SC_UNSUPPORTED_MEDIA_TYPE, nullptr, &errRespDataPtr);
+                pjsip_inv_send_msg(invSessPtr, errRespDataPtr);
+    
+                LOG(ERROR) << "Sip invite app media update error. invalid proto type. device id: " << sessionInfo.deviceId;
+                return;
+            }
+    
+            if (!localSdpPtr->m_connection.empty()) {
+                sessionInfo.localServIpAddr = localSdpPtr->m_connection.m_address;
+            }
+            else {
+                sessionInfo.localServIpAddr = validLocalMediaPtr->m_connection.m_address;
+            }
+    
+            sessionInfo.localServPort = validLocalMediaPtr->m_port;
+            localSdpPtr->toString(sessionInfo.localSdp);
+        }
+
+        {
+            MySdpMedia::Ptr validRemoteMediaPtr;
+            for (const auto& media : remoteSdpPtr->m_mediaPtrVec) {
+                if (MyStatus_t::SUCCESS == media->checkValid()) {
+                    validRemoteMediaPtr = media;
+                    break;
+                } 
+            }
+
+            if (nullptr == validRemoteMediaPtr) {
+                pjsip_inv_end_session(invSessPtr, PJSIP_SC_UNSUPPORTED_MEDIA_TYPE, nullptr, &errRespDataPtr);
+                pjsip_inv_send_msg(invSessPtr, errRespDataPtr);
+
+                LOG(ERROR) << "Sip invite app media update error. invalid remote media. device id: " << sessionInfo.deviceId;
+                return;
+            }
+
+            if (!remoteSdpPtr->m_connection.empty()) {
+                sessionInfo.remoteServIpAddr = remoteSdpPtr->m_connection.m_address;
+            }
+            else {
+                sessionInfo.remoteServIpAddr = validRemoteMediaPtr->m_connection.m_address;
+            }
+
+            sessionInfo.remoteServPort = validRemoteMediaPtr->m_port;
+            remoteSdpPtr->toString(sessionInfo.remoteSdp);
+        }
+
+        LOG(INFO) << "Sip invite app media update success. remote sdp: \n" << remoteSdpBuf;
+    }
+
+    // 保存会话信息
+    MySipSessionManage::AddSipSessionInfo(sessionInfo.deviceId, sessionInfo);
 }
 
 MySipInviteApp::~MySipInviteApp()
@@ -67,6 +278,7 @@ MyStatus_t MySipInviteApp::init(const std::string& servId, const std::string& na
     m_invCbPtr = std::make_shared<pjsip_inv_callback>();
     m_invCbPtr->on_state_changed = &MySipInviteApp::OnInviteStateChanged;
     m_invCbPtr->on_new_session   = &MySipInviteApp::OnNewInviteSession;
+    // 处理对于invite的200 ok响应消息
     m_invCbPtr->on_media_update  = &MySipInviteApp::OnInviteMediaUpdate;
 
     if (PJ_SUCCESS != pjsip_inv_usage_init(endptPtr, m_invCbPtr.get())) {
@@ -142,6 +354,13 @@ MyStatus_t MySipInviteApp::onReqDevicePlayMedia(const std::string& deviceId, con
     if (MyStatus_t::SUCCESS != this->reqDevicePlayMediaCheck(deviceId, reqInfo)) {
         respInfo = "check device type error.";
         LOG(ERROR) << "Sip app module req device play media error. check device type error. device id: " << deviceId;
+        return MyStatus_t::FAILED;
+    }
+
+    // 查询设备是否已经关联会话
+    if (MyStatus_t::SUCCESS == MySipSessionManageView::HasSipSessionInfo(deviceId)) {
+        respInfo = "device already associated with a session.";
+        LOG(ERROR) << "Sip app module req device play media error. device already associated with a session. device id: " << deviceId;
         return MyStatus_t::FAILED;
     }
 
@@ -224,6 +443,11 @@ MyStatus_t MySipInviteApp::onReqDevicePlayMedia(const std::string& deviceId, con
         LOG(ERROR) << "Sip app module req device play media error. send invite message error. device id: " << deviceId;
         return MyStatus_t::FAILED;
     }
+    else {
+        char sdpOffer[1024] = {0};
+        pjmedia_sdp_print(sdpSessionPtr, sdpOffer, sizeof(sdpOffer));
+        LOG(INFO) << "Sip app module req device play media success. device id: " << deviceId << " sdp offer: " << sdpOffer;
+    }
 
     respInfo = "pjsip send invite message success.";
     return MyStatus_t::SUCCESS;
@@ -231,15 +455,44 @@ MyStatus_t MySipInviteApp::onReqDevicePlayMedia(const std::string& deviceId, con
 
 MyStatus_t MySipInviteApp::onRecvSipInviteReqMsg(MySipRxDataPtr rxDataPtr) const
 {
-    std::string deviceId;
-    MySipCatalogDeviceCfg_dt deviceCfg;
-
     MySdpSession remoteSdp;
     MySdpSession localSdp;
+
+    MySipSessionInfo_dt sessionInfo;
 
     // sdp处理
     int statusCode = pjsip_status_code::PJSIP_SC_OK;
     do {
+        // 解析本级服务id
+        char toHdrBuf[256] = {0};
+        pjsip_uri_print(PJSIP_URI_IN_REQ_URI, rxDataPtr->msg_info.to->uri, toHdrBuf, sizeof(toHdrBuf));
+
+        std::string localServId;
+        std::string localServIpAddr;
+        if (MyStatus_t::SUCCESS != MySipMsgHelper::ParseSipMsgToHdr(toHdrBuf, localServId, localServIpAddr)) {
+            LOG(ERROR) << "Sip invite app receive invite request message error. parse to header failed.";
+            statusCode = pjsip_status_code::PJSIP_SC_BAD_REQUEST;
+            break;
+        }
+        else {
+            sessionInfo.localServerId = localServId;
+        }
+
+        // 解析上级服务id
+        char fromHdrBuf[256] = {0};
+        pjsip_uri_print(PJSIP_URI_IN_REQ_URI, rxDataPtr->msg_info.from->uri, fromHdrBuf, sizeof(fromHdrBuf));
+
+        std::string remoteServId;
+        std::string remoteServIpAddr;
+        if (MyStatus_t::SUCCESS != MySipMsgHelper::ParseSipMsgFromHdr(fromHdrBuf, remoteServId, remoteServIpAddr)) {
+            LOG(ERROR) << "Sip invite app receive invite request message error. parse from header failed.";
+            statusCode = pjsip_status_code::PJSIP_SC_BAD_REQUEST;
+            break;
+        }
+        else {
+            sessionInfo.remoteServerId = remoteServId;
+        }
+
         // sdp解析
         if (nullptr == rxDataPtr->msg_info.msg->body) {
             LOG(ERROR) << "Sip invite app receive invite request message error. invalid msg body. ";
@@ -269,8 +522,8 @@ MyStatus_t MySipInviteApp::onRecvSipInviteReqMsg(MySipRxDataPtr rxDataPtr) const
             break;
         }
 
-        deviceId = std::string(sdpSessionPtr->origin.user.ptr, sdpSessionPtr->origin.user.slen).substr(0, 20);
-        std::string deviceType = deviceId.substr(10, 3);
+        sessionInfo.deviceId = std::string(sdpSessionPtr->origin.user.ptr, sdpSessionPtr->origin.user.slen).substr(0, 20);
+        std::string deviceType = sessionInfo.deviceId.substr(10, 3);
         if (DEVICE_TYPE_IP_CAMERA != deviceType && DEVICE_TYPE_NETWORK_VIDEO_RECORDER != deviceType) {
             LOG(ERROR) << "Sip invite app receive invite request message error. invalid device type. ";
             statusCode = pjsip_status_code::PJSIP_SC_BAD_REQUEST;
@@ -278,9 +531,19 @@ MyStatus_t MySipInviteApp::onRecvSipInviteReqMsg(MySipRxDataPtr rxDataPtr) const
         }
 
         // 设备查询
-        if (MyStatus_t::SUCCESS != MySipCatalogManageView::GetSipCatalogDeviceCfg(m_servId, deviceId, deviceCfg)) {
-            LOG(ERROR) << "Sip invite app receive invite request message error. device not exists. device id: " << deviceId;
+        MySipCatalogDeviceCfg_dt deviceCfg;
+        if (MyStatus_t::SUCCESS != MySipCatalogManageView::GetSipCatalogDeviceCfg(m_servId, sessionInfo.deviceId, 
+            deviceCfg)) {
+            LOG(ERROR) << "Sip invite app receive invite request message error. device not exists. device id: " << sessionInfo.deviceId;
             statusCode = pjsip_status_code::PJSIP_SC_NOT_FOUND;
+            break;
+        }
+
+        // 设备是否已经关联会话
+        if (MyStatus_t::SUCCESS == MySipSessionManageView::HasSipSessionInfo(sessionInfo.deviceId)) {
+            LOG(ERROR) << "Sip invite app receive invite request message error. device already associated with a session. device id: " 
+                       << sessionInfo.deviceId;
+            statusCode = pjsip_status_code::PJSIP_SC_FORBIDDEN;
             break;
         }
 
@@ -289,23 +552,80 @@ MyStatus_t MySipInviteApp::onRecvSipInviteReqMsg(MySipRxDataPtr rxDataPtr) const
         pjmedia_sdp_print(sdpSessionPtr, sdpOfferBuf, sizeof(sdpOfferBuf));
 
         if (MyStatus_t::SUCCESS != remoteSdp.loadFrom(sdpOfferBuf)) {
-            LOG(ERROR) << "Sip invite app receive invite request message error. load sdp from string error. ";
+            LOG(ERROR) << "Sip invite app receive invite request message error. load sdp from string error. device id: " 
+                       << sessionInfo.deviceId;
             statusCode = pjsip_status_code::PJSIP_SC_FORBIDDEN;
             break;
         }
 
-        if (MyStatus_t::SUCCESS != MySdpSession::CreateAnswer(remoteSdp, *m_localSdpPlayPtr, localSdp)) {
-            LOG(ERROR) << "Sip invite app receive invite request message error. create answer sdp error. ";
+        if (MyStatus_t::SUCCESS != MySdpHelper::ConvertToSdpPlayWay(remoteSdp.m_sessionName, sessionInfo.playType)) {
+            LOG(ERROR) << "Sip invite app receive invite request message error. invalid session name. device id: " << sessionInfo.deviceId;
             statusCode = pjsip_status_code::PJSIP_SC_FORBIDDEN;
             break;
         }
+
+        MySdpMedia::Ptr validRemoteMediaPtr;
+        for (const auto& media : remoteSdp.m_mediaPtrVec) {
+            if (MyStatus_t::SUCCESS == media->checkValid()) {
+                validRemoteMediaPtr = media;
+                break;
+            } 
+        }
+
+        if (nullptr == validRemoteMediaPtr || MyStatus_t::SUCCESS != MySdpHelper::ConvertToSdpProtoType(validRemoteMediaPtr->m_proto,
+            sessionInfo.protoType)) {
+            LOG(ERROR) << "Sip invite app receive invite request message error. invalid proto type. device id: " << sessionInfo.deviceId;
+            statusCode = pjsip_status_code::PJSIP_SC_FORBIDDEN;
+            break;
+        }
+
+        if (!remoteSdp.m_connection.empty()) {
+            sessionInfo.remoteServIpAddr = remoteSdp.m_connection.m_address;
+        }
+        else {
+            sessionInfo.remoteServIpAddr = validRemoteMediaPtr->m_connection.m_address;
+        }
+
+        sessionInfo.remoteServPort = validRemoteMediaPtr->m_port;
+        remoteSdp.toString(sessionInfo.remoteSdp);
+
+        if (MyStatus_t::SUCCESS != MySdpSession::CreateAnswer(remoteSdp, *m_localSdpPlayPtr, localSdp)) {
+            LOG(ERROR) << "Sip invite app receive invite request message error. create answer sdp error. device id: " 
+                       << sessionInfo.deviceId;
+            statusCode = pjsip_status_code::PJSIP_SC_FORBIDDEN;
+            break;
+        }
+
+        MySdpMedia::Ptr validLocalMediaPtr;
+        for (const auto& media : localSdp.m_mediaPtrVec) {
+            if (MyStatus_t::SUCCESS == media->checkValid()) {
+                validLocalMediaPtr = media;
+                break;
+            } 
+        }
+
+        if (nullptr == validLocalMediaPtr) {
+            LOG(ERROR) << "Sip invite app receive invite request message error. invalid local media. device id: " << sessionInfo.deviceId;
+            statusCode = pjsip_status_code::PJSIP_SC_FORBIDDEN;
+            break;
+        }
+
+        if (!localSdp.m_connection.empty()) {
+            sessionInfo.localServIpAddr = localSdp.m_connection.m_address;
+        }
+        else {
+            sessionInfo.localServIpAddr = validLocalMediaPtr->m_connection.m_address;
+        }
+        
+        sessionInfo.localServPort = validLocalMediaPtr->m_port;
+        localSdp.toString(sessionInfo.localSdp);
 
     } while(false);
 
     // 获取endpoint
     MySipEndptPtr endptPtr = nullptr;
     if (MyStatus_t::SUCCESS != MySystemPjsip::GetPjsipEndptPtr(&endptPtr)) {
-        LOG(ERROR) << "Sip invite app answer invite error. get pjsip endpoint failed. device id: " << deviceId;
+        LOG(ERROR) << "Sip invite app answer invite error. get pjsip endpoint failed. device id: " << sessionInfo.deviceId;
         return MyStatus_t::FAILED;
     }
 
@@ -317,12 +637,13 @@ MyStatus_t MySipInviteApp::onRecvSipInviteReqMsg(MySipRxDataPtr rxDataPtr) const
     pjsip_endpt_create_response(endptPtr, rxDataPtr, statusCode, nullptr, &txDataPtr);
 
     if (pjsip_status_code::PJSIP_SC_OK != statusCode) {
-        txDataPtr->msg->body = pjsip_msg_body_create(txDataPtr->pool, &type, &sdpType, &(pjsip_rdata_get_sdp_info(rxDataPtr)->body));
+        txDataPtr->msg->body = pjsip_msg_body_create(txDataPtr->pool, &type, &sdpType, 
+        &(pjsip_rdata_get_sdp_info(rxDataPtr)->body));
     }
     else {
         std::string localSdpStr;
         if (MyStatus_t::SUCCESS != localSdp.toString(localSdpStr)) {
-            LOG(ERROR) << "Sip invite app answer invite error. local sdp to string error. device id: " << deviceId;
+            LOG(ERROR) << "Sip invite app answer invite error. local sdp to string error. device id: " << sessionInfo.deviceId;
             return MyStatus_t::FAILED;
         }
 
@@ -333,12 +654,13 @@ MyStatus_t MySipInviteApp::onRecvSipInviteReqMsg(MySipRxDataPtr rxDataPtr) const
     // 获取本地sip服务地址配置
     MySipServAddrCfg_dt servAddrCfg;
     if (MyStatus_t::SUCCESS != MyServManage::GetSipServAddrCfg(servAddrCfg)) {
-        LOG(ERROR) << "Sip invite app answer invite error. get sip serv addr cfg failed. device id: " << deviceId;
+        LOG(ERROR) << "Sip invite app answer invite error. get sip serv addr cfg failed. device id: " << sessionInfo.deviceId;
         return MyStatus_t::FAILED;
     }
 
     std::string sContact;
-    MySipMsgHelper::GenerateSipMsgContactHeader(servAddrCfg.id, servAddrCfg.ipAddr, servAddrCfg.regPort, sContact);
+    MySipMsgHelper::GenerateSipMsgContactHeader(servAddrCfg.id, servAddrCfg.ipAddr, servAddrCfg.regPort, 
+        sContact);
 
     const pj_str_t contactHeader = pj_str(const_cast<char*>("Contact"));
     const pj_str_t param = pj_str(const_cast<char*>(sContact.c_str()));
@@ -358,10 +680,15 @@ MyStatus_t MySipInviteApp::onRecvSipInviteReqMsg(MySipRxDataPtr rxDataPtr) const
         return MyStatus_t::FAILED;
     }
 
+    if (pjsip_status_code::PJSIP_SC_OK != statusCode) {
+        return MyStatus_t::FAILED;
+    }
+
+    LOG(INFO) << "Sip invite app answer invite success. device id: " << sessionInfo.deviceId << " sdp offer: " << sessionInfo.remoteSdp
+              << " sdp answer: " << sessionInfo.localSdp;
+
     // 保存会话信息
-
-
-
+    MySipSessionManage::AddSipSessionInfo(sessionInfo.deviceId, sessionInfo);
     return MyStatus_t::SUCCESS;
 }
 
@@ -544,8 +871,8 @@ MyStatus_t MySipInviteApp::reqDevicePlayMediaPrepareSdp(const std::string& devic
             mediaPtr->attr[mediaPtr->attr_count++] = attrPtr;
         }
 
-        std::string ssrcStr = "y=" + std::to_string(media->m_ssrcVec[0]);
-        pj_strdup2(poolPtr, &sdpSessionPtr->gb28181_extend_f, ssrcStr.c_str());
+        std::string ssrcStr = std::to_string(media->m_ssrcVec[0]);
+        pj_strdup2(poolPtr, &sdpSessionPtr->gb28181_extend_y, ssrcStr.c_str());
 
         sdpSessionPtr->media[mediaIndex++] = mediaPtr;
     }

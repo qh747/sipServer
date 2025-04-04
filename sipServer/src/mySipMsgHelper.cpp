@@ -1,5 +1,6 @@
 #include <iostream>
 #include <sstream>
+#include <regex>
 #include <cstdio>
 #include <cstdint>
 #include <cstring>
@@ -98,16 +99,58 @@ MyStatus_t MySipMsgHelper::ParseSipMsgExpireHdr(const std::string& expireHeader,
 
 MyStatus_t MySipMsgHelper::ParseSipMsgFromHdr(const std::string& fromHeader, std::string& id, std::string& ipAddr)
 {
-    char idBuf[128] = {0};
-    char ipAddrBuf[128] = {0};
-
-    if (2 == sscanf(fromHeader.c_str(), "sip:%[^@]@%s", idBuf, ipAddrBuf)) {
-        id     = idBuf;
-        ipAddr = ipAddrBuf;
-        return MyStatus_t::SUCCESS;
-    } else {
-        return MyStatus_t::FAILED;
+    // 查找 "sip:" 的起始位置
+    std::size_t sipStartPos = fromHeader.find("sip:");
+    if (std::string::npos == sipStartPos) {
+        return MyStatus_t::FAILED; 
     }
+    
+    // 调整起始位置到 "sip:" 之后
+    std::size_t idStartPos = sipStartPos + 4;
+    
+    // 查找 '@' 符号
+    std::size_t atStartPos = fromHeader.find('@', idStartPos);
+    if (std::string::npos == atStartPos) {
+        return MyStatus_t::FAILED; 
+    }
+    
+    // 查找域名的结束位置（可能是 '>' 或字符串结尾）
+    std::size_t domainEndPos = fromHeader.find('>', atStartPos + 1);
+    if (std::string::npos == domainEndPos) {
+        domainEndPos = fromHeader.length();
+    }
+
+    id     = fromHeader.substr(idStartPos, atStartPos - idStartPos);
+    ipAddr = fromHeader.substr(atStartPos + 1, domainEndPos - (atStartPos + 1));
+    return MyStatus_t::SUCCESS;
+}
+
+MyStatus_t MySipMsgHelper::ParseSipMsgToHdr(const std::string& toHeader, std::string& id, std::string& ipAddr)
+{
+    // 查找 "sip:" 的起始位置
+    std::size_t sipStartPos = toHeader.find("sip:");
+    if (std::string::npos == sipStartPos) {
+        return MyStatus_t::FAILED; 
+    }
+    
+    // 调整起始位置到 "sip:" 之后
+    std::size_t idStartPos = sipStartPos + 4;
+    
+    // 查找 '@' 符号
+    std::size_t atStartPos = toHeader.find('@', idStartPos);
+    if (std::string::npos == atStartPos) {
+        return MyStatus_t::FAILED; 
+    }
+    
+    // 查找域名的结束位置（可能是 '>' 或字符串结尾）
+    std::size_t domainEndPos = toHeader.find('>', atStartPos + 1);
+    if (std::string::npos == domainEndPos) {
+        domainEndPos = toHeader.length();
+    }
+
+    id     = toHeader.substr(idStartPos, atStartPos - idStartPos);
+    ipAddr = toHeader.substr(atStartPos + 1, domainEndPos - (atStartPos + 1));
+    return MyStatus_t::SUCCESS;
 }
 
 MyStatus_t MySipMsgHelper::PrintSipMsgContactHdr(const MySipMsgContactHdr_dt& sipContactHeader, std::string& str)

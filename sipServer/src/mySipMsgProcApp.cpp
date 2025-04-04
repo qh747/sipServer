@@ -176,7 +176,38 @@ MyStatus_t MySipMsgProcApp::onProcSipInviteReqMsg(MySipRxDataPtr rdataPtr)
     // sip regist uri解析
     char buf[256];
     pjsip_uri_print(PJSIP_URI_IN_REQ_URI, rdataPtr->msg_info.msg->line.req.uri, buf, sizeof(buf));
-    LOG(INFO) << "Sip app module recv sip invite message. uri: " << buf;
+    LOG(INFO) << "Sip app module recv sip register message. uri: " << buf;
+
+    // 解析本级服务id
+    char toHdrBuf[256] = {0};
+    pjsip_uri_print(PJSIP_URI_IN_REQ_URI, rdataPtr->msg_info.to->uri, toHdrBuf, sizeof(toHdrBuf));
+
+    std::string servId;
+    std::string servIpAddr;
+    if (MyStatus_t::SUCCESS != MySipMsgHelper::ParseSipMsgToHdr(toHdrBuf, servId, servIpAddr)) {
+        LOG(ERROR) << "Sip app module recv sip invite message error. parse to header failed.";
+        return MyStatus_t::FAILED;
+    }
+    else if (m_servId != servId) {
+        LOG(ERROR) << "Sip app module recv sip invite message error. invalid service id. uri: " << buf << ".";
+        return MyStatus_t::FAILED;
+    }
+
+    // 解析上级服务id
+    char fromHdrBuf[256] = {0};
+    pjsip_uri_print(PJSIP_URI_IN_REQ_URI, rdataPtr->msg_info.from->uri, fromHdrBuf, sizeof(fromHdrBuf));
+
+    std::string remoteServId;
+    std::string remoteServIpAddr;
+    if (MyStatus_t::SUCCESS != MySipMsgHelper::ParseSipMsgFromHdr(fromHdrBuf, remoteServId, remoteServIpAddr)) {
+        LOG(ERROR) << "Sip app module recv sip invite message error. parse from header failed.";
+        return MyStatus_t::FAILED;
+    }
+
+    if (MyStatus_t::SUCCESS != MySipRegManage::HasSipRegUpServInfo(remoteServId)) {
+        LOG(ERROR) << "Sip app module recv sip invite message error. find up service failed. uri: " << buf << ".";
+        return MyStatus_t::FAILED;
+    }
 
     MySipServer::SmtWkPtr sipServWkPtr;
     if (MyStatus_t::SUCCESS != MyServManage::GetSipServer(sipServWkPtr)) {

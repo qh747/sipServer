@@ -44,14 +44,6 @@ public:
     static void                                 OnInviteMediaUpdate(MY_COMMON::MySipInvSessionPtr invSessPtr,
                                                     pj_status_t status);
 
-    /**
-     * @brief                                   邀请会话响应Ack回调
-     * @param invSessPtr                        邀请会话对象
-     * @param rxDataPtr                         接收数据
-     */
-    static void                                 OnInviteSendAck(MY_COMMON::MySipInvSessionPtr invSessPtr,
-                                                    MY_COMMON::MySipRxDataPtr rxDataPtr);
-
 public:
     /**
      * @brief                                   应用初始化

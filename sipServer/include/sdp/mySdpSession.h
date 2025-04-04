@@ -94,11 +94,22 @@ public:
     MY_COMMON::MyStatus_t           setSSRC(const MySdpMedia::SSRCVec& ssrcVec, MY_COMMON::MySdpTrackType_t type);
 
 public:
+    //                              版本
     uint32_t                        m_version;
+
+    //                              会话发起方信息
     MySdpOrigin                     m_origin;
+
+    //                              会话名称
     std::string                     m_sessionName;
+
+    //                              会话时间
     MySdpTime                       m_time;
+
+    //                              会话连接信息
     MySdpConnection                 m_connection;
+
+    //                              媒体信息
     MySdpMedia::PtrVec              m_mediaPtrVec;
 };
 

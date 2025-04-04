@@ -50,7 +50,8 @@ public:
      * @param natPort               用户nat映射后的端口
      * @param contactHeader         生成的sip contact header
      */     
-    static MY_COMMON::MyStatus_t    GenerateSipMsgContactHeader(const std::string& id, const std::string& natIpAddr, uint16_t natPort, std::string& contactHeader);
+    static MY_COMMON::MyStatus_t    GenerateSipMsgContactHeader(const std::string& id, const std::string& natIpAddr, uint16_t natPort, 
+                                        std::string& contactHeader);
 
 public:
     /**
@@ -85,6 +86,15 @@ public:
      * @param ipAddr                解析后的服务ip地址
      */     
     static MY_COMMON::MyStatus_t    ParseSipMsgFromHdr(const std::string& fromHeader, std::string& id, std::string& ipAddr);
+
+    /**
+     * @brief                       解析sip消息to首部
+     * @return                      解析结果，success-0，fail-非0
+     * @param toHeader              to字符串
+     * @param id                    解析后的服务id
+     * @param ipAddr                解析后的服务ip地址
+     */     
+    static MY_COMMON::MyStatus_t    ParseSipMsgToHdr(const std::string& toHeader, std::string& id, std::string& ipAddr);
 
 public:
     /**

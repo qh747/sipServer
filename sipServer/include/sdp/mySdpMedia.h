@@ -62,13 +62,28 @@ public:
     MY_COMMON::MyStatus_t           getRtpSSRC(uint32_t& ssrc) const;
 
 public:
+    //                              媒体轨道类型
     MY_COMMON::MySdpTrackType_t     m_type {MY_COMMON::MySdpTrackType_t::SDP_TRACK_TYPE_INVALID};
+
+    //                              媒体端口
     uint16_t                        m_port {0};
+
+    //                              媒体连接信息
     MySdpConnection                 m_connection;
+
+    //                              媒体协议
     std::string                     m_proto;
+
+    //                              媒体角色类型
     MySdpAttrSetup                  m_setup;
+
+    //                              媒体传输方向
     MY_COMMON::MySdpDirection_t     m_direction {MY_COMMON::MySdpDirection_t::SDP_DIRECTION_INVALID};
+
+    //                              媒体编解码信息
     CodecPlanVector                 m_codecPlanVec;
+
+    //                              媒体RTP SSRC
     SSRCVec                         m_ssrcVec;
 };
 

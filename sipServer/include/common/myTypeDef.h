@@ -7,6 +7,7 @@
 #include <pjlib.h>
 #include <pjlib-util.h>
 #include <pjmedia.h>
+#include <pjmedia/sdp_neg.h>
 #include <pjsip_ua.h>
 #include <pjsip/sip_uri.h>
 #include <pjsip/sip_msg.h>
@@ -42,6 +43,7 @@ typedef         pjsip_generic_string_hdr*                                   MySi
 typedef         pjsip_regc_cbparam*                                         MySipRegCbParamPtr;
 typedef         pjsip_inv_session*                                          MySipInvSessionPtr;
 typedef         pjmedia_sdp_session*                                        MySipSdpSessionPtr;
+typedef         const pjmedia_sdp_session*                                  MySipSdpSessionCstPtr;
 typedef         pjmedia_sdp_session**                                       MySipSdpSessionPtrAddr;
 typedef         pjmedia_sdp_conn*                                           MySipSdpConnPtr;
 typedef         pjmedia_sdp_media*                                          MySipSdpMediaPtr;

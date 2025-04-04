@@ -992,16 +992,23 @@ static int print_session(const pjmedia_sdp_session *ses,
         p += printed;
     }
 
-    /* Print gb28181 media description. */
+    
+    /* Print gb28181 ssrc. */
     if (NULL != ses->gb28181_extend_y.ptr) {
+        *p++ = 'y';
+        *p++ = '=';
+
         pj_memcpy(p, ses->gb28181_extend_y.ptr, ses->gb28181_extend_y.slen);
         p += ses->gb28181_extend_y.slen;
         *p++ = '\r';
         *p++ = '\n';
     }
 
-    /* Print gb28181 ssrc. */
+    /* Print gb28181 media description. */
     if (NULL != ses->gb28181_extend_f.ptr) {
+        *p++ = 'f';
+        *p++ = '=';
+
         pj_memcpy(p, ses->gb28181_extend_f.ptr, ses->gb28181_extend_f.slen);
         p += ses->gb28181_extend_f.slen;
         *p++ = '\r';
@@ -1010,6 +1017,9 @@ static int print_session(const pjmedia_sdp_session *ses,
 
     /* Print gb28181 uri. */
     if (NULL != ses->gb28181_extend_u.ptr) {
+        *p++ = 'u';
+        *p++ = '=';
+
         pj_memcpy(p, ses->gb28181_extend_u.ptr, ses->gb28181_extend_u.slen);
         p += ses->gb28181_extend_u.slen;
         *p++ = '\r';
