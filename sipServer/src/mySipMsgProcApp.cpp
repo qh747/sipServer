@@ -148,7 +148,7 @@ MyStatus_t MySipMsgProcApp::onProcSipRegisterReqMsg(MySipRxDataPtr rdataPtr)
     // sip regist uri解析
     char buf[256];
     pjsip_uri_print(PJSIP_URI_IN_REQ_URI, rdataPtr->msg_info.msg->line.req.uri, buf, sizeof(buf));
-    LOG(INFO) << "Sip app module recv sip register message. uri: " << buf;
+    LOG(INFO) << "Sip app module recv sip register message. uri: " << buf << " message: " << pjsip_rx_data_get_info(rdataPtr);
 
     MySipMsgUri_dt sipUri;
     if (MyStatus_t::SUCCESS != MySipMsgHelper::ParseSipMsgURL(buf, sipUri)) {
@@ -176,7 +176,7 @@ MyStatus_t MySipMsgProcApp::onProcSipInviteReqMsg(MySipRxDataPtr rdataPtr)
     // sip regist uri解析
     char buf[256];
     pjsip_uri_print(PJSIP_URI_IN_REQ_URI, rdataPtr->msg_info.msg->line.req.uri, buf, sizeof(buf));
-    LOG(INFO) << "Sip app module recv sip register message. uri: " << buf;
+    LOG(INFO) << "Sip app module recv sip register message. uri: " << buf << " message: " << pjsip_rx_data_get_info(rdataPtr);
 
     // 解析本级服务id
     char toHdrBuf[256] = {0};
@@ -222,14 +222,15 @@ MyStatus_t MySipMsgProcApp::onProcSipInviteReqMsg(MySipRxDataPtr rdataPtr)
 MyStatus_t MySipMsgProcApp::onProcSipKeepAliveReqMsg(MySipRxDataPtr rdataPtr)
 {
     MySipKeepAliveMsgBody_dt keepAliveMsgBody;
-    if (MyStatus_t::SUCCESS != MyXmlHelper::ParseSipKeepAliveMsgBody(static_cast<char*>(rdataPtr->msg_info.msg->body->data), keepAliveMsgBody)) {
+    if (MyStatus_t::SUCCESS != MyXmlHelper::ParseSipKeepAliveMsgBody(static_cast<char*>(rdataPtr->msg_info.msg->body->data), 
+        keepAliveMsgBody)) {
         LOG(ERROR) << "Sip app module recv keepalive message failed. parse message failed.";
         return MyStatus_t::FAILED;
     }
 
     std::string msgInfo;
     MySipMsgHelper::PrintSipKeepAliveMsgBody(keepAliveMsgBody, msgInfo);
-    LOG(INFO) << "Sip app module recv keepalive message. " << msgInfo << ".";
+    LOG(INFO) << "Sip app module recv keepalive message: " << pjsip_rx_data_get_info(rdataPtr);;
 
     std::string cmdTypeStr;
     MyStrHelper::ConvertToLowStr(keepAliveMsgBody.cmdType, cmdTypeStr);
@@ -256,11 +257,13 @@ MyStatus_t MySipMsgProcApp::onProcSipKeepAliveReqMsg(MySipRxDataPtr rdataPtr)
 MyStatus_t MySipMsgProcApp::onProcSipCatalogQueryReqMsg(MySipRxDataPtr rdataPtr)
 {
     MySipCatalogReqMsgBody_dt catalogMsgBody;
-
     std::string msgBodyStr = static_cast<const char*>(rdataPtr->msg_info.msg->body->data);
     if (MyStatus_t::SUCCESS != MyXmlHelper::ParseSipCatalogQueryReqMsgBody(msgBodyStr, catalogMsgBody)) {
         LOG(ERROR) << "Sip app module recv catalog query message failed. parse message failed.";
         return MyStatus_t::FAILED;
+    }
+    else {
+        LOG(INFO) << "Sip app module recv catalog query message: " << pjsip_rx_data_get_info(rdataPtr);
     }
 
     std::string msgInfo;
@@ -281,7 +284,9 @@ MyStatus_t MySipMsgProcApp::onProcSipCatalogQueryReqMsg(MySipRxDataPtr rdataPtr)
 
     MySipServer::SmtWkPtr sipServWkPtr; 
     if (MyStatus_t::SUCCESS != MyServManage::GetSipServer(sipServWkPtr)) {
-        LOG(ERROR) << "Sip app module recv catalog query message failed. find sip server failed. message serv id: " << catalogMsgBody.deviceId << ".";
+        LOG(ERROR) << "Sip app module recv catalog query message failed. find sip server failed. message serv id: " 
+                   << catalogMsgBody.deviceId << ".";
+
         return MyStatus_t::FAILED;
     }
 
@@ -303,7 +308,8 @@ MyStatus_t MySipMsgProcApp::onProcSipCatalogResponseReqMsg(MySipRxDataPtr rdataP
         return MyStatus_t::FAILED;
     }
 
-    LOG(INFO) << "Sip app module recv catalog response message. device id: " << sipRegLowServId << ".";
+    LOG(INFO) << "Sip app module recv catalog response message. device id: " << sipRegLowServId << " message: " 
+              << pjsip_rx_data_get_info(rdataPtr);
 
     // 获取本级服务id
     if (MyStatus_t::SUCCESS != MySipRegManage::HasSipRegLowServInfo(sipRegLowServId)) {
@@ -343,6 +349,10 @@ pj_status_t MySipMsgProcApp::OnAppModuleStopCb(void)
 
 pj_bool_t MySipMsgProcApp::OnAppModuleRecvReqCb(MySipRxDataPtr rdataPtr)
 {
+    char msgBuf[1024] = {0};
+    pjsip_msg_print(rdataPtr->msg_info.msg, msgBuf, sizeof(msgBuf));
+    LOG(INFO) << "Recv request message: " << "\n-------------------------------\n" << msgBuf << "\n-------------------------------";
+
     // sip 消息uri解析
     char buf[256];
     pjsip_uri_print(PJSIP_URI_IN_REQ_URI, rdataPtr->msg_info.msg->line.req.uri, buf, sizeof(buf));

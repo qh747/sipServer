@@ -220,18 +220,18 @@ MyStatus_t MySdpHelper::ConvertToSdpTrackTypeByPayloadType(const std::string& st
     return MyStatus_t::FAILED;
 }
 
-MyStatus_t MySdpHelper::ConvertToSdpPlayWay(const std::string& str, MyMedaPlayWay_t& way)
+MyStatus_t MySdpHelper::ConvertToSdpPlayWay(const std::string& str, MyMediaPlayWay_t& way)
 {
     std::string lowStr;
     MyStrHelper::ConvertToLowStr(str, lowStr);
 
     if ("play" == lowStr) {
-        way = MyMedaPlayWay_t::PLAY;
+        way = MyMediaPlayWay_t::PLAY;
         return MyStatus_t::SUCCESS;
     }
 
     if ("playback" == lowStr) {
-        way = MyMedaPlayWay_t::PLAYBACK;
+        way = MyMediaPlayWay_t::PLAYBACK;
         return MyStatus_t::SUCCESS;
     }
 

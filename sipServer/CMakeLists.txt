@@ -55,6 +55,15 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../thirdP
 target_link_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../thirdParty/tinyxml2/lib)
 target_link_libraries(${PROJECT_NAME} PRIVATE tinyxml2)
 
+# 链接jrtplib依赖库
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../thirdParty/jthread/include)
+target_link_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../thirdParty/jthread/lib)
+target_link_libraries(${PROJECT_NAME} PRIVATE jthread)
+
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../thirdParty/jrtplib/include)
+target_link_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../thirdParty/jrtplib/lib)
+target_link_libraries(${PROJECT_NAME} PRIVATE jrtp)
+
 # 链接ZLToolkit依赖库
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../thirdParty/ZLToolKit/include)
 target_link_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/../thirdParty/ZLToolKit/lib)

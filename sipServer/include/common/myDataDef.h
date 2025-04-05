@@ -45,7 +45,7 @@ typedef enum class MyMediaPlayWayType : int
     //                                                      回放媒体
     PLAYBACK                                                = 1,
 
-} MyMedaPlayWay_t;
+} MyMediaPlayWay_t;
 
 /**
  * @brief sip消息uri
@@ -164,7 +164,7 @@ typedef struct MyHttpReqMediaInfoDataType
     std::string                                             deviceId;
 
     //                                                      播放方式
-    MyMedaPlayWay_t                                         playType;
+    MyMediaPlayWay_t                                        playType;
 
     //                                                      协议类型
     MyTpProto_t                                             protoType;
@@ -180,7 +180,7 @@ typedef struct MySipSessionInfoDataType
     std::string                                             deviceId;
 
     //                                                      播放方式
-    MyMedaPlayWay_t                                         playType;
+    MyMediaPlayWay_t                                        playType;
 
     //                                                      协议类型
     MyTpProto_t                                             protoType;
@@ -210,6 +210,5 @@ typedef struct MySipSessionInfoDataType
     std::string                                             remoteSdp;
 
 } MySipSessionInfo_dt;
-
 
 }; // MY_COMMON

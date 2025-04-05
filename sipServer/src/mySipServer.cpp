@@ -327,7 +327,7 @@ MyStatus_t MySipServer::onReqDeviceMedia(const std::string& deviceId, const MyHt
         return MyStatus_t::FAILED;
     }
 
-    if (MyMedaPlayWay_t::PLAY == reqInfo.playType) {
+    if (MyMediaPlayWay_t::PLAY == reqInfo.playType) {
         return sipInviteAppWkPtr.lock()->onReqDevicePlayMedia(deviceId, reqInfo, respInfo);
     }
     else {

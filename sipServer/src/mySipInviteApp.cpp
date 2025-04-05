@@ -730,7 +730,7 @@ MyStatus_t MySipInviteApp::reqDevicePlayMediaCheck(const std::string& deviceId, 
     }
 
     // 校验播放方式
-    if (MyMedaPlayWay_t::PLAY != reqInfo.playType) {
+    if (MyMediaPlayWay_t::PLAY != reqInfo.playType) {
         LOG(ERROR) << "Check req device play media failed. play way is invalid. ";
         return MyStatus_t::FAILED;
     }

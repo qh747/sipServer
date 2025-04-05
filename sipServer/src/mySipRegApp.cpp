@@ -573,7 +573,9 @@ MyStatus_t MySipRegApp::onLowSipServRegSuccess(const MySipRegLowServCfg_dt& sipR
 MyStatus_t MySipRegApp::onRecvSipRegReqMsg(MySipRxDataPtr rxDataPtr)
 {
     // 解析下级sip服务id
-    auto contactHeader = static_cast<MySipMsgHdrPtr>(pjsip_msg_find_hdr(rxDataPtr->msg_info.msg, PJSIP_H_CONTACT, nullptr));
+    auto contactHeader = static_cast<MySipMsgHdrPtr>(pjsip_msg_find_hdr(rxDataPtr->msg_info.msg, 
+        PJSIP_H_CONTACT, nullptr));
+
     if (nullptr == contactHeader) {
         LOG(ERROR) << "Sip reg app receive register request message failed. Can't find contact header. ";
         return MyStatus_t::FAILED;
@@ -754,7 +756,8 @@ MyStatus_t MySipRegApp::onRecvSipRegReqMsg(MySipRxDataPtr rxDataPtr)
     }
 
     // 发送sip应答消息
-    if (PJ_SUCCESS != pjsip_endpt_respond(endptPtr, nullptr, rxDataPtr, statusCode, nullptr, &hdrList, nullptr, nullptr)) {
+    if (PJ_SUCCESS != pjsip_endpt_respond(endptPtr, nullptr, rxDataPtr, statusCode, nullptr, 
+        &hdrList, nullptr, nullptr)) {
         LOG(ERROR) << "Sip reg app receive register request message failed. can't send response message. " << contactHeaderStr << ".";
         return MyStatus_t::FAILED;
     }

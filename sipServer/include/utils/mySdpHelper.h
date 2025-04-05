@@ -102,7 +102,7 @@ public:
      * @param str                   sdp字符串
      * @param way                   sdp播放方式
      */
-    static MY_COMMON::MyStatus_t    ConvertToSdpPlayWay(const std::string& str, MY_COMMON::MyMedaPlayWay_t& way);
+    static MY_COMMON::MyStatus_t    ConvertToSdpPlayWay(const std::string& str, MY_COMMON::MyMediaPlayWay_t& way);
 
     /**
      * @brief                       转换sdp协议类型

@@ -359,7 +359,7 @@ MyStatus_t MyJsonHelper::ParseHttpReqMediaInfo(const std::string& buf, MyHttpReq
 
     // 解析JSON数据
     reqInfo.deviceId  = rootNode["deviceId"].asString();
-    reqInfo.playType  = ("play" == playType ? MyMedaPlayWay_t::PLAY : MyMedaPlayWay_t::PLAYBACK);
+    reqInfo.playType  = ("play" == playType ? MyMediaPlayWay_t::PLAY : MyMediaPlayWay_t::PLAYBACK);
     reqInfo.protoType = ("udp" == protoType ? MyTpProto_t::UDP : MyTpProto_t::TCP);
     return MyStatus_t::SUCCESS;
 }
