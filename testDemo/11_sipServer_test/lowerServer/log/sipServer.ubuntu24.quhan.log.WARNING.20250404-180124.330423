@@ -1,0 +1,5 @@
+Log file created at: 2025/04/04 18:01:24
+Running on machine: ubuntu24
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+W20250404 18:01:24.446942 133452768741056 myHttpServer.cpp:182] HttpServer execute thread function exception. Operation canceled

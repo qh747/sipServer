@@ -1,0 +1,6 @@
+Name: Jrtplib 
+Description: A full featured RTP library
+Requires:
+Version: 3.11.2
+Libs:  -L/home/quhan/02_myLibrary/JRTPLIB/install/lib -ljrtp -L/home/quhan/02_myLibrary/JThread/install/lib -ljthread /usr/local/lib/libsrtp2.a
+Cflags:  -I/home/quhan/02_myLibrary/JThread/install/include -I/usr/local/include -I/home/quhan/02_myLibrary/JRTPLIB/install/include

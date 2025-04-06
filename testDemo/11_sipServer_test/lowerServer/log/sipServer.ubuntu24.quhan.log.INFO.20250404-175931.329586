@@ -1,0 +1,50 @@
+Log file created at: 2025/04/04 17:59:31
+Running on machine: ubuntu24
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I20250404 17:59:31.100026 129776841940672 mySipServer.cpp:203] SipServer init success. name: myLowerSipServer domain: myLowerSipServer.com id: 11000000002000000001 ip: 192.168.3.234 port: 15060 protocol: udp/tcp.
+I20250404 17:59:31.100211 129776841940672 myHttpServer.cpp:169] HttpServer init success. name: myHttpServer domain: myHttpServer.com id: 11000000002000000001 ip: 192.168.3.234 port: 8081 protocol: tcp.
+I20250404 17:59:31.100238 129776841940672 mySipMsgProcApp.cpp:84] Sip app module init success. SipApp id: 5, name: sipMsgProcApp_1, priority: 64.
+I20250404 17:59:31.100257 129776841940672 mySipRegApp.cpp:165] Sip reg app module init success. SipApp id: sipRegApp_1, name: sipRegApp_1, priority: 64.
+I20250404 17:59:31.100325 129776841940672 mySipCatalogApp.cpp:1048] Sip catalog app module init success. SipApp id: sipCatalogApp_1, name: sipCatalogApp_1, priority: 64.
+I20250404 17:59:31.100594 129776841940672 mySipInviteApp.cpp:318] Sip app module init success. SipApp id: 6, name: sipInviteApp_1, priority: 64.
+I20250404 17:59:31.106132 129776771663552 mySipRegApp.cpp:57] Sip reg app reg module register response callback success. reg info: name: upperSipServer domain: upperSipServer.com id: 10000000002000000001 ip: 192.168.3.234 port: 5061 protocol: udp/tcp
+I20250404 17:59:36.371550 129776771663552 mySipMsgProcApp.cpp:179] Sip app module recv sip register message. uri: sip:11000000001310000059@192.168.3.234:15061;transport=udp
+I20250404 17:59:36.372024 129776771663552 mySipInviteApp.cpp:687] Sip invite app answer invite success. device id: 11000000001310000059 sdp offer: v=0
+o=11000000001310000059 0 0 IN IP4 192.168.3.234
+s=Play
+t=0 0
+c=IN IP4 192.168.3.234
+m=video 5062 RTP/AVP 96 97 98
+a=recvonly
+a=rtpmap:96 PS/90000/1
+a=rtpmap:97 MPEG4/90000/1
+a=rtpmap:98 H264/90000/1
+y=1234567890
+ sdp answer: v=0
+o=11000000001310000059 0 0 IN IP4 192.168.3.234
+s=Play
+t=0 0
+c=IN IP4 192.168.3.234
+m=video 15062 RTP/AVP 96 97 98
+a=sendonly
+a=rtpmap:96 PS/90000/1
+a=rtpmap:97 MPEG4/90000/1
+a=rtpmap:98 H264/90000/1
+y=1529384706
+I20250404 18:00:28.815338 129776841940672 mySystemSigCatch.cpp:41] Interrupt signal (2) received. server is shutting down...
+I20250404 18:00:29.815582 129776841940672 mySipMsgProcApp.cpp:107] Sip app module shutdown success. SipApp id: 5, name: sipMsgProcApp_1, priority: 64.
+I20250404 18:00:29.815741 129776841940672 mySipRegApp.cpp:241] Sip app module shutdown success. SipApp id: sipRegApp_1, name: sipRegApp_1, priority: 64.
+I20250404 18:00:29.815764 129776841940672 mySipRegApp.cpp:241] Sip app module shutdown success. SipApp id: sipRegApp_1, name: sipRegApp_1, priority: 64.
+I20250404 18:00:29.815784 129776841940672 mySipCatalogApp.cpp:1069] Sip app module shutdown success. SipApp id: sipCatalogApp_1, name: sipCatalogApp_1, priority: 64.
+I20250404 18:00:29.815799 129776841940672 mySipCatalogApp.cpp:1069] Sip app module shutdown success. SipApp id: sipCatalogApp_1, name: sipCatalogApp_1, priority: 64.
+I20250404 18:00:29.815818 129776841940672 mySipInviteApp.cpp:344] Sip app module shutdown success. SipApp id: 6, name: sipInviteApp_1, priority: 64.
+I20250404 18:00:29.815847 129776841940672 mySystemEnvir.cpp:113] Server environment shutdown. MyAppManage::Shutdown() success
+I20250404 18:00:29.835729 129776771663552 mySipServer.cpp:61] ServThdFunc() exit. sip server is invalid.
+I20250404 18:00:29.916012 129776841940672 mySipServer.cpp:257] SipServer shutdown success. name: myLowerSipServer domain: myLowerSipServer.com id: 11000000002000000001 ip: 192.168.3.234 port: 15060 protocol: udp/tcp.
+W20250404 18:00:29.916361 129776803120832 myHttpServer.cpp:182] HttpServer execute thread function exception. Operation canceled
+I20250404 18:00:30.916212 129776841940672 myHttpServer.cpp:210] HttpServer shutdown success. name: myHttpServer domain: myHttpServer.com id: 11000000002000000001 ip: 192.168.3.234 port: 8081 protocol: tcp.
+I20250404 18:00:30.916278 129776841940672 mySystemEnvir.cpp:117] Server environment shutdown. MyServManage::Shutdown() success
+I20250404 18:00:30.916586 129776841940672 mySystemEnvir.cpp:121] Server environment shutdown. MySystemThdPool::Shutdown() success
+E20250404 18:00:30.916700 129776841940672 mySipRegApp.cpp:102] Sip reg app reg module keep alive response callback failed. invalid sip server. id.
+I20250404 18:00:30.919542 129776841940672 mySystemEnvir.cpp:125] Server environment shutdown. MySystemThdPool::Shutdown() success

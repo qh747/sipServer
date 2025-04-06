@@ -1,0 +1,29 @@
+Log file created at: 2025/04/04 17:32:53
+Running on machine: ubuntu24
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I20250404 17:32:53.204274 134532375031488 mySipServer.cpp:203] SipServer init success. name: myUpperSipServer domain: myUpperSipServer.com id: 10000000002000000001 ip: 192.168.3.234 port: 5060 protocol: udp/tcp.
+I20250404 17:32:53.204470 134532375031488 myHttpServer.cpp:169] HttpServer init success. name: myHttpServer domain: myHttpServer.com id: 10000000002000000001 ip: 192.168.3.234 port: 8080 protocol: tcp.
+I20250404 17:32:53.204501 134532375031488 mySipMsgProcApp.cpp:84] Sip app module init success. SipApp id: 5, name: sipMsgProcApp_1, priority: 64.
+I20250404 17:32:53.204513 134532375031488 mySipRegApp.cpp:165] Sip reg app module init success. SipApp id: sipRegApp_1, name: sipRegApp_1, priority: 64.
+I20250404 17:32:53.204555 134532375031488 mySipCatalogApp.cpp:1048] Sip catalog app module init success. SipApp id: sipCatalogApp_1, name: sipCatalogApp_1, priority: 64.
+I20250404 17:32:53.204800 134532375031488 mySipInviteApp.cpp:318] Sip app module init success. SipApp id: 6, name: sipInviteApp_1, priority: 64.
+I20250404 17:32:58.776324 134532294510272 mySipMsgProcApp.cpp:151] Sip app module recv sip register message. uri: sip:10000000002000000001@192.168.3.234:5061;transport=udp
+I20250404 17:32:58.777972 134532294510272 mySipMsgProcApp.cpp:151] Sip app module recv sip register message. uri: sip:10000000002000000001@192.168.3.234:5061;transport=udp
+I20250404 17:33:46.220490 134532294510272 mySipMsgProcApp.cpp:151] Sip app module recv sip register message. uri: sip:10000000002000000001@192.168.3.234:5061;transport=udp
+I20250404 17:33:46.222137 134532294510272 mySipMsgProcApp.cpp:151] Sip app module recv sip register message. uri: sip:10000000002000000001@192.168.3.234:5061;transport=udp
+I20250404 17:34:02.617692 134532375031488 mySystemSigCatch.cpp:41] Interrupt signal (2) received. server is shutting down...
+I20250404 17:34:03.617926 134532375031488 mySipMsgProcApp.cpp:107] Sip app module shutdown success. SipApp id: 5, name: sipMsgProcApp_1, priority: 64.
+I20250404 17:34:03.618068 134532375031488 mySipRegApp.cpp:241] Sip app module shutdown success. SipApp id: sipRegApp_1, name: sipRegApp_1, priority: 64.
+I20250404 17:34:03.618093 134532375031488 mySipRegApp.cpp:241] Sip app module shutdown success. SipApp id: sipRegApp_1, name: sipRegApp_1, priority: 64.
+I20250404 17:34:03.618111 134532375031488 mySipCatalogApp.cpp:1069] Sip app module shutdown success. SipApp id: sipCatalogApp_1, name: sipCatalogApp_1, priority: 64.
+I20250404 17:34:03.618128 134532375031488 mySipCatalogApp.cpp:1069] Sip app module shutdown success. SipApp id: sipCatalogApp_1, name: sipCatalogApp_1, priority: 64.
+I20250404 17:34:03.618148 134532375031488 mySipInviteApp.cpp:344] Sip app module shutdown success. SipApp id: 6, name: sipInviteApp_1, priority: 64.
+I20250404 17:34:03.618173 134532375031488 mySystemEnvir.cpp:113] Server environment shutdown. MyAppManage::Shutdown() success
+I20250404 17:34:03.626444 134532294510272 mySipServer.cpp:61] ServThdFunc() exit. sip server is invalid.
+I20250404 17:34:03.718328 134532375031488 mySipServer.cpp:257] SipServer shutdown success. name: myUpperSipServer domain: myUpperSipServer.com id: 10000000002000000001 ip: 192.168.3.234 port: 5060 protocol: udp/tcp.
+W20250404 17:34:03.718688 134532336453312 myHttpServer.cpp:182] HttpServer execute thread function exception. Operation canceled
+I20250404 17:34:04.718573 134532375031488 myHttpServer.cpp:210] HttpServer shutdown success. name: myHttpServer domain: myHttpServer.com id: 10000000002000000001 ip: 192.168.3.234 port: 8080 protocol: tcp.
+I20250404 17:34:04.718639 134532375031488 mySystemEnvir.cpp:117] Server environment shutdown. MyServManage::Shutdown() success
+I20250404 17:34:04.718930 134532375031488 mySystemEnvir.cpp:121] Server environment shutdown. MySystemThdPool::Shutdown() success
+I20250404 17:34:04.721490 134532375031488 mySystemEnvir.cpp:125] Server environment shutdown. MySystemThdPool::Shutdown() success

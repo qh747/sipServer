@@ -1,0 +1,44 @@
+Log file created at: 2025/04/04 16:31:48
+Running on machine: ubuntu24
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I20250404 16:31:48.924011 138058239307456 mySipServer.cpp:203] SipServer init success. name: myUpperSipServer domain: myUpperSipServer.com id: 10000000002000000001 ip: 192.168.3.234 port: 5060 protocol: udp/tcp.
+I20250404 16:31:48.924206 138058239307456 myHttpServer.cpp:169] HttpServer init success. name: myHttpServer domain: myHttpServer.com id: 10000000002000000001 ip: 192.168.3.234 port: 8080 protocol: tcp.
+I20250404 16:31:48.924245 138058239307456 mySipMsgProcApp.cpp:84] Sip app module init success. SipApp id: 5, name: sipMsgProcApp_1, priority: 64.
+I20250404 16:31:48.924258 138058239307456 mySipRegApp.cpp:165] Sip reg app module init success. SipApp id: sipRegApp_1, name: sipRegApp_1, priority: 64.
+I20250404 16:31:48.924296 138058239307456 mySipCatalogApp.cpp:1048] Sip catalog app module init success. SipApp id: sipCatalogApp_1, name: sipCatalogApp_1, priority: 64.
+I20250404 16:31:48.924545 138058239307456 mySipInviteApp.cpp:330] Sip app module init success. SipApp id: 6, name: sipInviteApp_1, priority: 64.
+I20250404 16:31:57.687575 138058097755840 mySipMsgProcApp.cpp:151] Sip app module recv sip register message. uri: sip:10000000002000000001@192.168.3.234:5061;transport=udp
+I20250404 16:31:57.690164 138058097755840 mySipMsgProcApp.cpp:151] Sip app module recv sip register message. uri: sip:10000000002000000001@192.168.3.234:5061;transport=udp
+I20250404 16:31:57.693521 138058097755840 mySipMsgProcApp.cpp:306] Sip app module recv catalog response message. device id: 11000000002000000001.
+I20250404 16:31:57.694829 138058097755840 mySipMsgProcApp.cpp:306] Sip app module recv catalog response message. device id: 11000000002000000001.
+I20250404 16:31:57.696105 138058097755840 mySipMsgProcApp.cpp:306] Sip app module recv catalog response message. device id: 11000000002000000001.
+I20250404 16:31:57.697498 138058097755840 mySipMsgProcApp.cpp:306] Sip app module recv catalog response message. device id: 11000000002000000001.
+I20250404 16:32:06.365401 138058066298560 mySipInviteApp.cpp:461] Sip app module req device play media success. device id: 11000000001310000059 sdp offer: v=0
+o=11000000001310000059 0 0 IN IP4 192.168.3.234
+s=Play
+c=IN IP4 192.168.3.234
+t=0 0
+m=video 5062 RTP/AVP 96 97 98
+a=rtpmap:96 PS/90000
+a=rtpmap:97 MPEG4/90000
+a=rtpmap:98 H264/90000
+a=recvonly
+y=1234567890
+I20250404 16:32:06.365449 138058066298560 mySipServer.cpp:109] ServMediaReqEvFunc() success. request media device id: 11000000001310000059.
+I20250404 16:32:06.365463 138058066298560 myHttpServer.cpp:114] HttpServer execute thread function success. proc client http post request. ip addr: 192.168.3.234. port: 50474. url: /index/reqDeviceMedia/11000000001310000059
+I20250404 16:33:39.016174 138058239307456 mySystemSigCatch.cpp:41] Interrupt signal (2) received. server is shutting down...
+I20250404 16:33:40.016384 138058239307456 mySipMsgProcApp.cpp:107] Sip app module shutdown success. SipApp id: 5, name: sipMsgProcApp_1, priority: 64.
+I20250404 16:33:40.016492 138058239307456 mySipRegApp.cpp:241] Sip app module shutdown success. SipApp id: sipRegApp_1, name: sipRegApp_1, priority: 64.
+I20250404 16:33:40.016505 138058239307456 mySipRegApp.cpp:241] Sip app module shutdown success. SipApp id: sipRegApp_1, name: sipRegApp_1, priority: 64.
+I20250404 16:33:40.016515 138058239307456 mySipCatalogApp.cpp:1069] Sip app module shutdown success. SipApp id: sipCatalogApp_1, name: sipCatalogApp_1, priority: 64.
+I20250404 16:33:40.016524 138058239307456 mySipCatalogApp.cpp:1069] Sip app module shutdown success. SipApp id: sipCatalogApp_1, name: sipCatalogApp_1, priority: 64.
+I20250404 16:33:40.016537 138058239307456 mySipInviteApp.cpp:356] Sip app module shutdown success. SipApp id: 6, name: sipInviteApp_1, priority: 64.
+I20250404 16:33:40.016554 138058239307456 mySystemEnvir.cpp:113] Server environment shutdown. MyAppManage::Shutdown() success
+I20250404 16:33:40.050634 138058097755840 mySipServer.cpp:61] ServThdFunc() exit. sip server is invalid.
+I20250404 16:33:40.116671 138058239307456 mySipServer.cpp:257] SipServer shutdown success. name: myUpperSipServer domain: myUpperSipServer.com id: 10000000002000000001 ip: 192.168.3.234 port: 5060 protocol: udp/tcp.
+I20250404 16:33:42.040007 138058239307456 myHttpServer.cpp:210] HttpServer shutdown success. name: myHttpServer domain: myHttpServer.com id: 10000000002000000001 ip: 192.168.3.234 port: 8080 protocol: tcp.
+I20250404 16:33:42.040051 138058239307456 mySystemEnvir.cpp:117] Server environment shutdown. MyServManage::Shutdown() success
+W20250404 16:33:45.232969 138058066298560 myHttpServer.cpp:182] HttpServer execute thread function exception. Operation canceled
+I20250404 16:33:45.396883 138058239307456 mySystemEnvir.cpp:121] Server environment shutdown. MySystemThdPool::Shutdown() success
+I20250404 16:33:45.399241 138058239307456 mySystemEnvir.cpp:125] Server environment shutdown. MySystemThdPool::Shutdown() success

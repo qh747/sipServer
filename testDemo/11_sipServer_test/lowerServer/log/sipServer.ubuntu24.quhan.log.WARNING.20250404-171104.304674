@@ -1,0 +1,14 @@
+Log file created at: 2025/04/04 17:11:04
+Running on machine: ubuntu24
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+E20250404 17:11:04.155091 140737207338688 mySipInviteApp.cpp:556] Sip invite app receive invite request message error. device already associated with a session. device id: 11000000001310000059
+E20250404 17:11:04.155400 140737207338688 mySipMsgProcApp.cpp:374] Sip msg proc app module recv sip invite message failed. proc msg failed. uri: sip:11000000001310000059@192.168.3.234:15061;transport=udp.
+E20250404 17:11:04.155481 140737207338688 mySipInviteApp.cpp:556] Sip invite app receive invite request message error. device already associated with a session. device id: 11000000001310000059
+E20250404 17:11:04.155533 140737207338688 mySipMsgProcApp.cpp:374] Sip msg proc app module recv sip invite message failed. proc msg failed. uri: sip:11000000001310000059@192.168.3.234:15061;transport=udp.
+E20250404 17:11:04.155602 140737207338688 mySipInviteApp.cpp:556] Sip invite app receive invite request message error. device already associated with a session. device id: 11000000001310000059
+E20250404 17:11:04.155658 140737207338688 mySipMsgProcApp.cpp:374] Sip msg proc app module recv sip invite message failed. proc msg failed. uri: sip:11000000001310000059@192.168.3.234:15061;transport=udp.
+E20250404 17:11:04.155731 140737207338688 mySipInviteApp.cpp:556] Sip invite app receive invite request message error. device already associated with a session. device id: 11000000001310000059
+E20250404 17:11:04.155780 140737207338688 mySipMsgProcApp.cpp:374] Sip msg proc app module recv sip invite message failed. proc msg failed. uri: sip:11000000001310000059@192.168.3.234:15061;transport=udp.
+E20250404 17:11:04.155840 140737207338688 mySipInviteApp.cpp:556] Sip invite app receive invite request message error. device already associated with a session. device id: 11000000001310000059
+E20250404 17:11:04.155885 140737207338688 mySipMsgProcApp.cpp:374] Sip msg proc app module recv sip invite message failed. proc msg failed. uri: sip:11000000001310000059@192.168.3.234:15061;transport=udp.

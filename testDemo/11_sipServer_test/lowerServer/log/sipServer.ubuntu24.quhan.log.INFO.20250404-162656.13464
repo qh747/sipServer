@@ -1,0 +1,13 @@
+Log file created at: 2025/04/04 16:26:56
+Running on machine: ubuntu24
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I20250404 16:26:56.580798 140737352904384 mySipServer.cpp:203] SipServer init success. name: myLowerSipServer domain: myLowerSipServer.com id: 11000000002000000001 ip: 192.168.3.234 port: 15060 protocol: udp/tcp.
+I20250404 16:26:56.580986 140737352904384 myHttpServer.cpp:169] HttpServer init success. name: myHttpServer domain: myHttpServer.com id: 11000000002000000001 ip: 192.168.3.234 port: 8081 protocol: tcp.
+I20250404 16:26:56.581020 140737352904384 mySipMsgProcApp.cpp:84] Sip app module init success. SipApp id: 5, name: sipMsgProcApp_1, priority: 64.
+I20250404 16:26:56.581032 140737352904384 mySipRegApp.cpp:165] Sip reg app module init success. SipApp id: sipRegApp_1, name: sipRegApp_1, priority: 64.
+I20250404 16:26:56.581089 140737352904384 mySipCatalogApp.cpp:1048] Sip catalog app module init success. SipApp id: sipCatalogApp_1, name: sipCatalogApp_1, priority: 64.
+I20250404 16:26:56.581336 140737352904384 mySipInviteApp.cpp:330] Sip app module init success. SipApp id: 6, name: sipInviteApp_1, priority: 64.
+I20250404 16:26:56.586870 140737207338688 mySipRegApp.cpp:57] Sip reg app reg module register response callback success. reg info: name: upperSipServer domain: upperSipServer.com id: 10000000002000000001 ip: 192.168.3.234 port: 5061 protocol: udp/tcp
+I20250404 16:27:14.291594 140737207338688 mySipMsgProcApp.cpp:179] Sip app module recv sip register message. uri: sip:11000000001310000059@192.168.3.234:15061;transport=udp
+E20250404 16:28:17.771080 140737207338688 mySipInviteApp.cpp:589] Sip invite app receive invite request message error. invalid proto type. device id: 11000000001310000059

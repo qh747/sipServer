@@ -1,0 +1,5 @@
+Log file created at: 2025/04/05 04:32:22
+Running on machine: ubuntu24
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I20250405 04:32:22.061183 140737352904384 mySipServer.cpp:203] SipServer init success. name: myLowerSipServer domain: myLowerSipServer.com id: 11000000002000000001 ip: 192.168.3.234 port: 15060 protocol: udp/tcp.

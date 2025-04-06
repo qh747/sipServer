@@ -1,0 +1,6 @@
+Log file created at: 2025/04/04 17:21:23
+Running on machine: ubuntu24
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+E20250404 17:21:23.940558 136112792143552 mySipInviteApp.cpp:139] Sip invite app media update error. to header parser failed. device id: 11000000001310000059
+W20250404 17:22:13.690495 136112897001152 myHttpServer.cpp:182] HttpServer execute thread function exception. Operation canceled

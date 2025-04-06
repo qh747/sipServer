@@ -1,0 +1,6 @@
+Log file created at: 2025/04/04 17:15:11
+Running on machine: ubuntu24
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+E20250404 17:15:11.397851 138589186819776 mySipInviteApp.cpp:70] Sip invite app media update error. print remote sdp error.
+W20250404 17:17:40.276105 138589304260288 myHttpServer.cpp:182] HttpServer execute thread function exception. Operation canceled

@@ -1,0 +1,16 @@
+Log file created at: 2025/04/04 16:54:30
+Running on machine: ubuntu24
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+E20250404 16:54:30.237512 140737207338688 mySipInviteApp.cpp:567] Sip invite app receive invite request message error. load sdp from string error. device id: 11000000001310000059
+E20250404 16:54:30.237943 140737207338688 mySipMsgProcApp.cpp:374] Sip msg proc app module recv sip invite message failed. proc msg failed. uri: sip:11000000001310000059@192.168.3.234:15061;transport=udp.
+E20250404 16:54:31.005574 140737207338688 mySipInviteApp.cpp:567] Sip invite app receive invite request message error. load sdp from string error. device id: 11000000001310000059
+E20250404 16:54:31.005750 140737207338688 mySipMsgProcApp.cpp:374] Sip msg proc app module recv sip invite message failed. proc msg failed. uri: sip:11000000001310000059@192.168.3.234:15061;transport=udp.
+E20250404 16:54:32.374290 140737207338688 mySipInviteApp.cpp:567] Sip invite app receive invite request message error. load sdp from string error. device id: 11000000001310000059
+E20250404 16:54:32.374768 140737207338688 mySipMsgProcApp.cpp:374] Sip msg proc app module recv sip invite message failed. proc msg failed. uri: sip:11000000001310000059@192.168.3.234:15061;transport=udp.
+E20250404 16:54:32.891583 140737207338688 mySipInviteApp.cpp:567] Sip invite app receive invite request message error. load sdp from string error. device id: 11000000001310000059
+E20250404 16:54:32.891759 140737207338688 mySipMsgProcApp.cpp:374] Sip msg proc app module recv sip invite message failed. proc msg failed. uri: sip:11000000001310000059@192.168.3.234:15061;transport=udp.
+E20250404 16:54:33.333761 140737207338688 mySipInviteApp.cpp:567] Sip invite app receive invite request message error. load sdp from string error. device id: 11000000001310000059
+E20250404 16:54:33.334934 140737207338688 mySipMsgProcApp.cpp:374] Sip msg proc app module recv sip invite message failed. proc msg failed. uri: sip:11000000001310000059@192.168.3.234:15061;transport=udp.
+E20250404 16:54:33.809079 140737207338688 mySipInviteApp.cpp:567] Sip invite app receive invite request message error. load sdp from string error. device id: 11000000001310000059
+E20250404 16:54:33.809249 140737207338688 mySipMsgProcApp.cpp:374] Sip msg proc app module recv sip invite message failed. proc msg failed. uri: sip:11000000001310000059@192.168.3.234:15061;transport=udp.

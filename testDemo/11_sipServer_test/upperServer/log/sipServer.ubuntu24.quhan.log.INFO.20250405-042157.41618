@@ -1,0 +1,30 @@
+Log file created at: 2025/04/05 04:21:57
+Running on machine: ubuntu24
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I20250405 04:21:57.697206 140737352904384 mySipServer.cpp:203] SipServer init success. name: myUpperSipServer domain: myUpperSipServer.com id: 10000000002000000001 ip: 192.168.3.234 port: 5060 protocol: udp/tcp.
+I20250405 04:21:57.697424 140737352904384 myHttpServer.cpp:169] HttpServer init success. name: myHttpServer domain: myHttpServer.com id: 10000000002000000001 ip: 192.168.3.234 port: 8080 protocol: tcp.
+I20250405 04:21:57.697458 140737352904384 mySipMsgProcApp.cpp:84] Sip app module init success. SipApp id: 5, name: sipMsgProcApp_1, priority: 64.
+I20250405 04:21:57.697472 140737352904384 mySipRegApp.cpp:165] Sip reg app module init success. SipApp id: sipRegApp_1, name: sipRegApp_1, priority: 64.
+I20250405 04:21:57.697514 140737352904384 mySipCatalogApp.cpp:1048] Sip catalog app module init success. SipApp id: sipCatalogApp_1, name: sipCatalogApp_1, priority: 64.
+I20250405 04:21:57.697791 140737352904384 mySipInviteApp.cpp:318] Sip app module init success. SipApp id: 6, name: sipInviteApp_1, priority: 64.
+I20250405 04:21:57.744953 140737196852928 mySipMsgProcApp.cpp:151] Sip app module recv sip register message. uri: sip:10000000002000000001@192.168.3.234:5061;transport=udp message: 
+Request msg REGISTER/cseq=38044 (rdata0x555555d053f8)
+I20250405 04:21:57.746599 140737196852928 mySipMsgProcApp.cpp:151] Sip app module recv sip register message. uri: sip:10000000002000000001@192.168.3.234:5061;transport=udp message: 
+Request msg REGISTER/cseq=38045 (rdata0x7fffb8004c68)
+I20250405 04:21:57.748848 140737196852928 mySipMsgProcApp.cpp:314] Sip app module recv catalog response message. device id: 11000000002000000001 message: 
+Request msg MESSAGE/cseq=55878 (rdata0x7fffb8004c68)
+I20250405 04:21:57.750075 140737196852928 mySipMsgProcApp.cpp:314] Sip app module recv catalog response message. device id: 11000000002000000001 message: 
+Request msg MESSAGE/cseq=55878 (rdata0x7fffb8004c68)
+I20250405 04:21:57.751285 140737196852928 mySipMsgProcApp.cpp:314] Sip app module recv catalog response message. device id: 11000000002000000001 message: 
+Request msg MESSAGE/cseq=55878 (rdata0x7fffb8004c68)
+I20250405 04:21:57.753285 140737196852928 mySipMsgProcApp.cpp:314] Sip app module recv catalog response message. device id: 11000000002000000001 message: 
+Request msg MESSAGE/cseq=55878 (rdata0x7fffb8004c68)
+I20250405 04:22:27.775716 140737196852928 mySipMsgProcApp.cpp:235] Sip app module recv keepalive message. 
+Request msg MESSAGE/cseq=34146 (rdata0x7fffb8004c68)
+I20250405 04:22:57.786311 140737196852928 mySipMsgProcApp.cpp:235] Sip app module recv keepalive message. 
+Request msg MESSAGE/cseq=49735 (rdata0x7fffb8004c68)
+I20250405 04:23:27.816497 140737196852928 mySipMsgProcApp.cpp:235] Sip app module recv keepalive message. 
+Request msg MESSAGE/cseq=15723 (rdata0x7fffb80677a8)
+I20250405 04:23:57.847047 140737196852928 mySipMsgProcApp.cpp:235] Sip app module recv keepalive message. 
+Request msg MESSAGE/cseq=13541 (rdata0x7fffb804fc28)

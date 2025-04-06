@@ -1,0 +1,6 @@
+Log file created at: 2025/04/04 17:23:19
+Running on machine: ubuntu24
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+W20250404 17:23:19.870706 123569176577728 myHttpServer.cpp:182] HttpServer execute thread function exception. Operation canceled
+E20250404 17:23:20.871153 123569349652160 mySipRegApp.cpp:102] Sip reg app reg module keep alive response callback failed. invalid sip server. id.

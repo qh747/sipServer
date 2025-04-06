@@ -21,5 +21,28 @@
         "deviceStream": "main",
         "longitude": "117.96647071838379",
         "latitude": "28.444311616185587"
+    },
+    "deviceInfo": {
+      "device-1": {
+        "name": "camera-up-1",
+        "status": "ON",
+        "parental": "1",
+        "manufacturer": "MY_UP_CAMERA",
+        "model": "MY_UP_CAMERA_1",
+        "block": "video",
+        "safetyWay": "0",
+        "registerWay": "1",
+        "secrecy": "0",
+        "deviceID": "10000000001310000059",
+        "parentID": "10000000002000000001",
+        "platformID": "10000000002000000001",
+        "owner": "upperSipServer",
+        "deviceIp": "192.168.3.234",
+        "devicePort": "18080",
+        "deviceChannel": "33",
+        "deviceStream": "main",
+        "longitude": "117.97082131585832",
+        "latitude": "28.44216139758548"
+      }
     }
 }

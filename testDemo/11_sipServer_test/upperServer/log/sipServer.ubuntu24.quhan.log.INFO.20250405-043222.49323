@@ -1,0 +1,63 @@
+Log file created at: 2025/04/05 04:32:22
+Running on machine: ubuntu24
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I20250405 04:32:22.165705 140737352904384 mySipServer.cpp:203] SipServer init success. name: myUpperSipServer domain: myUpperSipServer.com id: 10000000002000000001 ip: 192.168.3.234 port: 5060 protocol: udp/tcp.
+I20250405 04:32:22.165899 140737352904384 myHttpServer.cpp:169] HttpServer init success. name: myHttpServer domain: myHttpServer.com id: 10000000002000000001 ip: 192.168.3.234 port: 8080 protocol: tcp.
+I20250405 04:32:22.165926 140737352904384 mySipMsgProcApp.cpp:84] Sip app module init success. SipApp id: 5, name: sipMsgProcApp_1, priority: 64.
+I20250405 04:32:22.165938 140737352904384 mySipRegApp.cpp:165] Sip reg app module init success. SipApp id: sipRegApp_1, name: sipRegApp_1, priority: 64.
+I20250405 04:32:22.165974 140737352904384 mySipCatalogApp.cpp:1048] Sip catalog app module init success. SipApp id: sipCatalogApp_1, name: sipCatalogApp_1, priority: 64.
+I20250405 04:32:22.166206 140737352904384 mySipInviteApp.cpp:318] Sip app module init success. SipApp id: 6, name: sipInviteApp_1, priority: 64.
+I20250405 04:32:22.565925 140737207338688 mySipMsgProcApp.cpp:354] Recv request message: 
+REGISTER sip:10000000002000000001@192.168.3.234:5061;transport=udp SIP/2.0
+Via: SIP/2.0/UDP 192.168.3.10:15061;rport=15061;received=192.168.3.234;branch=z9hG4bKPjb1e32d34-b681-46e4-ad06-e7ed30b7b5e5
+Max-Forwards: 70
+From: <sip:11000000002000000001@192.168.3.234>;tag=9d2f46df-d6f1-4fb9-80f8-69055c43e425
+To: <sip:11000000002000000001@192.168.3.234>
+Call-ID: 151a883b-9817-4a24-9181-c02474609e5a
+CSeq: 2430 REGISTER
+Contact: <sip:11000000002000000001@192.168.3.234:15061>
+Expires: 3600
+Allow: PRACK, INVITE, ACK, BYE, CANCEL, UPDATE
+Content-Length: 0
+Content-Length:  0
+
+I20250405 04:32:22.566006 140737207338688 mySipMsgProcApp.cpp:151] Sip app module recv sip register message. uri: sip:10000000002000000001@192.168.3.234:5061;transport=udp message: Request msg REGISTER/cseq=2430 (rdata0x555555d053f8)
+I20250405 04:32:22.568928 140737207338688 mySipMsgProcApp.cpp:354] Recv request message: 
+REGISTER sip:10000000002000000001@192.168.3.234:5061;transport=udp SIP/2.0
+Via: SIP/2.0/UDP 192.168.3.10:15061;rport=15061;received=192.168.3.234;branch=z9hG4bKPj223f6d3a-4c90-4f99-936a-f0f052c2abb4
+Max-Forwards: 70
+From: <sip:11000000002000000001@192.168.3.234>;tag=9d2f46df-d6f1-4fb9-80f8-69055c43e425
+To: <sip:11000000002000000001@192.168.3.234>
+Call-ID: 151a883b-9817-4a24-9181-c02474609e5a
+CSeq: 2431 REGISTER
+Contact: <sip:11000000002000000001@192.168.3.234:15061>
+Expires: 3600
+Allow: PRACK, INVITE, ACK, BYE, CANCEL, UPDATE
+Authorization: Digest username="admin", realm="123456", nonce="qê˚G¯
+I20250405 04:32:22.568973 140737207338688 mySipMsgProcApp.cpp:151] Sip app module recv sip register message. uri: sip:10000000002000000001@192.168.3.234:5061;transport=udp message: Request msg REGISTER/cseq=2431 (rdata0x7fffb8004c68)
+I20250405 04:32:22.572070 140737207338688 mySipMsgProcApp.cpp:354] Recv request message: 
+MESSAGE sip:10000000002000000001@192.168.3.234:5061;transport=udp SIP/2.0
+Via: SIP/2.0/UDP 192.168.3.10:15061;rport=15061;received=192.168.3.234;branch=z9hG4bKPj1dd47565-1d71-4761-b123-187cb440ddeb
+Max-Forwards: 70
+From: <sip:11000000002000000001@192.168.3.234>;tag=93714741-cb76-4204-b69f-51ae58c474e9
+To: <sip:10000000002000000001@192.168.3.234>
+Call-ID: 5761e6ff-7cde-4f02-bb23-9e70256104c6
+CSeq: 12903 MESSAGE
+Content-Type: Application/MANSCDP+xml
+Content-Length: 895
+Content-Type: Application/MANSCDP+xml
+Content-Length:      
+
+I20250405 04:32:22.572242 140737207338688 mySipMsgProcApp.cpp:311] Sip app module recv catalog response message. device id: 11000000002000000001 message: Request msg MESSAGE/cseq=12903 (rdata0x7fffb8004c68)
+I20250405 04:32:22.573355 140737207338688 mySipMsgProcApp.cpp:354] Recv request message: 
+MESSAGE sip:10000000002000000001@192.168.3.234:5061;transport=udp SIP/2.0
+Via: SIP/2.0/UDP 192.168.3.10:15061;rport=15061;received=192.168.3.234;branch=z9hG4bKPj661d8fb4-620b-43f7-a755-c4e9f2d6edce
+Max-Forwards: 70
+From: <sip:11000000002000000001@192.168.3.234>;tag=c2412382-f695-484e-a09c-21f8769c13ab
+To: <sip:10000000002000000001@192.168.3.234>
+Call-ID: ce276fe5-a88a-4d60-a4d2-1b630eade6a1
+CSeq: 12903 MESSAGE
+Content-Type: Application/MANSCDP+xml
+Content-Length: 962
+Content-Type: Applicatio

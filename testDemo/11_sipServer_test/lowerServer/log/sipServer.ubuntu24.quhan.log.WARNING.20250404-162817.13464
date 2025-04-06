@@ -1,0 +1,6 @@
+Log file created at: 2025/04/04 16:28:17
+Running on machine: ubuntu24
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+E20250404 16:28:17.771080 140737207338688 mySipInviteApp.cpp:589] Sip invite app receive invite request message error. invalid proto type. device id: 11000000001310000059
+E20250404 16:28:17.771469 140737207338688 mySipMsgProcApp.cpp:374] Sip msg proc app module recv sip invite message failed. proc msg failed. uri: sip:11000000001310000059@192.168.3.234:15061;transport=udp.
